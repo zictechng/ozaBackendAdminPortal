@@ -1,0 +1,19 @@
+black: #5E5873
+primaryColor1: "#1D2667",
+primaryColor2: "#010A4F",
+primaryLightBlue: "#595F90",
+lightBg: "#333",
+bgColor:"#F7F7F7",
+shahColorLight:"#F2F3F7",
+shahColorDark:"#EEEFF3",
+statusBarColor:"#666",
+greenColorLight:"#E6F0FC",
+textColorBlack:"#D9DDE0",
+textColorBlack2:"#6C737B",
+darkHl: "#666",
+
+oldThemeColor" #C6A7FE
+
+
+ICON: https://pictogrammers.com/library/mdi/
+
