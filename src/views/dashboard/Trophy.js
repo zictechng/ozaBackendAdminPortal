@@ -1,15 +1,17 @@
+import React, {useEffect, useState } from 'react'
+
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import { styled, useTheme } from '@mui/material/styles'
-import CurrencyUsd from 'mdi-material-ui/CurrencyUsd'
-import Avatar from '@mui/material/Avatar'
+import BeatLoader from "react-spinners/BeatLoader";
 import Box from '@mui/material/Box'
 
 // ** Icons Imports
 import MenuUp from 'mdi-material-ui/MenuUp'
+import { NumberDollarValueFormat } from 'src/@core/function/formatDollarNumber'
 
 // Styled component for the triangle shaped background image
 const TriangleImg = styled('img')({
@@ -27,7 +29,18 @@ const TrophyImg = styled('img')({
   position: 'absolute'
 })
 
-const Trophy = () => {
+const Trophy = ({data, Loading}) => {
+  const [show, setShow] = useState(false)
+    useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShow(true)
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+
+  }, [show])
+
+
   // ** Hook
   const theme = useTheme()
   const imageSrc = theme.palette.mode === 'light' ? 'triangle-light.png' : 'triangle-dark.png'
@@ -42,8 +55,18 @@ const Trophy = () => {
         <Typography variant='h5' sx={{ my: 6, color: 'primary.main' }}>
 
         <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center' }}>
-          <Typography variant='h5' sx={{ fontWeight: 600, fontSize: '2.125rem', color: 'primary.main' }}>
-            $24,895
+          <Typography variant='h4' sx={{ fontWeight: 600, fontSize: '2.125rem', color: 'primary.main' }}>
+
+              {!show ?
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                 <BeatLoader
+                  color={'#1D2667'}
+                  loading={true}
+                  size={5}
+                  margin={5}
+                />
+              </Box> : <NumberDollarValueFormat value={data}/>
+              }
           </Typography>
           {/* <Box sx={{ display: 'flex', alignItems:'flex-end', color: 'success.main' }}>
               <Avatar

@@ -5,11 +5,8 @@ import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
-import CreditCardOutline from 'mdi-material-ui/CreditCardOutline'
-import AccountPlusOutline from 'mdi-material-ui/AccountPlusOutline'
-import AlertCircleOutline from 'mdi-material-ui/AlertCircleOutline'
-import GoogleCirclesExtended from 'mdi-material-ui/GoogleCirclesExtended'
 import { AccountAlert, AccountCancel, AccountCheck, AccountRemove, Bank, ChartBar, CreditCardCheck, CreditCardMinus, CreditCardPlus, CreditCardScan, CurrencyUsd, FileAlert, FileCancel, FileChart, FileChartOutline, FileCheck, FileCloud, FileDocumentMultiple, Information, InformationOutline, Lifebuoy, RadioboxBlank, ScaleBalance } from 'mdi-material-ui'
+import { AutoMode, ManageHistory } from '@mui/icons-material'
 
 const navigation = () => {
   return [
@@ -32,7 +29,7 @@ const navigation = () => {
       icon: AccountCheck,
 
       //path: '/active-users'
-      path: '/users/active-users'
+      path: '/users'
     },
     {
       title: 'Pending Users',
@@ -70,19 +67,22 @@ const navigation = () => {
       title: 'Approved',
       icon: FileCheck,
       path: '/documents/approved',
-      openInNewTab: true
+
+      //openInNewTab: true
     },
     {
       title: 'Pending',
       icon: FileAlert,
       path: '/documents/pending',
-      openInNewTab: true
+
+      //openInNewTab: true
     },
     {
       title: 'Rejected',
       icon: FileCancel,
       path: '/documents/rejected',
-      openInNewTab: true
+
+     // openInNewTab: true
     },
 
     {
@@ -91,32 +91,33 @@ const navigation = () => {
     {
       title: 'Bank Details',
       icon: Bank,
-      path: '/typography'
+      path: '/bank-details'
     },
 
     {
       sectionTitle: 'User Account Statement'
     },
-    {
-      title: 'Funding',
-      path: '/icons',
-      icon: FileChart
-    },
-    {
-      title: 'Sales',
-      icon: FileChartOutline,
-      path: '/cards'
-    },
-    {
-      title: 'Buying',
-      icon: FileCloud,
-      path: '/tables'
-    },
-    {
-      icon: CubeOutline,
-      title: 'Form Layouts',
-      path: '/form-layouts'
-    },
+
+    // {
+    //   title: 'Funding',
+    //   path: '/account-funding',
+    //   icon: FileChart
+    // },
+    // {
+    //   title: 'Sales',
+    //   icon: FileChartOutline,
+    //   path: '/sales'
+    // },
+    // {
+    //   title: 'Buying',
+    //   icon: FileCloud,
+    //   path: '/buying'
+    // },
+    // {
+    //   icon: CubeOutline,
+    //   title: 'All Transactions',
+    //   path: '/all-transactions'
+    // },
 
     {
       sectionTitle: 'Transaction'
@@ -124,17 +125,22 @@ const navigation = () => {
     {
       icon: CreditCardPlus,
       title: 'Funding',
-      path: '/form-layouts'
+      path: '/account-funding'
     },
     {
       icon: CreditCardCheck,
       title: 'Sales',
-      path: '/form-layouts'
+      path: '/sales'
     },
     {
       icon: CreditCardScan,
       title: 'Buying',
-      path: '/form-layouts'
+      path: '/buying'
+    },
+    {
+      icon: CubeOutline,
+      title: 'All Transactions',
+      path: '/all-transactions'
     },
 
     {
@@ -143,7 +149,7 @@ const navigation = () => {
     {
       icon: Lifebuoy,
       title: 'Support Ticket',
-      path: '/form-layouts'
+      path: '/messages'
     },
     {
       icon: ChartBar,
@@ -157,27 +163,27 @@ const navigation = () => {
     {
       icon: Information,
       title: 'About Us',
-      path: '/form-layouts'
+      path: '/about-us'
     },
     {
       icon: CurrencyUsd,
       title: 'Trade Rate',
-      path: '/form-layouts'
+      path: '/service-rate'
     },
     {
       icon: RadioboxBlank,
       title: 'Terms & Conditions',
-      path: '/form-layouts'
+      path: '/terms-conditions'
     },
     {
       icon: ScaleBalance,
       title: 'User Policy',
-      path: '/form-layouts'
+      path: '/user-policy'
     },
     {
       icon: InformationOutline,
-      title: 'Company Info',
-      path: '/form-layouts'
+      title: 'App Settings',
+      path: '/app-setting'
     },
 
     {
@@ -186,31 +192,38 @@ const navigation = () => {
     {
       title: 'Active Users',
       icon: AccountCheck,
-
-      //path: '/active-users'
-      path: '/adminUsers/active-users'
+      path: '/admin-user'
     },
     {
       title: 'Pending Users',
       icon: AccountAlert,
-
-      //path: '/active-users'
-      path: '/adminUsers/pending-users'
+      path: '/admin-user/pending'
     },
     {
       title: 'Suspended Users',
       icon: AccountCancel,
-
-      //path: '/active-users'
-      path: '/adminUsers/suspended-users'
+      path: '/admin-user/suspended'
     },
     {
-      title: 'Deleted Users',
+      title: 'Deleted User',
       icon: AccountRemove,
-
-      //path: '/active-users'
-      path: '/adminUsers/deleted-users'
+      path: '/admin-user/deleted'
     },
+
+    {
+      sectionTitle: 'System Logs'
+    },
+    {
+      title: 'Logs',
+      icon: AutoMode,
+      path: '/logs'
+    },
+    {
+      title: 'System Activity',
+      icon: ManageHistory,
+      path: '/system-activity'
+    },
+
   ]
 }
 

@@ -1,18 +1,9 @@
-import React, {useEffect} from 'react'
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import React, {useContext, useEffect, useState, CSSProperties } from 'react'
 import { useRouter } from 'next/router'
-import { useNavigate } from 'react-router-dom';
+import ScaleLoader from "react-spinners/ScaleLoader";
 
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
-import Link from '@mui/material/Link'
-import CardHeader from '@mui/material/CardHeader'
-
-// ** Icons Imports
-import Poll from 'mdi-material-ui/Poll'
-import CurrencyUsd from 'mdi-material-ui/CurrencyUsd'
-import HelpCircleOutline from 'mdi-material-ui/HelpCircleOutline'
-import BriefcaseVariantOutline from 'mdi-material-ui/BriefcaseVariantOutline'
 
 // ** Custom Components Imports
 import CardStatisticsVerticalComponent from 'src/@core/components/card-statistics/card-stats-vertical'
@@ -25,36 +16,161 @@ import Table from 'src/views/dashboard/Table'
 import Trophy from 'src/views/dashboard/Trophy'
 import TotalEarning from 'src/views/dashboard/TotalEarning'
 import StatisticsCard from 'src/views/dashboard/StatisticsCard'
-import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
-import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
-import SalesByCountries from 'src/views/dashboard/SalesByCountries'
-import CardContent from '@mui/material/CardContent'
 import { AccountAlert, AccountCancel, AccountCheck, AccountGroup } from 'mdi-material-ui'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import { AuthContext } from 'src/@core/context/authContext';
+import { AuthenticateUser, AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
+import client from 'src/@core/context/client';
+
+import 'react-toastify/dist/ReactToastify.css';
+
+const useUser = () => ({ user: null, loading: false })
 
 const Dashboard = () => {
-  // const navigate = useNavigate()
 
-  // // ** Hook
-  // //const theme = useTheme()
-  // const router = useRouter()
-  //   const user = '';
+  // ** States
+  const [anchorEl, setAnchorEl] = useState(true);
+  const [todaySale, setTodaySale] = useState('');
+  const [accountFund, setAccountFund] = useState('');
+  const [payPalSale, setPayPalSale] = useState('');
+  const [payoneerSale, setPayoneerSale] = useState('');
+  const [bitcoinSale, setBitcoinSale] = useState('');
 
-  // useEffect(() => {
-  //   if(user == '') {
-  //     navigate('/pages/login')
-  //   }
-  // }, [user])
+  const [allUsers, setAllUsers] = useState('');
+  const [activeUsers, setActiveUsers] = useState('');
+  const [pendingUsers, setPendingUsers] = useState('');
+  const [suspendedUsers, setSuspendedUsers] = useState('');
+  const [loadingFetch, setLoadingFetch] = useState(false);
+
+
+  // ** Hook
+  //const theme = useTheme()
+  const router = useRouter()
+  const {test, loading, isAuthenticated, userToken} = useContext(AuthContext)
+
+  const userTokenId = localStorage.getItem('userToken')
+  const userPro = localStorage.getItem('userInfo')
+
+  const override = {
+    display: "block",
+    margin: "0 auto",
+
+    //borderColor: "red",
+  };
+
+  const handleRedirect = PageRedirect('/pages/login')
+
+
+  // check user login authorization if valid
+  const CheckUserLogin = () =>{
+    AuthenticateUserCheck(userTokenId).then((res)=>
+        {
+          if(res.status == '401'){
+            router.replace(handleRedirect)
+            localStorage.clear()
+          }
+          else if(res.status == '402'){
+            router.replace(handleRedirect)
+            localStorage.clear()
+          }
+        });
+      }
+
+  // get daily sales stats here
+  const dailySalesStats = async() =>{
+    setLoadingFetch(true)
+      try {
+        const res = await client.get(`/api/dashboard_salesReport`, {
+          headers: {
+          'Authorization': 'Bearer '+userTokenId,
+          }
+        })
+
+      //console.log(res.data);
+      if(res.data.msg =='201'){
+      //console.log('Daily Sales ' ,res.data);
+      setTodaySale(res.data)
+      setPayPalSale(res.data.feedPaypal)
+      setPayoneerSale(res.data.feedPayoneer)
+      setBitcoinSale(res.data.feedBitcoin)
+      setAccountFund(res.data.feedAcctFund)
+      }
+      } catch (error) {
+        console.log(error.message)
+      }
+      finally{
+        setLoadingFetch(false)
+      }
+  }
+
+ // get daily sales stats here
+ const getUserStats = async() =>{
+  try {
+    const res = await client.get(`/api/dashboard_userReport`, {
+      headers: {
+      'Authorization': 'Bearer '+userTokenId,
+      }
+    })
+
+  //console.log(res.data);
+  if(res.data.msg =='201'){
+  //console.log('Daily Sales ' ,res.data);
+  setAllUsers(res.data.feedAll)
+  setActiveUsers(res.data.feedActive)
+  setPendingUsers(res.data.feedPending)
+  setSuspendedUsers(res.data.feedSuspended)
+  }
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+  useEffect(() => {
+      const userInfo = localStorage.getItem('userInfo')
+      const userToken = localStorage.getItem('userToken')
+
+    // get local storage details
+    const userLocal = localStorage.getItem('userToken')
+    CheckUserLogin()
+
+    dailySalesStats()
+    getUserStats()
+
+    //payPalSalesStats()
+
+    if (userLocal == null) {
+      router.push(handleRedirect)
+      }
+    else{
+      console.log('User authenticated');
+    }
+
+  }, [])
 
   return (
     <ApexChartWrapper>
+      {/* {anchorEl ?
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <ScaleLoader
+          color={'#1D2667'}
+          cssOverride={override}
+          size={80}
+      />
+      </Box>
+      : ''} */}
+
       <Grid container spacing={6}>
         <Grid item xs={12} md={4}>
-          <Trophy />
+          <Trophy data={todaySale.feedback}
+          loading={loadingFetch}/>
         </Grid>
         <Grid item xs={12} md={8}>
-          <StatisticsCard />
+          <StatisticsCard
+          payPalSales={payPalSale}
+          payoneerSales={payoneerSale}
+          bitcoinSales={bitcoinSale}
+          acctFund={accountFund}/>
         </Grid>
         {/* <Grid item xs={12} md={6} lg={4}>
           <WeeklyOverview />
@@ -67,7 +183,7 @@ const Dashboard = () => {
           <Grid container spacing={6}>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='10,000,000'
+                stats={allUsers}
                 icon={<AccountGroup />}
                 color='secondary'
                 trendNumber='+42%'
@@ -77,7 +193,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='9,500,000'
+                stats={activeUsers}
                 title='Active Users'
                 trend='negative'
                 color='success'
@@ -89,7 +205,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='300,000'
+                stats={pendingUsers}
                 trend='negative'
                 color='warning'
 
@@ -101,7 +217,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={6}>
               <CardStatisticsVerticalComponent
-                stats='200,000'
+                stats={suspendedUsers}
                 color='error'
                 trend='negative'
                 trendNumber='-18%'
@@ -184,10 +300,12 @@ const Dashboard = () => {
         }}
       >
         Recent transaction</Typography>
+
         </Grid>
           <Table />
         </Grid>
       </Grid>
+
     </ApexChartWrapper>
   )
 }

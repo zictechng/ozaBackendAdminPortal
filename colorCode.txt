@@ -17,3 +17,29 @@ oldThemeColor" #C6A7FE
 
 ICON: https://pictogrammers.com/library/mdi/
 
+To use this ICON you need to install
+npm install @mui/icons-material @mui/material @emotion/styled @emotion/react
+
+ICON URL: https://mui.com/material-ui/material-icons/
+
+Material Design URL: https://mui.com/material-ui/
+
+Material Icon URL https://mui.com/material-ui/material-icons/#api
+
+color code url: https://mui.com/material-ui/customization/color/
+Next docs:
+
+https://nextjs.org/docs/pages/building-your-application/data-fetching/client-side
+
+color palate code: https://mui.com/material-ui/customization/color/
+
+Animation loader icon: https://www.davidhu.io/react-spinners/storybook/?path=/docs/scaleloader--main
+
+alert notification: https://fkhadra.github.io/react-toastify/api/toast-container
+
+check here for card page sample: http://localhost:3000/cards/
+
+Table sample: http://localhost:3000/tables/
+
+Nextjs sample: https://nextjs.org/docs/pages/api-reference/functions/use-router
+

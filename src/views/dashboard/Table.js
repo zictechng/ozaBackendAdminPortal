@@ -1,3 +1,7 @@
+import React, {useContext, useEffect, useState, CSSProperties } from 'react'
+import moment from 'moment';
+import { useRouter } from 'next/router'
+
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -9,6 +13,11 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import Typography from '@mui/material/Typography'
 import TableContainer from '@mui/material/TableContainer'
+import client from 'src/@core/context/client'
+import { NumberValueFormat } from 'src/@core/function/formatNumberValue'
+import { NumberDollarValueFormat } from 'src/@core/function/formatDollarNumber'
+import { PageRedirect } from 'src/@core/function/controlFunction';
+import BeatLoader from "react-spinners/BeatLoader";
 
 const rows = [
   {
@@ -86,45 +95,92 @@ const rows = [
 ]
 
 const statusObj = {
-  applied: { color: 'info' },
+  waiting: { color: 'info' },
   rejected: { color: 'error' },
   current: { color: 'primary' },
-  resigned: { color: 'warning' },
-  professional: { color: 'success' }
+  expired: { color: 'warning' },
+  Successful: { color: 'success' }
 }
 
 const DashboardTable = () => {
+  const router = useRouter()
+  const [newFundData, setNewFundData] = useState([]);
+  const userTokenId = localStorage.getItem('userToken')
+  const [showLoading, setShowLoading] = useState(false)
+
+  const goToLogin = PageRedirect('/pages/login')
+
+   // get current user transaction stats here
+   const userRecentStats = async() =>{
+    setShowLoading(true)
+    try {
+      const res = await client.get(`/api/user_recentReport`, {
+        headers: {
+        'Authorization': 'Bearer '+userTokenId,
+        }
+      })
+      if(res.data.msg =='201'){
+        //console.log('Recent trans ' , res.data);
+        setNewFundData(res.data.feedAll)
+        }
+        else if(res.data.status =='402'){
+          router.replace(goToLogin)
+        }
+        } catch (error) {
+          console.log(error.message)
+        }
+        finally{
+          setShowLoading(false)
+        }
+    }
+
+useEffect(() => {
+  // get local storage details
+    const userLocal = localStorage.getItem('userToken')
+    userRecentStats()
+}, [])
+
   return (
     <Card>
       <TableContainer>
+          {showLoading ? <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <BeatLoader
+            color={'#1D2667'}
+            loading={true}
+            size={10}
+            margin={10}
+          />
+        </Box>:
+
         <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell>TID</TableCell>
+              <TableCell>Amount</TableCell>
               <TableCell>Date</TableCell>
-              <TableCell>Salary</TableCell>
-              <TableCell>Age</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map(row => (
-              <TableRow hover key={row.name} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
+            {newFundData.map(row => (
+              <TableRow hover key={row._id} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
                 <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.name}</Typography>
-                    <Typography variant='caption'>{row.designation}</Typography>
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.acct_name}</Typography>
+                    <Typography variant='caption'>{row.transac_nature}</Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{row.email}</TableCell>
-                <TableCell>{row.date}</TableCell>
-                <TableCell>{row.salary}</TableCell>
-                <TableCell>{row.age}</TableCell>
+                <TableCell>{row.tid}</TableCell>
+                <TableCell><NumberDollarValueFormat value={row.amount}/></TableCell>
+                <TableCell>{moment(row.creditOn).format('YYYY-MM-DD')}</TableCell>
+                <TableCell>{row.tran_type}</TableCell>
                 <TableCell>
-                  <Chip
-                    label={row.status}
-                    color={statusObj[row.status].color}
+                  {row.transaction_status == 'Successful' ? (
+                    <Chip
+                    label={row.transaction_status}
+                    color={'success'}
                     sx={{
                       height: 24,
                       fontSize: '0.75rem',
@@ -132,11 +188,61 @@ const DashboardTable = () => {
                       '& .MuiChip-label': { fontWeight: 500 }
                     }}
                   />
+                  ): row.transaction_status == 'Pending' ?
+                  (
+                    <Chip
+                    label={row.transaction_status}
+                    color={'primary'}
+                    sx={{
+                      height: 24,
+                      fontSize: '0.75rem',
+                      textTransform: 'capitalize',
+                      '& .MuiChip-label': { fontWeight: 500 }
+                    }}
+                  />
+                  ): row.transaction_status == 'rejected' ?
+                  (
+                    <Chip
+                    label={row.transaction_status}
+                    color={'danger'}
+                    sx={{
+                      height: 24,
+                      fontSize: '0.75rem',
+                      textTransform: 'capitalize',
+                      '& .MuiChip-label': { fontWeight: 500 }
+                    }}
+                  />
+                  ): row.transaction_status == 'expired' ?
+                  (
+                    <Chip
+                    label={row.transaction_status}
+                    color={'warning'}
+                    sx={{
+                      height: 24,
+                      fontSize: '0.75rem',
+                      textTransform: 'capitalize',
+                      '& .MuiChip-label': { fontWeight: 500 }
+                    }}
+                  />
+                  ): (
+                    <Chip
+                    label={row.transaction_status}
+                    color={'default'}
+                    sx={{
+                      height: 24,
+                      fontSize: '0.75rem',
+                      textTransform: 'capitalize',
+                      '& .MuiChip-label': { fontWeight: 500 }
+                    }}
+                  />
+                  )}
+
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        }
       </TableContainer>
     </Card>
   )

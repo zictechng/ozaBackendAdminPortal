@@ -26,6 +26,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
+import UserProvider from 'src/@core/context/userProvider'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -52,15 +53,15 @@ const App = props => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
+        <title>{`${themeConfig.templateName} - Oza Mobile Admin`}</title>
         <meta
           name='description'
-          content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
+          content={`${themeConfig.templateName} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
         />
-        <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+        <meta name='keywords' content='Online business, Virtual funds, Sale paypal funds, Bitcoin, Payoneer, Work from home' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
-
+      <UserProvider>
       <SettingsProvider>
         <SettingsConsumer>
           {({ settings }) => {
@@ -68,6 +69,7 @@ const App = props => {
           }}
         </SettingsConsumer>
       </SettingsProvider>
+      </UserProvider>
     </CacheProvider>
   )
 }
