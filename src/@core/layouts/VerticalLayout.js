@@ -84,7 +84,9 @@ const VerticalLayout = props => {
         //console.log("Toke check ", verifyToken)
         verifyToken.then(function(result){
 
-          if(result.status =='402'){
+          console.log("check Auth ", result)
+
+          if(result?.status =='402'){
             router.push(authorizedUser)
             localStorage.clear()
             toast.error('Error! Session expired, login again', {
@@ -98,7 +100,7 @@ const VerticalLayout = props => {
               theme: "colored",
               });
            }
-           else if(result.status == '401'){
+           else if(result?.status == '401'){
             router.push(authorizedUser)
             localStorage.clear()
             toast.error('Failed! Please login required', {

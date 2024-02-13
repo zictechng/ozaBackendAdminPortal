@@ -31,6 +31,7 @@ const AppLandPageView = () => {
   const router = useRouter()
   const [loadingData, setLoadingData] = useState(false);
   const [updateLoadingData, setUpdateLoadingData] = useState(false);
+  const [textEditorKey, setTextEditorKey] = useState({});
   const userTokenId = localStorage.getItem('userToken')
 
   const editorRef = useRef(null);
@@ -82,6 +83,13 @@ useEffect(() => {
     }
 }
 getAppSetting()
+
+// get local storage details
+const userLocal = localStorage.getItem('AppSettingData')
+
+// get the editor api key from database via local storage
+const appSettingDetails = JSON.parse(userLocal)
+setTextEditorKey(appSettingDetails.app_textEditor_key)
 
 }, [userTokenId])
 
@@ -208,6 +216,7 @@ getAppSetting()
             <InputLabel id='form-layouts-separator-select-label'>App Landing Page Description</InputLabel>
               <FormControl>
               <Editor
+                  apiKey="ejtsvhwpodr92mffqzn9yhr7oo4xjfw4tmy4eycq8jagks5u"
                   onInit={(evt, editor) => editorRef.current = editor}
                   placeholder="Landing Description"
                   initialValue={longDesc}
@@ -215,14 +224,9 @@ getAppSetting()
                   init={{
                   height: 200,
                   menubar: false,
-                  plugins: [
-                    'a11ychecker','advlist','advcode','advtable','autolink','checklist','export',
-                    'lists','link','image','charmap','preview','anchor','searchreplace','visualblocks',
-                    'powerpaste','fullscreen','formatpainter','insertdatetime','media','table','help','wordcount'
-                  ],
-                  toolbar: 'undo redo | casechange blocks | bold italic backcolor | ' +
-                    'alignleft aligncenter alignright alignjustify | ' +
-                    'bullist numlist checklist outdent indent | removeformat | a11ycheck code table help',
+                  plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | numlist bullist indent outdent | emoticons charmap | removeformat|backcolor |'
+                  +'| casechange blocks|a11ycheck code table',
                   contentStyle: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
                 }}
               />

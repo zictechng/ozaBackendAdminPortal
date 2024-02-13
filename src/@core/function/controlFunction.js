@@ -57,11 +57,12 @@ if(res.data.msg =='200'){
   return res.data
   }
 else if(res.data.status == '401') {
-  //console.log('Login required ' , res.data);
+  console.log('Login required ' , res.data);
+
   return res.data
     }
   else if(res.data.status == '402') {
-    //console.log('Authentication Session expired! Login again ' ,res.data);
+    console.log('Authentication Session expired! Login again ' ,res.data);
 
     return res.data
       }

@@ -29,7 +29,7 @@ const UserProvider = ({children}) =>{
         password
     })
 
-      //console.log(res.data);
+  //console.log(res.data);
   if(res.data.msg =='200'){
     //console.log('Login details ' ,res.data);
     let userInfo = res.data;
@@ -54,8 +54,7 @@ const UserProvider = ({children}) =>{
         progress: undefined,
         theme: "colored",
         });
-
-        }
+      }
         else if(res.data.status == '404'){
 
       return toast.error('Failed! Username or Password incorrect', {

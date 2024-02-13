@@ -5,8 +5,8 @@ import CubeOutline from 'mdi-material-ui/CubeOutline'
 import HomeOutline from 'mdi-material-ui/HomeOutline'
 import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
-import { AccountAlert, AccountCancel, AccountCheck, AccountRemove, Bank, ChartBar, CreditCardCheck, CreditCardMinus, CreditCardPlus, CreditCardScan, CurrencyUsd, FileAlert, FileCancel, FileChart, FileChartOutline, FileCheck, FileCloud, FileDocumentMultiple, Information, InformationOutline, Lifebuoy, RadioboxBlank, ScaleBalance } from 'mdi-material-ui'
-import { AutoMode, ManageHistory } from '@mui/icons-material'
+import { AccountAlert, AccountCancel, AccountCheck, AccountRemove, Bank, ChartBar, CreditCardCheck, CreditCardMinus, CreditCardPlus, CreditCardScan, CurrencyUsd, FileAlert, FileCancel, FileChart, FileChartOutline, FileCheck, FileCloud, FileDocumentMultiple, Information, InformationOutline, Lifebuoy, RadioboxBlank, ScaleBalance, ShareAll, ShareCircle } from 'mdi-material-ui'
+import { AutoMode, GroupAddSharp, ManageHistory } from '@mui/icons-material'
 
 const navigation = () => {
   return [
@@ -222,6 +222,15 @@ const navigation = () => {
       title: 'System Activity',
       icon: ManageHistory,
       path: '/system-activity'
+    },
+
+    {
+      sectionTitle: 'Referral Programs'
+    },
+    {
+      title: 'Referral Bonus',
+      icon: GroupAddSharp,
+      path: '/referrals'
     },
 
   ]

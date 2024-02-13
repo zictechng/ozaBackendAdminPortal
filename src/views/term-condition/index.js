@@ -39,6 +39,7 @@ const TermsConditionsView = () => {
   const router = useRouter()
   const [loadingData, setLoadingData] = useState(false);
   const [updateLoadingData, setUpdateLoadingData] = useState(false);
+  const [textEditorKey, setTextEditorKey] = useState('');
   const userTokenId = localStorage.getItem('userToken')
 
   const editorRef = useRef(null);
@@ -73,7 +74,7 @@ useEffect(() => {
   const getAboutUs = async() =>{
     setLoadingData(true);
     try {
-      const res = await client.get(`/api/terms_condition`, {
+      const res = await client.get(`/api/allAbout_us`, {
         headers: {
         'Authorization': 'Bearer '+userTokenId,
         }
@@ -81,7 +82,7 @@ useEffect(() => {
 
     //console.log('Pending users ' , res.data);
   if(res.data.msg =='201'){
-     setTermCondition(res.data.feedAll[0]?.term_condition)
+     setTermCondition(res.data.feedAll[0]?.company_term_conditions)
      setTermStatus(res.data.feedAll[0]?.term_status)
 
     }
@@ -94,7 +95,12 @@ useEffect(() => {
 }
 
 // get local storage details
-const userLocal = localStorage.getItem('userToken')
+const userLocal = localStorage.getItem('AppSettingData')
+
+// get the editor api key from database via local storage
+const appSettingDetails = JSON.parse(userLocal)
+setTextEditorKey(appSettingDetails.app_textEditor_key)
+
 getAboutUs()
 
 }, [userTokenId])
@@ -180,7 +186,7 @@ getAboutUs()
                   label='Status'
                   defaultValue={termStatus}
                   id='form-layouts-separator-select'
-                  onChange={(e) => setPolicyStatus(e.target.value)}
+                  onChange={(e) => setTermStatus(e.target.value)}
                   labelId='form-layouts-separator-select-label'
                 >
                   <MenuItem value=''></MenuItem>
@@ -194,20 +200,16 @@ getAboutUs()
             <Grid item xs={12} sm={10}>
               <FormControl>
               <Editor
+                  apiKey={textEditorKey}
                   onInit={(evt, editor) => editorRef.current = editor}
                   initialValue={termsCondition}
                   onChange={(e) => setTermCondition(e.target.value)}
                   init={{
                   height: 500,
                   menubar: false,
-                  plugins: [
-                    'a11ychecker','advlist','advcode','advtable','autolink','checklist','export',
-                    'lists','link','image','charmap','preview','anchor','searchreplace','visualblocks',
-                    'powerpaste','fullscreen','formatpainter','insertdatetime','media','table','help','wordcount'
-                  ],
-                  toolbar: 'undo redo | casechange blocks | bold italic backcolor | ' +
-                    'alignleft aligncenter alignright alignjustify | ' +
-                    'bullist numlist checklist outdent indent | removeformat | a11ycheck code table help',
+                  plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | numlist bullist indent outdent | emoticons charmap | removeformat|backcolor |'
+                  +'| casechange blocks|a11ycheck code table',
                   contentStyle: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
                 }}
               />

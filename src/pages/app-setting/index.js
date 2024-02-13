@@ -10,6 +10,7 @@ import CardHeader from '@mui/material/CardHeader'
 import AppSettingsView from 'src/views/app-setting'
 import AppStatusView from 'src/views/app-setting/appStatus'
 import AppLandPageView from 'src/views/app-setting/appLandPage'
+import CompanyBankDetails from 'src/views/app-setting/bankDetails'
 
 
 const AppSetting = () => {
@@ -46,6 +47,14 @@ const AppSetting = () => {
           <AppLandPageView/>
         </Card>
       </Grid>
+
+      <Grid item xs={12} marginTop={10}>
+        <Card>
+          <CardHeader title='Company Bank Info' titleTypographyProps={{ variant: 'h6' }} />
+          <CompanyBankDetails/>
+        </Card>
+      </Grid>
+
       {/* <Grid item xs={12}>
         <Card>
           <CardHeader title='Collapsible Table' titleTypographyProps={{ variant: 'h6' }} />

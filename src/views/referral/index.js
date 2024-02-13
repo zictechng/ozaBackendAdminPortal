@@ -25,6 +25,7 @@ import FormControl from '@mui/material/FormControl'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
 
+
 import CircularProgress, {
   circularProgressClasses,
 } from '@mui/material/CircularProgress';
@@ -38,6 +39,8 @@ import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
+import CheckIcon from '@mui/icons-material/Check';
+import Alert from '@mui/material/Alert';
 
 import ListItemText from '@mui/material/ListItemText'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -51,7 +54,7 @@ import Pagination from '@mui/material/Pagination';
 
 // modal inner table import
 import Paper from '@mui/material/Paper';
-import { ShowSnackbar } from 'src/@core/function/controlFunction';
+import { FullPageIndicator, ShowSnackbar } from 'src/@core/function/controlFunction';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -79,10 +82,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 })
 
 
-const SystemActivityLogTable = () => {
+const ReferralProgramTable = () => {
   const router = useRouter()
 
-  const [allLogData, setAllLogData] = useState([]);
+  const [allReferralData, setAllReferralData] = useState([]);
   const [allLogSearchData, setAllLogSearchData] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const userTokenId = localStorage.getItem('userToken');
@@ -95,16 +98,17 @@ const SystemActivityLogTable = () => {
 
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [displayType, setDisplayType] = useState(false);
+  const [approveLoading, setApproveLoading] = useState(false);
 
 
   // pagination state
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10)
+  const [pageLimit, setPageLimit] = useState(2)
   const [totalPageCount, setTotalPageCount] = React.useState(0)
 
   // pagination search state
   const [pageNumberSearch, setPageNumberSearch] = useState(1);
-  const [pageLimitSearch, setPageLimitSearch] = useState(10)
+  const [pageLimitSearch, setPageLimitSearch] = useState(2)
   const [searchParameter, setSearchParameter] = useState('')
   const [totalPageCountSearch, setTotalPageCountSearch] = React.useState(0)
 
@@ -118,6 +122,10 @@ const SystemActivityLogTable = () => {
     paginationSearchFunction()
   };
 
+  // close alert notification
+  const closeAlertNotification = () => {
+    setShowAlert(false);
+  }
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const [showAlertStatus, setShowAlertStatus] = useState({
@@ -126,13 +134,15 @@ const SystemActivityLogTable = () => {
         errorType:'',
         });
 
+  const [showAlertData, setAlertData] = useState('');
+
   const [searchInput, setSearchInput] = useState({
           searchValue: '',
           })
 
         const handleClickOpen = (dataId) => {
           setOpen(true);
-          fetchLogs(dataId);
+          fetchReferralById(dataId);
           setSearchInput({
             searchValue:''
              })
@@ -148,22 +158,27 @@ const SystemActivityLogTable = () => {
           if (reason === 'clickaway') {
             return;
           }
-          setOpen(false);
           setShowAlert(false)
           setDisplayType(false);
         };
 
   // get logs details with the ID received from database
-      const fetchLogs = async(data) => {
+      const fetchReferralById = async(data) => {
         setLoadingLogs(true);
         try {
-          const res = await client.get(`/api/get_systemLogs_byId/${data}`, {
+          const res = await client.get(`/api/get_referral_byId/${data}`, {
             headers: {
             'Authorization': 'Bearer '+userTokenId,
             }
           })
       if(res.data.msg =='201'){
-        setFetchData(res.data.feedAll)
+        setFetchData(res.data.feedAll);
+
+        setAllLogSearchData(res.data.feedAllData)
+
+        //console.log("data all ", res.data.feedAllData)
+        setFetchSearchData(res.data[0].feedAllData)
+        setTotalPageCountSearch(res.data.totalPageSearch)
         setDisplayType(false)
 
         }
@@ -192,35 +207,33 @@ const SystemActivityLogTable = () => {
         }
       }
 
-   // get all logs stats here
+// get all logs stats here
    const getAllLogs = async() =>{
     setLoadingData(true);
     try {
-      const res = await client.get(`/api/fetchAll_systemLog`, {
+      const res = await client.get(`/api/fetchAll_referral`, {
         headers: {
         'Authorization': 'Bearer '+userTokenId,
         }
       })
 
-    //console.log('Pending users ' , res.data);
   if(res.data.msg =='201'){
-    //console.log('Pending trans ' , res.data);
+    console.log('Pending ' , res.data);
     setTotalPageCount(res.data.totalPage)
-    setAllLogData(res.data.feedAll)
-
+    setAllReferralData(res.data.feedAll)
     }
     } catch (error) {
       console.log(error.message)
-    }
+      }
     finally{
       setLoadingData(false)
-    }
+      }
     }
 
-     //pagination function goes here
+//pagination function goes here
      const paginationFunction = async() =>{
       try {
-        const res = await client.get(`/api/fetchAll_systemLog?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
+        const res = await client.get(`/api/fetchAll_referral?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
           headers: {
           'Authorization': 'Bearer '+userTokenId,
           }
@@ -229,14 +242,14 @@ const SystemActivityLogTable = () => {
       //console.log('Pending users ' , res.data);
     if(res.data.msg =='201'){
       setTotalPageCount(res.data.totalPage)
-      setAllLogData(res.data.feedAll)
+      setAllReferralData(res.data.feedAll)
       }
       } catch (error) {
         console.log(error.message)
       }
     }
 
-    //pagination function goes here
+//pagination function goes here
     const paginationSearchFunction = async() =>{
       const paraData = {
         dataInfo: searchInput
@@ -244,7 +257,7 @@ const SystemActivityLogTable = () => {
 
       //console.log("send para ", searchParameter)
       try {
-        const res = await client.get(`/api/search_systemLogs_pagination?pageNumber=${pageNumberSearch}&pageLimit=${pageLimitSearch}`, {
+        const res = await client.get(`/api/search_referral_pagination?pageNumber=${pageNumberSearch}&pageLimit=${pageLimitSearch}`, {
           headers: {
           'Authorization': 'Bearer '+userTokenId,
           },
@@ -254,15 +267,17 @@ const SystemActivityLogTable = () => {
         })
         if(res.data.msg =='201'){
           setTotalPageCountSearch(res.data.totalPage)
-          setAllLogSearchData(res.data.feedAll)
-          setFetchSearchData(res.data[0].feedAll)
+
+          //setAllLogSearchData(res.data.feedAll)
+          setAllLogSearchData(res.data.feedAllData)
+          setFetchSearchData(res.data[0].feedAllData)
           }
           } catch (error) {
             console.log(error.message)
           }
      }
 
-    // Search function to query database goes here
+// Search function to query database goes here
    const searchQuery = async() => {
     const paraData = {
       dataInfo: searchInput
@@ -283,7 +298,7 @@ const SystemActivityLogTable = () => {
       setLoadingSearch(true)
 
     try {
-      const res = await client.post(`/api/search_systemLogs_database`, paraData, {
+      const res = await client.post(`/api/search_referral_database`, paraData, {
         headers: {
         'Authorization': 'Bearer '+userTokenId,
         }
@@ -296,10 +311,8 @@ const SystemActivityLogTable = () => {
         searchValue:''
          })
       setOpen(true);
-      setAllLogSearchData(res.data.feedAll)
-      setFetchSearchData(res.data[0].feedAll)
-
-
+      setAllLogSearchData(res.data.feedAllData)
+      setFetchSearchData(res.data[0].feedAllData)
         }
       else if(res.data.status == '404'){
       setShowAlert(true)
@@ -330,23 +343,84 @@ const SystemActivityLogTable = () => {
     }
    }
 
-  useEffect(() => {
-// get local storage details
-const userLocal = localStorage.getItem('userToken')
-getAllLogs()
+// approve referral bonus action
+const approveAction = async(recId) =>{
+      setApproveLoading(true)
+  try {
+    const res = await client.get(`/api/approveReferral_bonus/${recId}`, {
+      headers: {
+      'Authorization': 'Bearer '+userTokenId,
+      },
+    })
+    if(res.data.msg =='201'){
+      setOpen(false)
+      setShowAlert(true)
+      setShowAlertStatus({
+        alertMessage: 'Referral bonus approved and credited successfully',
+        errorType:'success',
+      })
 
-}, [userTokenId])
+      }
+      else if(res.data.status == '402'){
+        setShowAlert(true)
+        setShowAlertStatus({
+          alertMessage: res.data.message,
+          errorType:'error',
+        })
+        router.push('/pages/login')
+        localStorage.clear()
+        }
+        else if(res.data.status == '401'){
+          setShowAlert(true)
+          setShowAlertStatus({
+          alertMessage: res.data.message,
+          errorType:'error',
+        })
+        router.push('/pages/login')
+        localStorage.clear()
+        }
+        else if(res.data.status == '404'){
+          setShowAlert(true)
+          setShowAlertStatus({
+          alertMessage: res.data.message,
+          errorType:'error',
+        })
+        }
+        else if(res.data.status == '500'){
+          setShowAlert(true)
+          setShowAlertStatus({
+          alertMessage: res.data.message,
+          errorType:'error',
+        })
+
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
+      finally{
+        setApproveLoading(false)
+      }
+  }
+
+  useEffect(() => {
+  // get local storage details
+  const userLocal = localStorage.getItem('userToken')
+  getAllLogs()
+
+  console.log(showAlertData)
+
+  }, [userTokenId])
 
 
 
   return (
     <Card>
       <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
-        <CardHeader title='System activities recorded' titleTypographyProps={{ variant: 'h6' }} />
+        <CardHeader title='System referral activities recorded' titleTypographyProps={{ variant: 'h6' }} />
         <Stack direction={'row'} >
               <FormControl fullWidth margin='dense'>
                 <OutlinedInput
-                  placeholder='Search with Email/IP'
+                  placeholder='Search with Email/Tag ID'
                   onChange={(e) => setSearchInput(e.target.value.trim())}
                   type={'text'}
                   size="small"
@@ -372,7 +446,7 @@ getAllLogs()
               </Box>
         </Stack>
       </Stack>
-          {allLogData.length > 0 &&
+          {allReferralData.length > 0 &&
           <Box sx={{
             //marginTop: 10,
             justifyContent:"right",
@@ -383,7 +457,7 @@ getAllLogs()
               <Pagination count={totalPageCount} page={pageNumber} onChange={handleChange} />
           </Box>}
       <TableContainer>
-      {loadingData &&
+            {loadingData &&
               <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
                  <BeatLoader
                   color={'#1D2667'}
@@ -393,31 +467,32 @@ getAllLogs()
                 />
               </Box>
             }
-        {!loadingData && allLogData.length > 0 ?
+        {!loadingData && allReferralData.length > 0 ?
         <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
           <TableHead>
             <TableRow>
-              <TableCell>User Name</TableCell>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Activity Nature</TableCell>
-              <TableCell>Activity Nature</TableCell>
+              <TableCell>Account Owner Email</TableCell>
+              <TableCell>Account Owner Tag ID</TableCell>
+              <TableCell>Referred Email</TableCell>
+              <TableCell>Referred Name</TableCell>
+              <TableCell>Referral Status</TableCell>
+              <TableCell>Date</TableCell>
               <TableCell>Option</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {allLogData.map(row => (
+            {allReferralData.map(row => (
               <TableRow hover key={row._id} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
-                <TableCell>{row.log_username}</TableCell>
+                <TableCell>{row.ref_mainEmail}</TableCell>
 
                 <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.log_name}</Typography>
-
+                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.ref_mainTag}</Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{row.log_status}</TableCell>
-                <TableCell>{row.log_nature}</TableCell>
+                <TableCell>{row.ref_userEmail}</TableCell>
+                <TableCell>{row.ref_userName}</TableCell>
+                <TableCell>{row.ref_status}</TableCell>
                 <TableCell>{row.createdOn ? moment(row.createdOn).format('YYYY-MM-DD'): null}</TableCell>
 
                 <TableCell>
@@ -435,7 +510,7 @@ getAllLogs()
                       '& .MuiChip-label': { fontWeight: 500 },
                       cursor: 'pointer'
                     }}
-                    onClick={() => handleClickOpen(row._id)}
+                    onClick={() => handleClickOpen(row.record_id)}
                   />
                 </Link>
 
@@ -448,7 +523,7 @@ getAllLogs()
         </Table>
         :null
         }
-      {!loadingData && allLogData.length < 1 &&
+      {!loadingData && allReferralData.length < 1 &&
         <NoRecordFund />
         }
       </TableContainer>
@@ -463,17 +538,6 @@ getAllLogs()
           desc={showAlertStatus.alertMessage}
           transitionState={Transition}
         />
-{/*
-      <ConfirmDialogDelete
-        openState={showConfirmDialog}
-        title={'Are you sure you want to this?'}
-        loadingState={loading}
-        icon1={<Cancel/>}
-        closeState={handleCloseConfirmModal}
-        actionBtn1={() => approveRejectBtn(fetchData._id)}
-        transitionState={Transition}
-        btnLable={'Reject Transaction'}
-      /> */}
 
 
        {/* full dialog that display message details */}
@@ -485,7 +549,7 @@ getAllLogs()
               <CloseIcon />
             </IconButton>
             <Typography sx={{ ml: 2, flex: 1, color: 'white' }} variant='h6' component='div'>
-              {'Search result found | Username : ' + allLogSearchData[0]?.login_username} | IP Address: { allLogSearchData[0]?.login_user_ip}
+              {'Search result found | Username : ' + allLogSearchData[0]?.ref_mainEmail} | Tag ID: { allLogSearchData[0]?.ref_mainTag}
             </Typography>
 
             <Button autoFocus color='inherit' onClick={() => handleClose()}>
@@ -500,7 +564,7 @@ getAllLogs()
             <CloseIcon />
           </IconButton>
           <Typography sx={{ ml: 2, flex: 1, color: 'white' }} variant='h6' component='div'>
-            {'Username : ' + fetchData.log_username}
+            {'User : ' + fetchData.ref_mainEmail}
           </Typography>
 
           <Button autoFocus color='inherit' onClick={() => handleClose()}>
@@ -516,16 +580,16 @@ getAllLogs()
         ) : (
             <List>
             <ListItemButton>
-              <ListItemText primary={displayType ? allLogSearchData[0]?.log_name : fetchData.log_name} secondary='Full Name' />
+              <ListItemText primary={displayType ? allLogSearchData[0]?.ref_mainEmail : fetchData.ref_mainEmail} secondary='Account Owner' />
             </ListItemButton>
             <Divider />
             <ListItemButton>
-              <ListItemText primary='Activities Date' secondary={displayType ? moment(allLogSearchData[0]?.createdOn).format('YYYY-MM-DD') : moment(fetchData?.createdOn).format('YYYY-MM-DD')} />
+              <ListItemText primary='Record Date' secondary={displayType ? moment(allLogSearchData[0]?.createdOn).format('YYYY-MM-DD') : moment(fetchData?.createdOn).format('YYYY-MM-DD')} />
             </ListItemButton>
             <Divider />
             <ListItemButton>
               {!displayType ?
-              <ListItemText primary='Status' secondary={fetchData?.log_status == 'Successful' ? (
+              <ListItemText primary='Status' secondary={fetchData?.ref_status == 'Successful' || fetchData?.ref_status == 'Approved' ? (
                 <Chip
                 label={'Successful'}
                 color={'success'}
@@ -539,7 +603,7 @@ getAllLogs()
                 />
                   ): (
                     <Chip
-                      label={fetchData.log_status}
+                      label={fetchData.ref_status}
                       color={'secondary'}
                       sx={{
                         height: 20,
@@ -551,7 +615,7 @@ getAllLogs()
                     />
                 )} />
                 :
-                 <ListItemText primary='Status' secondary={allLogSearchData[0]?.log_status == 'Successful' ? (
+                 <ListItemText primary='Status' secondary={allLogSearchData[0]?.ref_status == 'Successful' || allLogSearchData[0]?.ref_status == 'Approved' ? (
                 <Chip
                 label={'Successful'}
                 color={'success'}
@@ -565,7 +629,7 @@ getAllLogs()
                 />
                   ): (
                     <Chip
-                      label={allLogSearchData[0]?.log_status}
+                      label={allLogSearchData[0]?.ref_status}
                       color={'secondary'}
                       sx={{
                         height: 20,
@@ -580,15 +644,20 @@ getAllLogs()
             </ListItemButton>
             <Divider />
 
+            {approveLoading && (<FullPageIndicator /> )}
             <ListItemButton>
-              <ListItemText primary='Activities Nature' secondary={displayType ? allLogSearchData[0]?.log_nature : fetchData?.log_nature} />
+              <ListItemText primary='Activities Nature' secondary={'Referral Bonus Program'} />
             </ListItemButton>
             <Divider />
             <ListItemButton>
                 {!displayType ?
-                <ListItemText primary='Tag ID' secondary={displayType ? allLogSearchData[0]?.log_acct_number : fetchData?.log_acct_number} />
+                <ListItemText primary='Tag ID' secondary={displayType ? allLogSearchData[0]?.ref_mainTag : fetchData?.ref_mainTag} />
                 :null}
               </ListItemButton>
+              <Typography sx={{ ml: 2, flex: 1, color: 'gray' }} variant='h7' component='div'>
+              User referred details
+            </Typography>
+
               {allLogSearchData.length > 0 &&
               <Box sx={{
                 //marginTop: 10,
@@ -600,20 +669,17 @@ getAllLogs()
                   <Pagination count={totalPageCountSearch} page={pageNumberSearch} onChange={handleSearchChange} />
               </Box>}
             <Divider />
-            <Typography sx={{ ml: 2, flex: 1, color: 'gray' }} variant='h7' component='div'>
-              {!displayType ? 'Description: ' + fetchData.log_desc : null}
-
-            </Typography>
 
 
-            {displayType ?
+            {displayType || allLogSearchData.length ?
             <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
               <TableHead>
               <TableRow>
-              <TableCell>Activity Nature</TableCell>
-              <TableCell>Activity Description</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Activity Date</TableCell>
+              <TableCell>Referral Email</TableCell>
+              <TableCell>Referral Name</TableCell>
+              <TableCell>Referral Status</TableCell>
+              <TableCell>Registered Date</TableCell>
+              <TableCell>Action</TableCell>
 
               </TableRow>
             </TableHead>
@@ -621,12 +687,12 @@ getAllLogs()
               {allLogSearchData.map(row => (
                 <TableRow hover key={row._id} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
 
-                  <TableCell>{row?.log_nature}</TableCell>
-                  <TableCell>{row?.log_desc}</TableCell>
+                  <TableCell>{row?.ref_userEmail}</TableCell>
+                  <TableCell>{row?.ref_userName}</TableCell>
                   <TableCell>
-                    {row.log_status == '1' || row.log_status == 'Successful' ?
+                    {row.ref_status == '1' || row.ref_status == 'Successful' || row.ref_status == 'Approved' ?
                     <Chip
-                        label={'Successful'}
+                        label={'Approved'}
                         color={'success'}
                         sx={{
                           height: 20,
@@ -637,7 +703,7 @@ getAllLogs()
                         }}
                       />:
                       <Chip
-                        label={row?.log_status}
+                        label={row?.ref_status}
                         color={'secondary'}
                         sx={{
                           height: 20,
@@ -649,6 +715,27 @@ getAllLogs()
                       />}
                   </TableCell>
                   <TableCell>{row?.createdOn ? moment(row.createdOn).format('YYYY-MM-DD'): null}</TableCell>
+                  <TableCell>
+                <Stack direction="row" spacing={1}>
+                  <Link
+                    href={`#`}>
+                    <Chip
+                      label={'Approve'}
+                      color={'info'}
+                      sx={{
+                        height: 30,
+                        fontSize: '0.75rem',
+                        textTransform: 'capitalize',
+                        '& .MuiChip-label': { fontWeight: 500 },
+                        cursor: 'pointer'
+                      }}
+                      disabled={row?.ref_status == 'Approved' || row?.ref_status == 'Successful'}
+                      onClick={() => approveAction(row._id)}
+                    />
+                  </Link>
+
+                    {/* <Chip label="success" color="success" variant="outlined" /> */}
+                </Stack></TableCell>
 
                 </TableRow>
               ))}
@@ -663,4 +750,4 @@ getAllLogs()
   )
 }
 
-export default SystemActivityLogTable
+export default ReferralProgramTable

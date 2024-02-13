@@ -66,6 +66,7 @@ const ServiceRateView = () => {
   const [payoneerSale, setPayoneerSale] = useState("")
   const [payoneerBuy, setPayoneerBuy] = useState("")
   const [bitcoinSale, setBitcoinSale] = useState("")
+  const [bonusAmt, setBonusAmt] = useState("")
   const [bitcoinBuy, setBitcoinBuy] = useState("")
 
 
@@ -89,6 +90,7 @@ useEffect(() => {
     setPayoneerBuy(res.data.feedAll[0]?.payoneer_buying)
     setBitcoinSale(res.data.feedAll[0]?.btc_selling)
     setBitcoinBuy(res.data.feedAll[0]?.btc_buying)
+    setBonusAmt(res.data.feedAll[0]?.bonus_rate)
 
     }
     } catch (error) {
@@ -117,6 +119,7 @@ getAboutUs()
       paypal_selling: paypalSale,
       payoneer_buying: payoneerBuy,
       payoneer_selling: payoneerSale,
+      referral_bonus_amt: bonusAmt,
 
     }
     setUpdateLoadingData(true)
@@ -143,6 +146,18 @@ getAboutUs()
           newestOnTop: false,
           theme: "light",
           });
+    }
+    else if (res.data.status =='402'){
+      toast.error(res.data.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        });
     }
     else{
       toast.error('Sorry, something went wrong', {
@@ -221,10 +236,10 @@ getAboutUs()
             <FormControl fullWidth>
                 <InputLabel htmlFor='form-layouts-separator-password-2'>Payoneer Selling Rate ($)</InputLabel>
                 <OutlinedInput
-                   name='payoneer_selling($)'
+                   name='payoneer_selling'
                    onChange={(e) => setPayoneerSale(e.target.value)}
                    value={payoneerSale}
-                   label='Payoneer Selling Rate'
+                   label='Payoneer Selling Rate($)'
                    type={'text'}
                   />
               </FormControl>
@@ -234,10 +249,10 @@ getAboutUs()
             <FormControl fullWidth>
                 <InputLabel htmlFor='form-layouts-separator-password-2'>Payoneer Buying ($)</InputLabel>
                 <OutlinedInput
-                   name='payoneer_buying($)'
+                   name='payoneer_buying'
                    onChange={(e) => setPayoneerBuy(e.target.value)}
                    value={payoneerBuy}
-                   label='Payoneer Buying Rate'
+                   label='Payoneer Buying Rate($)'
                    type={'text'}
                   />
               </FormControl>
@@ -247,10 +262,10 @@ getAboutUs()
             <FormControl fullWidth>
                 <InputLabel htmlFor='form-layouts-separator-password-2'>Bitcoin Buying Rate ($)</InputLabel>
                 <OutlinedInput
-                   name='btc_buying($)'
+                   name='btc_buying'
                    onChange={(e) => setBitcoinBuy(e.target.value)}
                    value={bitcoinBuy}
-                   label='Bitcoin Buying Rate'
+                   label='Bitcoin Buying Rate($)'
                    type={'text'}
                   />
               </FormControl>
@@ -260,14 +275,29 @@ getAboutUs()
             <FormControl fullWidth>
                 <InputLabel htmlFor='form-layouts-separator-password-2'>Bitcoin Selling Rate ($)</InputLabel>
                 <OutlinedInput
-                   name='btc_selling($)'
+                   name='btc_selling'
                    onChange={(e) => setBitcoinSale(e.target.value)}
                    value={bitcoinSale}
-                   label='Bitcoin Selling Rate'
+                   label='Bitcoin Selling Rate($)'
                    type={'text'}
                   />
               </FormControl>
             </Grid>
+
+            <Grid item xs={12} sm={5}>
+              Referral Bonus Amount
+            <FormControl fullWidth>
+                <InputLabel htmlFor='form-layouts-separator-password-2'></InputLabel>
+                <OutlinedInput
+                   name='referral_bonus_amt'
+                   onChange={(e) => setBonusAmt(e.target.value)}
+                   value={bonusAmt}
+                   label='Referral Bonus Amount($)'
+                   type={'text'}
+                  />
+              </FormControl>
+            </Grid>
+
           </Grid>
         </CardContent>
         <Divider sx={{ margin: 0 }} />

@@ -9,6 +9,7 @@ import Grid from '@mui/material/Grid'
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
 import client from 'src/@core/context/client'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
@@ -60,6 +61,10 @@ const AppStatusView = () => {
   const [payoneerBuyStatus, setPayoneerBuyStatus] = useState("")
   const [bitcoinBuyStatus, setBitcoinBuyStatus] = useState("")
   const [appStatus, setAppStatus] = useState("")
+  const [payPayKey, setPayPayKey] = useState("")
+  const [appBaseUrl, setAppBaseUrl] = useState("")
+  const [appMiniFunding, setAppMiniFunding] = useState("")
+  const [appMaximumFunding, setAppMaximumFunding] = useState("")
 
 
 useEffect(() => {
@@ -83,6 +88,10 @@ useEffect(() => {
     setPayoneerBuyStatus(res.data.feedAll[0]?.app_payoneer_buy)
     setBitcoinBuyStatus(res.data.feedAll[0]?.app_bitcoin_buy)
     setAppStatus(res.data.feedAll[0]?.app_state)
+    setPayPayKey(res.data.feedAll[0]?.app_paypayKey)
+    setAppBaseUrl(res.data.feedAll[0]?.app_baseurl)
+    setAppMiniFunding(res.data.feedAll[0]?.app_minim_funding)
+    setAppMaximumFunding(res.data.feedAll[0]?.app_maxi_funding)
     }
     } catch (error) {
       console.log(error.message)
@@ -107,6 +116,10 @@ getAppSetting()
       "payoneerBuy" : payoneerBuyStatus,
       "bitcoinBuy" : bitcoinBuyStatus,
       "appStatus" : appStatus,
+      "payPayToken" : payPayKey,
+      "baseUrl" : appBaseUrl,
+      "mini_funding" : appMiniFunding,
+      "maxi_funding" : appMaximumFunding,
     }
 
    setUpdateLoadingData(true)
@@ -290,6 +303,63 @@ getAppSetting()
                 </Select>
               </FormControl>
             </Grid>
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>PayPay Key</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                  required
+                  name='pay_key'
+                  defaultValue={payPayKey}
+                  onChange={(e) => setPayPayKey(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Api Base URL</InputLabel>
+              <FormControl fullWidth>
+                <TextField
+                  required
+                  name='app_base_url'
+                  defaultValue={appBaseUrl}
+                  onChange={(e) => setAppBaseUrl(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Minimum Account Funding</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                  required
+                  name='app_account_funding'
+                  defaultValue={appMiniFunding}
+                  onChange={(e) => setAppMiniFunding(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Maximum Account Funding</InputLabel>
+              <FormControl fullWidth>
+                <TextField
+                  required
+                  name='app_accountMaxi_funding'
+                  defaultValue={appMaximumFunding}
+                  onChange={(e) => setAppMaximumFunding(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+
+
           </Grid>
         </CardContent>
         <Divider sx={{ margin: 0 }} />

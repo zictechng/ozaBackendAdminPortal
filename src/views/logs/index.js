@@ -136,7 +136,8 @@ const SystemLogTable = () => {
 
         const handleClose = () => {
           setOpen(false);
-          setShowConfirmDialog(false);
+
+          //setShowConfirmDialog(false);
           setDisplayType(false);
         };
 

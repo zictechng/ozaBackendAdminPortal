@@ -37,6 +37,7 @@ const UserPolicyView = () => {
   const router = useRouter()
   const [loadingData, setLoadingData] = useState(false);
   const [updateLoadingData, setUpdateLoadingData] = useState(false);
+  const [textEditorKey, setTextEditorKey] = useState('');
   const userTokenId = localStorage.getItem('userToken')
 
   const editorRef = useRef(null);
@@ -71,15 +72,15 @@ useEffect(() => {
   const getUserPolicy = async() =>{
     setLoadingData(true);
     try {
-      const res = await client.get(`/api/terms_condition`, {
+      const res = await client.get(`/api/allAbout_us`, {
         headers: {
         'Authorization': 'Bearer '+userTokenId,
         }
       })
 
-    //console.log('Pending users ' , res.data);
+    console.log('Pending users ' , res.data.policy_status);
   if(res.data.msg =='201'){
-     setTermCondition(res.data.feedAll[0]?.user_policy)
+     setTermCondition(res.data.feedAll[0]?.company_privacy_policy)
      setPolicyStatus(res.data.feedAll[0]?.policy_status)
 
     }
@@ -92,7 +93,12 @@ useEffect(() => {
 }
 
 // get local storage details
-const userLocal = localStorage.getItem('userToken')
+const userLocal = localStorage.getItem('AppSettingData')
+
+// get the editor api key from database via local storage
+const appSettingDetails = JSON.parse(userLocal)
+setTextEditorKey(appSettingDetails.app_textEditor_key)
+
 getUserPolicy()
 
 }, [userTokenId])
@@ -221,6 +227,7 @@ getUserPolicy()
             <Grid item xs={12} sm={10}>
               <FormControl>
               <Editor
+                apiKey='ejtsvhwpodr92mffqzn9yhr7oo4xjfw4tmy4eycq8jagks5u'
                 onInit={(evt, editor) => editorRef.current = editor}
                 placeholder="User Policy"
                 initialValue={termsCondition}
@@ -228,14 +235,9 @@ getUserPolicy()
                 init={{
                 height: 500,
                 menubar: false,
-                plugins: [
-                  'a11ychecker','advlist','advcode','advtable','autolink','checklist','export',
-                  'lists','link','image','charmap','preview','anchor','searchreplace','visualblocks',
-                  'powerpaste','fullscreen','formatpainter','insertdatetime','media','table','help','wordcount'
-                ],
-                toolbar: 'undo redo | casechange blocks | bold italic backcolor | ' +
-                  'alignleft aligncenter alignright alignjustify | ' +
-                  'bullist numlist checklist outdent indent | removeformat | a11ycheck code table help',
+                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | numlist bullist indent outdent | emoticons charmap | removeformat|backcolor |'
+                +'| casechange blocks|a11ycheck code table',
                 contentStyle: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
               }}
               />
