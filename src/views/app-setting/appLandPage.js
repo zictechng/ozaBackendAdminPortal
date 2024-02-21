@@ -89,7 +89,7 @@ const userLocal = localStorage.getItem('AppSettingData')
 
 // get the editor api key from database via local storage
 const appSettingDetails = JSON.parse(userLocal)
-setTextEditorKey(appSettingDetails.app_textEditor_key)
+setTextEditorKey(appSettingDetails?.app_textEditor_key)
 
 }, [userTokenId])
 

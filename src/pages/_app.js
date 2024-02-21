@@ -1,3 +1,5 @@
+import React, {useContext, useEffect, useState, Fragment, forwardRef, useRef } from 'react'
+
 // ** Next Imports
 import Head from 'next/head'
 import { Router } from 'next/router'
@@ -45,7 +47,49 @@ if (themeConfig.routingLoader) {
 
 // ** Configure JSS & ClassName
 const App = props => {
+  // const userLocal = localStorage?.getItem('AppSettingData')
+  // const userTokenId = localStorage?.getItem('userToken')
+  // const appSettingDetails = JSON.parse(userLocal)
+  const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
+  const [appDetails, setAppDetails] = useState('');
+  const [loadingData, setLoadingData] = useState(false);
+
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+
+  // useEffect(() => {
+  //   const getAppSetting = async() =>{
+  //     setLoadingData(true);
+  //     try {
+  //       const res = await client.get(`/api/app_setting`, {
+  //         headers: {
+  //         'Authorization': 'Bearer '+userTokenId,
+  //         }
+  //       })
+
+  //     console.log('Pending users ' , res.data.feedAll);
+  //   if(res.data.msg =='201'){
+  //     setLongDesc(res.data.feedAll[0]?.app_launch_desc)
+  //     setAppTitle(res.data.feedAll[0]?.app_launch_title)
+  //     setAppDetails(res.data.feedAll)
+  //     }
+  //     } catch (error) {
+  //       console.log(error.message)
+  //     }
+  //     finally{
+  //       setLoadingData(false)
+  //     }
+  // }
+  // getAppSetting()
+
+  // // get local storage details
+  // const userLocal = localStorage.getItem('AppSettingData')
+
+  // // get the editor api key from database via local storage
+  // const appSettingDetails = JSON.parse(userLocal)
+
+  // //setLogo(appSettingDetails?.app_logo)
+
+  // }, [])
 
   // Variables
   const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>)
@@ -53,10 +97,10 @@ const App = props => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>{`${themeConfig.templateName} - Oza Mobile Admin`}</title>
+        <title>{ `${'Oza'} Mobile Admin`}</title>
         <meta
           name='description'
-          content={`${themeConfig.templateName} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
+          content={`${'Oza'} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
         />
         <meta name='keywords' content='Online business, Virtual funds, Sale paypal funds, Bitcoin, Payoneer, Work from home' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />

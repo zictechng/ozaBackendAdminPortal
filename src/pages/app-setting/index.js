@@ -11,6 +11,7 @@ import AppSettingsView from 'src/views/app-setting'
 import AppStatusView from 'src/views/app-setting/appStatus'
 import AppLandPageView from 'src/views/app-setting/appLandPage'
 import CompanyBankDetails from 'src/views/app-setting/bankDetails'
+import AppLogoView from 'src/views/app-setting/appLogo'
 
 
 const AppSetting = () => {
@@ -45,6 +46,13 @@ const AppSetting = () => {
         <Card>
           <CardHeader title='App Landing Page Description' titleTypographyProps={{ variant: 'h6' }} />
           <AppLandPageView/>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} marginTop={10}>
+        <Card>
+          <CardHeader title='Manage Application Images/Logo' titleTypographyProps={{ variant: 'h6' }} />
+          <AppLogoView/>
         </Card>
       </Grid>
 

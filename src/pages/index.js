@@ -43,14 +43,17 @@ const Dashboard = () => {
   const [suspendedUsers, setSuspendedUsers] = useState('');
   const [loadingFetch, setLoadingFetch] = useState(false);
 
+  const [LoadingData, setLoadingData] = useState(false);
+
 
   // ** Hook
   //const theme = useTheme()
   const router = useRouter()
-  const {test, loading, isAuthenticated, userToken} = useContext(AuthContext)
+  const {test, loading, isAuthenticated, userToken, logo, setLogo} = useContext(AuthContext)
 
   const userTokenId = localStorage.getItem('userToken')
   const userPro = localStorage.getItem('userInfo')
+  const [appTitleLocal, setAppTitleLocal] = useState("")
 
   const override = {
     display: "block",
@@ -127,6 +130,34 @@ const Dashboard = () => {
 }
 
   useEffect(() => {
+    const getAppSetting = async() =>{
+      setLoadingData(true);
+      try {
+        const res = await client.get(`/api/app_setting`, {
+          headers: {
+          'Authorization': 'Bearer '+userTokenId,
+          }
+        })
+
+      //console.log('Pending users ' , res.data);
+    if(res.data.msg =='201'){
+
+      setAppTitleLocal(res.data.infoData)
+      let appTitleLocal = res.data.infoData;
+      setLongDesc(res.data.feedAll[0]?.app_launch_desc)
+      setAppTitle(res.data.feedAll[0]?.app_launch_title)
+
+      localStorage.setItem('AppSettingData',  JSON.stringify( appTitleLocal));
+      }
+      } catch (error) {
+        console.log(error.message)
+      }
+      finally{
+        setLoadingData(false)
+      }
+  }
+  getAppSetting()
+
       const userInfo = localStorage.getItem('userInfo')
       const userToken = localStorage.getItem('userToken')
 

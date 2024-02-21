@@ -19,6 +19,9 @@ const UserProvider = ({children}) =>{
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appSettingDetails, setAppSettingDetails] = useState();
+  const [logo, setLogo] = useState('');
+  const [appLogoMain, setAppLogoMain] = useState('');
+  const [appName, setAppName] = useState('');
 
   // login action function
   const loginAction = async (username, password)=>{
@@ -37,7 +40,7 @@ const UserProvider = ({children}) =>{
       setUserInfo(userInfo)
       setUserToken(userInfo.token)
 
-      //setAppSettingDetails(appSettingDetails)
+      setAppSettingDetails(appSettingDetails)
       localStorage.setItem('userToken', userInfo.token);
       localStorage.setItem('AppSettingData',  JSON.stringify( appSettingDetails));
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -159,7 +162,10 @@ const UserProvider = ({children}) =>{
     userToken, setUserToken,
     userInfo, setUserInfo,
     loginAction,
-    isAuthenticated
+    isAuthenticated,
+    logo, setLogo,
+    appName, setAppName,
+    appLogoMain, setAppLogoMain
     }}>
       {children}
     </AuthContext.Provider>

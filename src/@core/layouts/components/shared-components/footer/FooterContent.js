@@ -6,12 +6,19 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 
 const FooterContent = () => {
   // ** Var
+  const userLocal = localStorage.getItem('AppSettingData')
+
+//console.log("Local ", userLocal);
+
+// get the editor api key from database via local storage
+const appSettingDetails = JSON.parse(userLocal)
+
   const hidden = useMediaQuery(theme => theme.breakpoints.down('md'))
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
       <Typography sx={{ mr: 2 }}>
-        {`© ${new Date().getFullYear()}, ${'Mappido App'} `}
+        {`© ${new Date().getFullYear()}, ${appSettingDetails?.app_name}` + ` Mobile `}
         {/* <Box component='span' sx={{ color: 'error.main' }}>
           ❤️
         </Box> */}

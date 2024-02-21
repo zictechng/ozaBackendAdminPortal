@@ -1,5 +1,5 @@
 const themeConfig = {
-  // ** Layout Configs
+    // ** Layout Configs
   templateName: 'Mappido' /* App Name */,
   mode: 'light' /* light | dark */,
   contentWidth: 'boxed' /* full | boxed */,
