@@ -67,6 +67,7 @@ const AppStatusView = () => {
   const [appMaximumFunding, setAppMaximumFunding] = useState("")
   const [payStackAction, setPayStackAction] = useState("")
   const [payPalAction, setPayPalAction] = useState("")
+  const [referralBonusState, setReferralBonusState] = useState("")
 
 
 useEffect(() => {
@@ -96,6 +97,7 @@ useEffect(() => {
     setAppMaximumFunding(res.data.feedAll[0]?.app_maxi_funding)
     setPayPalAction(res.data.feedAll[0]?.app_paypal_bnt)
     setPayStackAction(res.data.feedAll[0]?.app_payStack_btn)
+    setReferralBonusState(res.data.feedAll[0]?.app_referral_bonus)
     }
     } catch (error) {
       console.log(error.message)
@@ -126,6 +128,7 @@ getAppSetting()
       "maxi_funding" : appMaximumFunding,
       "paypal_btn" : payPalAction,
       "payStack_btn" : payStackAction,
+      "referral_bonus_status" : referralBonusState,
     }
 
    setUpdateLoadingData(true)
@@ -365,6 +368,22 @@ getAppSetting()
               </FormControl>
             </Grid>
 
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'><strong>Referral Bonus Status</strong></InputLabel>
+              <FormControl fullWidth>
+              <Select
+                  label='PayStack Button Status'
+                  defaultValue={referralBonusState}
+                  id='form-layouts-separator-select'
+                  onChange={(e) => setReferralBonusState(e.target.value)}
+                  labelId='form-layouts-separator-select-label'>
+                  <MenuItem value=''></MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Disabled</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12}>
               <Typography variant='body2' sx={{ fontWeight: 900, color:'#1D2667' }}>
               Payment Button Details
@@ -384,8 +403,7 @@ getAppSetting()
                   <MenuItem value=''></MenuItem>
                   <MenuItem value='true'>Active</MenuItem>
                   <MenuItem value='false'>Disabled</MenuItem>
-
-                </Select>
+               </Select>
               </FormControl>
             </Grid>
 
