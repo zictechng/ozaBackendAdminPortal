@@ -282,14 +282,14 @@ const LoginPage = () => {
                 </Link>
               </Typography>
             </Box>
-            <Divider sx={{ my: 5 }}>or</Divider>
+            <Divider sx={{ my: 5 }}></Divider>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Link href='/' passHref>
+              {/*<Link href='/' passHref>
                 <IconButton component='a' onClick={e => e.preventDefault()}>
                   <Facebook sx={{ color: '#497ce2' }} />
                 </IconButton>
               </Link>
-              <Link href='/' passHref>
+               <Link href='/' passHref>
                 <IconButton component='a' onClick={e => e.preventDefault()}>
                   <Twitter sx={{ color: '#1da1f2' }} />
                 </IconButton>
@@ -299,7 +299,7 @@ const LoginPage = () => {
                 <IconButton component='a' onClick={e => e.preventDefault()}>
                   <Google sx={{ color: '#db4437' }} />
                 </IconButton>
-              </Link>
+              </Link> */}
             </Box>
           </form>
         </CardContent>
