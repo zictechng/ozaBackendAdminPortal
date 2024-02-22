@@ -60,9 +60,7 @@ const AppLogoView = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [updateLoadingData, setUpdateLoadingData] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [textEditorKey, setTextEditorKey] = useState({});
   const userTokenId = localStorage.getItem('userToken')
-
 
     // check user login authentication
 
@@ -116,12 +114,10 @@ const AppLogoView = () => {
     setUpdateLoadingData(false)
   }
 
-
   function handleChangeMain(event) {
     setMainLogo(event.target.files[0]);
     setAppLogoScr(URL.createObjectURL(event.target.files[0]))
     setAppLogoMain(URL.createObjectURL(event.target.files[0]))
-
   }
 
   const resetMainImagePicker = () =>{
@@ -228,7 +224,6 @@ const userLocal = localStorage.getItem('AppSettingData')
       setUpdateLoadingData(false)
     }
   }
-
 
   // here upload app logo
   const submitUpdateMain = async() => {
