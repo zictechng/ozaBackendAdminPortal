@@ -68,6 +68,8 @@ const ServiceRateView = () => {
   const [bitcoinSale, setBitcoinSale] = useState("")
   const [bonusAmt, setBonusAmt] = useState("")
   const [bitcoinBuy, setBitcoinBuy] = useState("")
+  const [signupBonusAmt, setSignupBonusAmt] = useState("")
+
 
 
 useEffect(() => {
@@ -91,6 +93,7 @@ useEffect(() => {
     setBitcoinSale(res.data.feedAll[0]?.btc_selling)
     setBitcoinBuy(res.data.feedAll[0]?.btc_buying)
     setBonusAmt(res.data.feedAll[0]?.bonus_rate)
+    setSignupBonusAmt(res.data.feedAll[0]?.signup_bonus_rate)
 
     }
     } catch (error) {
@@ -120,7 +123,7 @@ getAboutUs()
       payoneer_buying: payoneerBuy,
       payoneer_selling: payoneerSale,
       referral_bonus_amt: bonusAmt,
-
+      signup_bonus: signupBonusAmt,
     }
     setUpdateLoadingData(true)
     try {
@@ -178,8 +181,6 @@ getAboutUs()
       setUpdateLoadingData(false)
     }
   }
-
-
 
   return (
     <Card>
@@ -292,6 +293,20 @@ getAboutUs()
                    name='referral_bonus_amt'
                    onChange={(e) => setBonusAmt(e.target.value)}
                    value={bonusAmt}
+                   label='Referral Bonus Amount($)'
+                   type={'text'}
+                  />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={5}>
+              Signup Bonus Amount
+            <FormControl fullWidth>
+                <InputLabel htmlFor='form-layouts-separator-password-2'></InputLabel>
+                <OutlinedInput
+                   name='referral_bonus_amt'
+                   onChange={(e) => setSignupBonusAmt(e.target.value)}
+                   value={signupBonusAmt}
                    label='Referral Bonus Amount($)'
                    type={'text'}
                   />

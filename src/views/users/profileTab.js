@@ -629,6 +629,14 @@ const ProfileUserAccountTabView = () => {
                   defaultValue={userData.acct_type}
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label='Signup Bonus'
+                  placeholder='Bonus Amount'
+                  defaultValue={userData.signup_account}
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 {/* <Button variant='contained' sx={{ marginRight: 3.5 }}>
