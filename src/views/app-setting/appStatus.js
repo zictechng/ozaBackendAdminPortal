@@ -69,6 +69,10 @@ const AppStatusView = () => {
   const [payPalAction, setPayPalAction] = useState("")
   const [referralBonusState, setReferralBonusState] = useState("")
   const [signupBonusState, setSignupBonusState] = useState("")
+  const [appMode, setAppMode] = useState("")
+  const [stopNewSignup, setStopNewSignup] = useState("")
+  const [stopUserLogin, setStopUserLogin] = useState("")
+  const [appModeMessage, setAppModeMessage] = useState("")
 
 
 
@@ -101,6 +105,10 @@ useEffect(() => {
     setPayStackAction(res.data.feedAll[0]?.app_payStack_btn)
     setReferralBonusState(res.data.feedAll[0]?.app_referral_bonus)
     setSignupBonusState(res.data.feedAll[0]?.app_signup_bonus)
+    setStopNewSignup(res.data.feedAll[0]?.app_new_signup_status)
+    setAppMode(res.data.feedAll[0]?.app_operation_status)
+    setStopUserLogin(res.data.feedAll[0]?.app_stop_login_status)
+    setAppModeMessage(res.data.feedAll[0]?.app_mode_message)
     }
     } catch (error) {
       console.log(error.message)
@@ -133,6 +141,10 @@ getAppSetting()
       "payStack_btn" : payStackAction,
       "referral_bonus_status" : referralBonusState,
       "signup_bonus_status" : signupBonusState,
+      "newSignup_status" : stopNewSignup,
+      "appMode_status" : appMode,
+      "appLogin_status" : stopUserLogin,
+      "appMode_message" : appModeMessage,
     }
 
    setUpdateLoadingData(true)
@@ -317,7 +329,7 @@ getAppSetting()
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-            <InputLabel id='form-layouts-separator-select-label'>PayPay Key</InputLabel>
+            <InputLabel id='form-layouts-separator-select-label'>PayStack Key</InputLabel>
             <FormControl fullWidth>
                 <TextField
                   required
@@ -435,6 +447,79 @@ getAppSetting()
                   defaultValue={payPalAction}
                   id='form-layouts-separator-select'
                   onChange={(e) => setPayPalAction(e.target.value)}
+                  labelId='form-layouts-separator-select-label'>
+                  <MenuItem value=''></MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Disabled</MenuItem>
+
+                </Select>
+              </FormControl>
+            </Grid>
+
+
+            <Grid item xs={12}>
+              <Typography variant='body2' sx={{ fontWeight: 900, color:'#1D2667' }}>
+              Application mode
+              </Typography>
+              <Divider sx={{ margin: 0 }} />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Disabled Mobile App Operation</InputLabel>
+            <FormControl fullWidth>
+                <Select
+                  label='Disabled Mobile App'
+                  defaultValue={appMode}
+                  id='form-layouts-separator-select'
+                  onChange={(e) => setAppMode(e.target.value)}
+                  labelId='form-layouts-separator-select-label'>
+                  <MenuItem value=''></MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Disabled</MenuItem>
+               </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>App Offline Mode Message</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                placeholder='Message to show users when off Mode'
+                  name='appMode_message'
+                  defaultValue={appModeMessage}
+                  onChange={(e) => setAppModeMessage(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Stop New Signup</InputLabel>
+            <FormControl fullWidth>
+                <Select
+                  label='Stop New Signup'
+                  defaultValue={stopNewSignup}
+                  id='form-layouts-separator-select'
+                  onChange={(e) => setStopNewSignup(e.target.value)}
+                  labelId='form-layouts-separator-select-label'>
+                  <MenuItem value=''></MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Disabled</MenuItem>
+
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Stop App Login</InputLabel>
+            <FormControl fullWidth>
+                <Select
+                  label='Stop App Login'
+                  defaultValue={stopUserLogin}
+                  id='form-layouts-separator-select'
+                  onChange={(e) => setStopUserLogin(e.target.value)}
                   labelId='form-layouts-separator-select-label'>
                   <MenuItem value=''></MenuItem>
                   <MenuItem value='true'>Active</MenuItem>
