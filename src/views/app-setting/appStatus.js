@@ -424,7 +424,7 @@ getAppSetting()
             </Grid>
 
             <Grid item xs={12} sm={6}>
-            <InputLabel id='form-layouts-separator-select-label'>PayStack Button Status</InputLabel>
+            <InputLabel id='form-layouts-separator-select-label'>PayStack Payment Button Status</InputLabel>
             <FormControl fullWidth>
                 <Select
                   label='PayStack Button Status'
@@ -440,7 +440,7 @@ getAppSetting()
             </Grid>
 
             <Grid item xs={12} sm={6}>
-            <InputLabel id='form-layouts-separator-select-label'>PayPal Button Status</InputLabel>
+            <InputLabel id='form-layouts-separator-select-label'>PayPal Payment Button Status</InputLabel>
             <FormControl fullWidth>
                 <Select
                   label='PayPal Button Status'
