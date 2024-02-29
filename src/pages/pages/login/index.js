@@ -185,7 +185,7 @@ const LoginPage = () => {
                 aria-label="Loading Spinner"
                 data-testid="loader"
               />:
-              <ImgStyled src={appLogoMain == '' || appLogoMain == null ? "Oza Mobile": appLogoMain} alt='App_Logo' />
+              <ImgStyled src={appLogoMain == '' || appLogoMain == null ? "Oza App": appLogoMain} alt='App_Logo' />
               }
             <Typography
               variant='h6'

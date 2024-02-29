@@ -1,6 +1,6 @@
 const themeConfig = {
     // ** Layout Configs
-  templateName: 'Oza Mobile Admin' /* App Name */,
+  templateName: 'Oza App Admin' /* App Name */,
   mode: 'light' /* light | dark */,
   contentWidth: 'boxed' /* full | boxed */,
   // ** Routing Configs
