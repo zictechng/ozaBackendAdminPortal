@@ -97,12 +97,12 @@ const App = props => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>{ `${'Oza'} Mobile Admin`}</title>
+        <title>{ `${'Oza'} App Admin`}</title>
         <meta
           name='description'
-          content={`${'Oza'} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
+          content={`${'Oza App'} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
         />
-        <meta name='keywords' content='Online business, Virtual funds, Sale paypal funds, Bitcoin, Payoneer, Work from home' />
+        <meta name='keywords' content='Online business, Virtual funds, Sale paypal funds, Bitcoin, Payoneer, Work from home, loan, free loan, make money online' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
       <UserProvider>
