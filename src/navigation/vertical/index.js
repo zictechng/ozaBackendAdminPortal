@@ -151,11 +151,12 @@ const navigation = () => {
       title: 'Support Ticket',
       path: '/messages'
     },
-    {
-      icon: ChartBar,
-      title: 'Report',
-      path: '/form-layouts'
-    },
+
+    // {
+    //   icon: ChartBar,
+    //   title: 'Report',
+    //   path: '/form-layouts'
+    // },
 
     {
       sectionTitle: 'Application Settings'
