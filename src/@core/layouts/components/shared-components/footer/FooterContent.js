@@ -18,7 +18,7 @@ const appSettingDetails = JSON.parse(userLocal)
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
       <Typography sx={{ mr: 2 }}>
-        {`© ${new Date().getFullYear()}, ${appSettingDetails?.app_name}` + ` Mobile `}
+        {`© ${new Date().getFullYear()}, ${appSettingDetails?.app_name}` + ` App `}
         {/* <Box component='span' sx={{ color: 'error.main' }}>
           ❤️
         </Box> */}
