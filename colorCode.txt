@@ -1,3 +1,18 @@
+to deploy nextjs on render follow this:
+
+1, do npm run build
+2, upload to github
+3, go to your render account and create a web service
+4, connect your git repo account where you upload your project
+5, setup some configuration to run the build in render
+ Note:
+ * runtime is: Node
+ * Build COmmand: npm install; npm run build
+ * Start Command: npm run start
+ * Root Directory: leave it blank
+
+And click on deploy bottom
+
 black: #5E5873
 primaryColor1: "#1D2667",
 primaryColor2: "#010A4F",
