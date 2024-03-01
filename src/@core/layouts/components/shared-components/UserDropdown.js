@@ -73,8 +73,13 @@ const UserDropdown = () => {
   const goToProfile =() => {
     handleDropdownClose()
     router.push(`admin-user/view-user/${userDetails.userData?._id}`)
+    }
 
-  }
+    const goToSettingProfile =() => {
+      handleDropdownClose()
+      router.push(`admin-user/view-user/${userDetails.userData?._id}`)
+
+    }
 
   //console.log('My Data', username.userData._id)
 
@@ -126,12 +131,12 @@ const UserDropdown = () => {
           </Box>
         </MenuItem>
 
-        <MenuItem sx={{ p: 0 }} onClick={() => goToProfile()}>
+        {/* <MenuItem sx={{ p: 0 }} onClick={() => goToSettingProfile()}>
           <Box sx={styles}>
             <CogOutline sx={{ marginRight: 2 }} />
             Settings
           </Box>
-        </MenuItem>
+        </MenuItem> */}
 
         <Divider />
         <MenuItem sx={{ py: 2 }} onClick={() => handleLogout('/pages/login')}>

@@ -103,7 +103,7 @@ const AdminViewUserDetails = () => {
               </Box>
             }
           />
-          <Tab
+          {/* <Tab
             value='info'
             label={
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -111,7 +111,7 @@ const AdminViewUserDetails = () => {
                 <TabName>Other Info</TabName>
               </Box>
             }
-          />
+          /> */}
         </TabList>
 
         <TabPanel sx={{ p: 0 }} value='account'>
@@ -120,9 +120,9 @@ const AdminViewUserDetails = () => {
         <TabPanel sx={{ p: 0 }} value='security'>
           <ProfileSecurityTabView />
         </TabPanel>
-        <TabPanel sx={{ p: 0 }} value='info'>
+        {/* <TabPanel sx={{ p: 0 }} value='info'>
           <OtherInfoTabView />
-        </TabPanel>
+        </TabPanel> */}
       </TabContext>
     </Card>
 

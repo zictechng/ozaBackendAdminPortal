@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import ArrowCircleLeftOutlinedIcon from '@mui/icons-material/ArrowCircleLeftOutlined'
 import DocumentViewPage from 'src/views/documents/documentViewTable'
-import OtherDocumentViewPage from 'src/views/documents/otherDocumentTable'
 
 const ViewDocuments = () => {
   const router = useRouter()

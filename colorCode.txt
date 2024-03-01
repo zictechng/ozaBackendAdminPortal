@@ -1,4 +1,4 @@
-to deploy nextjs on render follow this:
+how to deploy nextjs on render follow this:
 
 1, do npm run build
 2, upload to github

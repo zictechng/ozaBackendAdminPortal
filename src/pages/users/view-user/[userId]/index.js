@@ -1,6 +1,7 @@
 // ** React Imports
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -12,7 +13,6 @@ import { styled } from '@mui/material/styles'
 import MuiTab from '@mui/material/Tab'
 
 import Grid from '@mui/material/Grid'
-import Link from 'next/link'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack';
 
@@ -70,7 +70,7 @@ const ViewUserDetails = () => {
           <Link href='/'>
            User Details
           </Link>
-          <Link href='#'>
+          <Link href='#' passHref>
             <Icon path={mdiArrowLeftCircleOutline} size={1.5} color={'#595F90'} cursor={'pointer'}
             onClick={() => router.back()} />
           </Link>
