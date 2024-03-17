@@ -511,8 +511,8 @@ const ProfileUserAccountTabView = () => {
                   <InputLabel>Status</InputLabel>
                   <Select label='Status' defaultValue={userData.acct_status}>
                     <MenuItem value={userData.acct_status}>{userData.acct_status}</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
+                    <MenuItem value='Active'>Active</MenuItem>
+                    <MenuItem value='Pending'>Pending</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
