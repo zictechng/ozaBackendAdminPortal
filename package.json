@@ -5,18 +5,19 @@
   "version": "1.0.0",
   "author": {
     "name": "Oza App",
-    "url": "https://ozaapp.com/"
+    "url": "https://themeselection.com/"
   },
-
+  "bugs": {
+    "url": "https://github.com/themeselection/materio-mui-react-nextjs-admin-template-free/issues"
+  },
   "private": false,
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/themeselection/materio-mui-react-nextjs-admin-template-free.git"
   },
   "homepage": "/",
   "keywords": [
     "oza",
-    "oza app",
     "current rate",
     "exchange rate",
     "current exchange rate",
