@@ -10,6 +10,6 @@ import axios from "axios";
 //export default axios.create({baseURL: 'https://crane-cuff-links.cyclic.cloud'})
 
 //export default axios.create({baseURL: 'https://ozabackendapi.ozaapp.com'})
-export default axios.create({baseURL: 'https://ozabackendadminportal2.onrender.com'})
+export default axios.create({baseURL: 'https://adminoffice.ozaapp.com'})
 
 
