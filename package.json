@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "dev": "next dev",
-    "build": "npm i",
+    "build": "next build",
     "start": "next start",
     "export": "next export",
     "lint": "eslint --fix \"src/**/*.{js,jsx}\"",
@@ -65,7 +65,7 @@
     "eslint-plugin-react": "^7.29.4",
     "mdi-material-ui": "^7.1.0",
     "moment": "^2.30.1",
-    "next": "^12.3.4",
+    "next": "12.0.4",
     "nprogress": "^0.2.0",
     "react": "17.0.2",
     "react-apexcharts": "^1.3.9",
