@@ -4,6 +4,8 @@ import { useRouter } from 'next/router'
 import { Editor } from '@tinymce/tinymce-react';
 import Link from 'next/link'
 
+// render version for deployment
+
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
