@@ -11,6 +11,6 @@ import axios from "axios";
 
 //export default axios.create({baseURL: 'https://ozabackendapi.ozaapp.com'})
 
-export default axios.create({baseURL: 'https://adminoffice.ozaapp.com'})
+export default axios.create({baseURL: 'https://ozawebservice.onrender.com'})
 
 
