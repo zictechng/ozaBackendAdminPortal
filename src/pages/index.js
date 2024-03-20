@@ -45,7 +45,6 @@ const Dashboard = () => {
 
   const [LoadingData, setLoadingData] = useState(false);
 
-
   // ** Hook
   //const theme = useTheme()
   const router = useRouter()
@@ -63,7 +62,6 @@ const Dashboard = () => {
   };
 
   const handleRedirect = PageRedirect('/pages/login')
-
 
   // check user login authorization if valid
   const CheckUserLogin = () =>{
