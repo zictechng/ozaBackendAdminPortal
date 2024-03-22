@@ -334,7 +334,7 @@ const AllTransactionsTable = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                       <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>
-                        <NumberDollarValueFormat value={row.amount} />
+                        {row.currency_level == '2' ? <NumberDollarValueFormat value={row.amount} /> : <NumberValueFormat value={row.amount}/>}
                       </Typography>
                     </Box>
                   </TableCell>
