@@ -173,7 +173,7 @@ useEffect(() => {
                   </Box>
                 </TableCell>
                 <TableCell>{row.tid}</TableCell>
-                <TableCell><NumberDollarValueFormat value={row.amount}/></TableCell>
+                <TableCell>{row.currency_level == '2' ? <NumberDollarValueFormat value={row.amount}/>: <NumberValueFormat value={row.amount} />}</TableCell>
                 <TableCell>{moment(row.creditOn).format('YYYY-MM-DD')}</TableCell>
                 <TableCell>{row.tran_type}</TableCell>
                 <TableCell>
