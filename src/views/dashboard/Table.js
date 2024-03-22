@@ -200,11 +200,11 @@ useEffect(() => {
                       '& .MuiChip-label': { fontWeight: 500 }
                     }}
                   />
-                  ): row.transaction_status == 'rejected' ?
+                  ): row.transaction_status == 'rejected' || row.transaction_status == 'Rejected' ?
                   (
                     <Chip
                     label={row.transaction_status}
-                    color={'warning'}
+                    color={'danger'}
                     sx={{
                       height: 24,
                       fontSize: '0.75rem',
@@ -212,7 +212,7 @@ useEffect(() => {
                       '& .MuiChip-label': { fontWeight: 500 }
                     }}
                   />
-                  ): row.transaction_status == 'expired' ?
+                  ): row.transaction_status == 'expired' || row.transaction_status == 'Expired' ?
                   (
                     <Chip
                     label={row.transaction_status}
