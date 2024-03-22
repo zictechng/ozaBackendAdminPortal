@@ -204,7 +204,7 @@ useEffect(() => {
                   (
                     <Chip
                     label={row.transaction_status}
-                    color={'warning'}
+                    color={'danger'}
                     sx={{
                       height: 24,
                       fontSize: '0.75rem',
