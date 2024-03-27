@@ -129,6 +129,9 @@ const OtherUserInfoTabView = () => {
             <TextField fullWidth label='Stage 5' placeholder='Stage 5' defaultValue={userDataInfo.reg_stage5} />
           </Grid>
           <Grid item xs={12} sm={6}>
+            <TextField fullWidth label='Stage 6' placeholder='Stage 6' defaultValue={userDataInfo.reg_stage6} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Email  Notification Enable</InputLabel>
               <Select label='Email Notification Enable' defaultValue={userDataInfo.receive_email_notification == true ? 'Enable': 'Disable'}>
