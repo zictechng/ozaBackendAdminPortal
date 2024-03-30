@@ -72,7 +72,7 @@ const OtherUserInfoTabView = () => {
 
   }, [userId])
 
-  console.log('Others ', userDataInfo)
+  //console.log('Others ', userDataInfo)
 
   return (
 
