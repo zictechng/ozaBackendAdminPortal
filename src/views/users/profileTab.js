@@ -394,7 +394,7 @@ const ProfileUserAccountTabView = () => {
             <Grid container spacing={7}>
               <Grid item xs={12} sx={{ marginTop: 4.8, marginBottom: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <ImgStyled src={imgSrc} alt='Profile Pic' />
+                  <ImgStyled src={userData?.profile_photo == null || userData?.profile_photo =='' ? imgSrc : userData?.profile_photo} alt='Profile Pic' />
                   <Box>
                     <ButtonStyled component='label' variant='contained' htmlFor='account-settings-upload-image'>
                       Upload New Photo
