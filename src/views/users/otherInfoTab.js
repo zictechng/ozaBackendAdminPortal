@@ -116,20 +116,20 @@ const OtherUserInfoTabView = () => {
             <TextField fullWidth label='Stage 1' placeholder='johnDoe' defaultValue={userDataInfo.reg_stage1} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Stage 2' placeholder='Stage 2' defaultValue={userDataInfo.reg_stage2} />
+            <TextField fullWidth label='Complete Signup' placeholder='Complete Signup' defaultValue={userDataInfo.reg_stage2} />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Stage 3' placeholder='Stage 3' defaultValue={userDataInfo.reg_stage3}/>
+            <TextField fullWidth label='Profile Photo' placeholder='Profile Photo' defaultValue={userDataInfo.reg_stage3}/>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Stage 4' placeholder='Stage 4' defaultValue={userDataInfo.reg_stage4} />
+            <TextField fullWidth label='Govt Document ID' placeholder='Govt Document ID' defaultValue={userDataInfo.reg_stage4} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Stage 5' placeholder='Stage 5' defaultValue={userDataInfo.reg_stage5} />
+            <TextField fullWidth label='Account 2FA' placeholder='Account 2FA' defaultValue={userDataInfo.reg_stage5} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label='Stage 6' placeholder='Stage 6' defaultValue={userDataInfo.reg_stage6} />
+            <TextField fullWidth label='Proof Address' placeholder='Proof Address' defaultValue={userDataInfo.reg_stage6} />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
