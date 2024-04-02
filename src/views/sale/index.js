@@ -674,7 +674,7 @@ allUserSales_details()
               <TableCell component="th" scope="column">
                 Check/Last Balance
               </TableCell>
-              <TableCell align="right"><NumberDollarValueFormat value={fetchData?.trans_balance} /></TableCell>
+              <TableCell align="right">{fetchData?.currency_level == '2' ? <NumberValueFormat value={fetchData?.trans_balance} /> : <NumberDollarValueFormat value={fetchData?.trans_balance} />}</TableCell>
             </TableRow>
             <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
               <TableCell component="th" scope="column">
