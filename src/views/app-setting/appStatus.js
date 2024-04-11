@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import client from 'src/@core/context/client'
 import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import BeatLoader from "react-spinners/BeatLoader";
 import Button from '@mui/material/Button'
@@ -26,7 +27,6 @@ import 'react-toastify/dist/ReactToastify.css';
 // ** Third Party Imports
 import { AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
 import { BtnLoaderIndicator } from 'src/@core/function/btnIndicator';
-import Select from '@mui/material/Select'
 
 const AppStatusView = () => {
   const router = useRouter()

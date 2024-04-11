@@ -14,6 +14,8 @@ import client from 'src/@core/context/client'
 import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
 import BeatLoader from "react-spinners/BeatLoader";
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import CardContent from '@mui/material/CardContent'
@@ -58,6 +60,10 @@ const AppSettingsView = () => {
   const [appName, setAppName] = useState("")
   const [shortName, setShortName] = useState("")
   const [appVersion, setAppVersion] = useState("")
+  const [updateShowIcon, setUpdateShowIcon] = useState("")
+  const [updateTitle, setUpdateTitle] = useState("")
+  const [updateNote, setUpdateNote] = useState("")
+  const [updateBtnText, setUpdateBtnText] = useState("")
 
 useEffect(() => {
   userAuthCheck()
@@ -77,6 +83,10 @@ useEffect(() => {
     setAppName(res.data.feedAll[0]?.app_name)
     setShortName(res.data.feedAll[0]?.app_short_name)
     setAppVersion(res.data.feedAll[0]?.app_version)
+    setAppVersion(res.data.feedAll[0]?.app_updateTitle)
+    setAppVersion(res.data.feedAll[0]?.app_updateShowIcon)
+    setAppVersion(res.data.feedAll[0]?.app_update_btn_text)
+    setAppVersion(res.data.feedAll[0]?.app_update_note)
     }
     } catch (error) {
       console.log(error.message)
@@ -99,7 +109,11 @@ getAppSetting()
     const data ={
       "appDesc": editorRef.current.getContent(),
       "appName": appName,
-      "appVersion": appVersion
+      "appVersion": appVersion,
+      "updateIcon": updateShowIcon,
+      "updateTitle": updateTitle,
+      "updateNote": updateNote,
+      "updateBtnText": updateBtnText,
     }
 
     if(data.appName == ''){
@@ -192,7 +206,7 @@ getAppSetting()
           <Grid container spacing={5}>
             <Grid item xs={12}>
               <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Information about the company user policy of the product
+                Information about the app and update Notifications
               </Typography>
             </Grid>
             <ToastContainer/>
@@ -250,6 +264,71 @@ getAppSetting()
               </FormControl>
             </Grid>
 
+            <Grid item xs={12}>
+              <br/>
+              <Typography variant='body2' sx={{ fontWeight: 900, color:'#1D2667', fontSize:20 }}>
+              App Update Notification Setup
+              </Typography>
+              <Divider sx={{ margin: 0 }} />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Update Title</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                  required
+                  label="Enter Update Title"
+                  name='update_title'
+                  defaultValue={updateTitle}
+                  onChange={(e) => setUpdateTitle(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Update Note</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                  required
+                  label="Enter Update Note"
+                  name='update_note'
+                  defaultValue={updateNote}
+                  onChange={(e) => setUpdateNote(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Button Text</InputLabel>
+            <FormControl fullWidth>
+                <TextField
+                  required
+                  label="Enter Button Text"
+                  name='update_btn_text'
+                  defaultValue={updateBtnText}
+                  onChange={(e) => setUpdateBtnText(e.target.value)}
+                  type={'text'}
+                  fullWidth
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+            <InputLabel id='form-layouts-separator-select-label'>Show Icon</InputLabel>
+            <FormControl fullWidth>
+            <Select
+                  label='Paypal Sale Status'
+                  defaultValue={updateShowIcon}
+                  id='form-layouts-separator-select'
+                  onChange={(e) => setUpdateShowIcon(e.target.value)}
+                  labelId='form-layouts-separator-select-label'>
+                  <MenuItem value=''></MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Pending</MenuItem>
+             </Select>
+              </FormControl>
+            </Grid>
           </Grid>
         </CardContent>
         <Divider sx={{ margin: 0 }} />

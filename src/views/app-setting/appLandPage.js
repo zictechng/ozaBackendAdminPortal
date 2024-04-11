@@ -232,7 +232,6 @@ setTextEditorKey(appSettingDetails?.app_textEditor_key)
               />
               </FormControl>
             </Grid>
-
           </Grid>
         </CardContent>
         <Divider sx={{ margin: 0 }} />
