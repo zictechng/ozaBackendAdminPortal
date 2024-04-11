@@ -83,10 +83,10 @@ useEffect(() => {
     setAppName(res.data.feedAll[0]?.app_name)
     setShortName(res.data.feedAll[0]?.app_short_name)
     setAppVersion(res.data.feedAll[0]?.app_version)
-    setAppVersion(res.data.feedAll[0]?.app_updateTitle)
-    setAppVersion(res.data.feedAll[0]?.app_updateShowIcon)
-    setAppVersion(res.data.feedAll[0]?.app_update_btn_text)
-    setAppVersion(res.data.feedAll[0]?.app_update_note)
+    setUpdateTitle(res.data.feedAll[0]?.app_updateTitle)
+    setUpdateShowIcon(res.data.feedAll[0]?.app_updateShowIcon)
+    setUpdateBtnText(res.data.feedAll[0]?.app_update_btn_text)
+    setUpdateNote(res.data.feedAll[0]?.app_update_note)
     }
     } catch (error) {
       console.log(error.message)
