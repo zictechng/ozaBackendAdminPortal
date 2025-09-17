@@ -82,10 +82,12 @@ const DocumentViewPage = () => {
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
 
   const [open, setOpen] = React.useState(false)
+  const [openSuccess, setOpenSuccess] = React.useState(false)
   const [openError, setOpenError] = React.useState(false)
   const [openConfirm, setOpenConfirm] = React.useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [openAlert, setOpenAlert] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   //close warning dialog
   const closeWarning = () => {
@@ -106,22 +108,24 @@ const DocumentViewPage = () => {
     }
     setOpen(false)
     setOpenError(false)
+    setOpenSuccess(false)
   }
 
   // get user document details
   const getDocument = async () => {
+    //console.log('result ID ', docId)
     setLoadingData(true)
     try {
-      const res = await client.get(`/api/adminGetUser_document/${docId}`, {
+      const res = await client.get(`/api/adminGet_documentDetails/${docId}`, {
         headers: {
           Authorization: 'Bearer ' + userTokenId
         }
       })
 
-      //console.log('result ', res.data)
-      if (res.data.msg == '201') {
+      //console.log('result ', res.data.feedAll)
+      if (res.data.msg == '200') {
         setUserData(res.data.feedAll)
-        if (res.data.feedAll.document_url == undefined || res.data.feedAll.document_url == '') {
+        if (res.data.document.document_url == undefined || res.data.document.document_url == '') {
           setOpenAlert(true)
         }
       } else if (res.data.status == '401') {
@@ -171,6 +175,7 @@ const DocumentViewPage = () => {
         console.log(res.data.message)
       } else {
         console.log(res.data.message)
+        setOpenError(true)
       }
     } catch (error) {
       console.log(error.message)
@@ -179,7 +184,7 @@ const DocumentViewPage = () => {
     }
   }
 
-  // approve document api request
+  // reject document api request
   const rejectDocRequest = async data => {
     const docData = {
       user_id: userData.user_id,
@@ -196,15 +201,22 @@ const DocumentViewPage = () => {
           Authorization: 'Bearer ' + userTokenId
         }
       })
-      console.log('result ', res.data)
       if (res.data.msg == '201') {
-        setOpenError(true)
+        setOpenSuccess(true)
         getDocument()
         handleCloseConfirm()
-      } else if (res.data.status == '401') {
-        console.log(res.data.message)
+        setTimeout(() => {
+          router.push('/documents/pending'); // your desired route
+        }, 1000);
+
+      } else if (res.data.status == 404) {
+        setErrorMessage(res.data.message)
+        setOpenError(true)
+        console.log('404 error ', res.data.message)
       } else {
         console.log(res.data.message)
+        openSuccess(true)
+
       }
     } catch (error) {
       console.log(error.message)
@@ -258,7 +270,7 @@ const DocumentViewPage = () => {
       <ResetButtonStyled
         color='error'
         variant='outlined'
-        disabled={userData.document_status == 'Rejected' || userData.document_status == 'Cancelled'}
+        disabled={userData?.document_status == 'Rejected' || userData?.document_status == 'Cancelled'}
         onClick={() => {
           handleOpenConfirm()
         }}>
@@ -299,7 +311,7 @@ const DocumentViewPage = () => {
       {/* confirmation dialog popup before approving the document */}
       <ConfirmDialog
         openState={btnConfirm}
-        title={'Are you sure you want to this?'}
+        title={'Are you sure you want to do this?'}
         desc={'Please, ensure you understand your action before continuing'}
         loadingState={loading}
         icon1={<CheckCircle />}
@@ -320,13 +332,23 @@ const DocumentViewPage = () => {
       />
       {/* error notification component */}
       <ShowSnackbar
-        openAction={openError}
+        openAction={openSuccess}
         type={'error'}
         hideDuration={4000}
         bgColored={'warning'}
         onCloseAction={handleClose}
         length={'100%'}
         desc={'Document rejected successfully'}
+        transitionState={Transition}
+      />
+
+      <ShowSnackbar
+        openAction={openError}
+        type={'info'}
+        hideDuration={4000}
+        onCloseAction={handleClose}
+        length={'100%'}
+        desc={errorMessage}
         transitionState={Transition}
       />
 

@@ -129,7 +129,7 @@ const UserDocumentRejectedTable = () => {
   }
   }
 
-   // get current user transaction stats here
+   // get all rejected document here
    const allRejectedDocument = async() =>{
     setLoadingData(true);
     try {
@@ -139,7 +139,7 @@ const UserDocumentRejectedTable = () => {
         }
       })
 
-    //console.log('Pending users ' , res.data);
+    //console.log('Rejected users ' , res.data);
   if(res.data.msg =='201'){
     //console.log('Pending trans ' , res.data);
     setRejectedDocumentUserData(res.data.feedAll)
@@ -162,7 +162,7 @@ const UserDocumentRejectedTable = () => {
       }
     })
 
-  //console.log('Pending users ' , res.data);
+  //console.log('Rejected users ' , res.data);
     if(res.data.msg =='201'){
       setTotalPageCount(res.data.totalPage)
       setRejectedDocumentUserData(res.data.feedAll)
@@ -291,7 +291,7 @@ allRejectedDocument()
                 {/* <Link href={`query/${row._id}`}>Here</Link> */}
                 <Stack direction="row" spacing={1}>
                   <Link
-                  href={`/documents/view-document/${row._id}`}>
+                  href={`/documents/view-document/${row._id}`} passHref>
                   <Chip
                     label={'View'}
                     color={'primary'}

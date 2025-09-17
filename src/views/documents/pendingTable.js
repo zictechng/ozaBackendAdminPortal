@@ -134,7 +134,7 @@ const UserDocumentPendingTable = () => {
    const allPendingDocument = async() =>{
     setLoadingData(true);
     try {
-      const res = await client.get(`/api/pendingDocument_details?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
+      const res = await client.get(`/api/pendingDocument_user?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
         headers: {
         'Authorization': 'Bearer '+userTokenId,
         }
@@ -158,7 +158,7 @@ const UserDocumentPendingTable = () => {
  //pagination function goes here
  const paginationFunction = async() =>{
   try {
-    const res = await client.get(`/api/pendingDocument_details?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
+    const res = await client.get(`/api/pendingDocument_user?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
       headers: {
       'Authorization': 'Bearer '+userTokenId,
       }
