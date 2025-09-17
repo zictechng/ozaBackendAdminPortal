@@ -98,7 +98,7 @@ const AccountFoundingTable = (props) => {
 
   // pagination state
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageLimit, setPageLimit] = useState(5)
+  const [pageLimit, setPageLimit] = useState(10)
   const [totalPageCount, setTotalPageCount] = React.useState(0)
 
   const handlePaginateChange = (event, value) => {
