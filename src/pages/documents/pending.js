@@ -23,7 +23,7 @@ const PendingDocument = () => {
           </Link> */}
             Pending Documents
         </Typography>
-        <Typography variant='body2'>View all users pending documents approval in the system </Typography>
+        <Typography variant='body2'>View all users pending documents in the system </Typography>
       </Grid>
       <Grid item xs={12}>
         <Card>
