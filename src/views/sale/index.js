@@ -44,7 +44,8 @@ import Button from '@mui/material/Button';
 import Cancel from '@mui/icons-material/Cancel'
 import Pagination from '@mui/material/Pagination';
 
-import Slide from '@mui/material/Slide'
+import Slide from '@mui/material/Slide';
+import FilePresentSharpIcon from '@mui/icons-material/FilePresentSharp';
 
 // modal inner table import
 import Paper from '@mui/material/Paper';
@@ -617,6 +618,30 @@ allUserSales_details()
               Payment ID: <strong>{fetchData?.pay_tran}</strong><br />
               Transaction Date: <strong>{moment(fetchData.creditOn).format('YYYY-MM-DD')} </strong><br />
               Action Date: <strong>{moment(fetchData.approved_date).format('YYYY-MM-DD')}</strong> <br />
+              <br/>
+                Proof of payment: {' '}
+              {fetchData?.payment_proof_url ? (
+                <IconButton
+                  component="a"
+                  href={fetchData.payment_proof_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ ml: 1}}>
+                  <FilePresentSharpIcon sx={{ fontSize: 35, color: '#1D2667' }} />
+                </IconButton>
+              ) : (
+                <Chip
+                label={'Not Provided'}
+                color={'secondary'}
+                sx={{
+                  height: 20,
+                  fontSize: '0.75rem',
+                  textTransform: 'capitalize',
+                  '& .MuiChip-label': { fontWeight: 500 },
+                  cursor: 'pointer'
+                }}
+              />
+              )}<br />
           </Typography>
 
           <TableContainer component={Paper} sx={{ padding: 4 }}>

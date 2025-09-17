@@ -25,7 +25,7 @@ import CardHeader from '@mui/material/CardHeader'
 import FormControl from '@mui/material/FormControl'
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
-
+import FilePresentSharpIcon from '@mui/icons-material/FilePresentSharp';
 
 import CircularProgress, {
   circularProgressClasses,
@@ -616,7 +616,31 @@ allBuyOrders()
               Transaction ID: <strong>{fetchData?.tid}</strong><br />
               Payment ID: <strong>{fetchData?.pay_tran}</strong><br />
               Transaction Date: <strong>{fetchData.creditOn !== null ? moment(fetchData.creditOn).format('YYYY-MM-DD'): ''} </strong><br />
-              Action Date: <strong>{fetchData.approved_date !== null ? moment(fetchData.approved_date).format('YYYY-MM-DD'): ''}</strong> <br />
+              Action Date: <strong>{fetchData.approved_date !== null ? moment(fetchData.approved_date).format('YYYY-MM-DD'): ''}</strong> <br /><br/>
+
+              Proof of payment: {' '}
+            {fetchData?.payment_proof_url ? (
+              <IconButton
+                component="a"
+                href={fetchData.payment_proof_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ml: 1}}>
+                <FilePresentSharpIcon sx={{ fontSize: 35, color: '#1D2667' }} />
+              </IconButton>
+            ) : (
+              <Chip
+              label={'Not Provided'}
+              color={'secondary'}
+              sx={{
+                height: 20,
+                fontSize: '0.75rem',
+                textTransform: 'capitalize',
+                '& .MuiChip-label': { fontWeight: 500 },
+                cursor: 'pointer'
+              }}
+            />
+            )}<br />
           </Typography>
 
           <TableContainer component={Paper} sx={{ padding: 4 }}>

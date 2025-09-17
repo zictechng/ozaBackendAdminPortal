@@ -26,6 +26,7 @@ import CardHeader from '@mui/material/CardHeader'
 
 import InputAdornment from '@mui/material/InputAdornment'
 import OutlinedInput from '@mui/material/OutlinedInput'
+import FilePresentSharpIcon from '@mui/icons-material/FilePresentSharp';
 
 //dialog modal import
 import { styled } from '@mui/material/styles';
@@ -626,7 +627,31 @@ allUserFunding_details()
             Payment Status: <strong>{fetchData.fund_status}</strong><br />
             Transaction ID: <strong>{fetchData.fund_number}</strong><br />
             Payment ID: <br />
-            Date: <strong>{fetchData.createdOn !== null ?moment(fetchData.createdOn).format('YYYY-MM-DD'): ''} </strong><br />
+            Date: <strong>{fetchData.createdOn !== null ?moment(fetchData.createdOn).format('YYYY-MM-DD'): ''} </strong><br /><br/>
+
+            Proof of payment: {' '}
+            {fetchData?.fund_payment_proof_url ? (
+              <IconButton
+                component="a"
+                href={fetchData.fund_payment_proof_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ ml: 1}}>
+                <FilePresentSharpIcon sx={{ fontSize: 35, color: '#1D2667' }} />
+              </IconButton>
+            ) : (
+              <Chip
+              label={'Not Provided'}
+              color={'secondary'}
+              sx={{
+                height: 20,
+                fontSize: '0.75rem',
+                textTransform: 'capitalize',
+                '& .MuiChip-label': { fontWeight: 500 },
+                cursor: 'pointer'
+              }}
+            />
+            )}<br />
           </Typography>
 
           <TableContainer component={Paper} sx={{ padding: 4 }}>
