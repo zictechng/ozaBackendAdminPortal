@@ -412,7 +412,7 @@ getAllLogs()
                       }}
                     />}
                 </TableCell>
-                <TableCell>{row.login_date ? moment(row.login_date).format('YYYY-MM-DD'): null}</TableCell>
+                <TableCell>{row.login_date ? moment(row.login_date).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
 
                 <TableCell>
                 {/* <Link href={`query/${row._id}`}>Here</Link> */}

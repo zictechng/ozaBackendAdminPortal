@@ -418,7 +418,7 @@ getAllLogs()
                 </TableCell>
                 <TableCell>{row.log_status}</TableCell>
                 <TableCell>{row.log_nature}</TableCell>
-                <TableCell>{row.createdOn ? moment(row.createdOn).format('YYYY-MM-DD'): null}</TableCell>
+                <TableCell>{row.createdOn ? moment(row.createdOn).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
 
                 <TableCell>
                 {/* <Link href={`query/${row._id}`}>Here</Link> */}
