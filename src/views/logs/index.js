@@ -412,8 +412,7 @@ getAllLogs()
                       }}
                     />}
                 </TableCell>
-                <TableCell>{row.login_date ? moment(row.login_date).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
-
+                <TableCell>{row.login_date ? moment(row.login_date).format('YYYY-MM-DD'): null}</TableCell>
                 <TableCell>
                 {/* <Link href={`query/${row._id}`}>Here</Link> */}
                 <Stack direction="row" spacing={1}>
@@ -527,7 +526,7 @@ getAllLogs()
             </ListItemButton>
             <Divider />
             <ListItemButton>
-              <ListItemText primary='Login Date' secondary={displayType ? moment(allLogSearchData[0]?.login_date).format('YYYY-MM-DD') : moment(fetchData?.login_date).format('YYYY-MM-DD')} />
+              <ListItemText primary='Login Date' secondary={displayType ? moment(allLogSearchData[0]?.login_date).format('YYYY-MM-DD hh:mm A') : moment(fetchData?.login_date).format('YYYY-MM-DD hh:mm A')} />
             </ListItemButton>
             <Divider />
             <ListItemButton>
@@ -588,7 +587,7 @@ getAllLogs()
             <Divider />
 
             <ListItemButton>
-              <ListItemText primary='Logout Date' secondary={displayType ? moment(allLogSearchData[0]?.logout_date).format('YYYY-MM-DD') : moment(fetchData?.logout_date).format('YYYY-MM-DD')} />
+              <ListItemText primary='Logout Date' secondary={displayType ? moment(allLogSearchData[0]?.logout_date).format('YYYY-MM-DD hh:mm A') : moment(fetchData?.logout_date).format('YYYY-MM-DD hh:mm A')} />
             </ListItemButton>
             <Divider />
             <ListItemButton>
@@ -646,7 +645,7 @@ getAllLogs()
                         }}
                       />}
                   </TableCell>
-                  <TableCell>{row?.login_date ? moment(row.login_date).format('YYYY-MM-DD'): null}</TableCell>
+                  <TableCell>{row?.login_date ? moment(row.login_date).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
                   <TableCell>{row?.login_browser}</TableCell>
                 </TableRow>
               ))}

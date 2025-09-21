@@ -418,7 +418,7 @@ getAllLogs()
                 </TableCell>
                 <TableCell>{row.log_status}</TableCell>
                 <TableCell>{row.log_nature}</TableCell>
-                <TableCell>{row.createdOn ? moment(row.createdOn).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
+                <TableCell>{row.createdOn ? moment(row.createdOn).format('YYYY-MM-DD'): null}</TableCell>
 
                 <TableCell>
                 {/* <Link href={`query/${row._id}`}>Here</Link> */}
@@ -520,7 +520,7 @@ getAllLogs()
             </ListItemButton>
             <Divider />
             <ListItemButton>
-              <ListItemText primary='Activities Date' secondary={displayType ? moment(allLogSearchData[0]?.createdOn).format('YYYY-MM-DD') : moment(fetchData?.createdOn).format('YYYY-MM-DD')} />
+              <ListItemText primary='Activities Date' secondary={displayType ? moment(allLogSearchData[0]?.createdOn).format('YYYY-MM-DD hh:mm A') : moment(fetchData?.createdOn).format('YYYY-MM-DD hh:mm A')} />
             </ListItemButton>
             <Divider />
             <ListItemButton>
@@ -648,7 +648,7 @@ getAllLogs()
                         }}
                       />}
                   </TableCell>
-                  <TableCell>{row?.createdOn ? moment(row.createdOn).format('YYYY-MM-DD'): null}</TableCell>
+                  <TableCell>{row?.createdOn ? moment(row.createdOn).format('YYYY-MM-DD hh:mm A'): null}</TableCell>
 
                 </TableRow>
               ))}
