@@ -13,6 +13,16 @@ import axios from "axios";
 
 //export default axios.create({baseURL: 'https://ozabackendapi.ozaapp.com'})
 
-export default axios.create({baseURL: 'https://ozabackendapi.ozaapp.com'})
+//export default axios.create({baseURL: 'https://ozabackendapi.ozaapp.com'})
+
+
+export default axios.create({
+  baseURL: 'http://192.168.0.239:3500',
+  timeout: 60000,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  }
+});
 
 

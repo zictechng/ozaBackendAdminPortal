@@ -1,239 +1,205 @@
-// ** Icon imports
-import Login from 'mdi-material-ui/Login'
-import Table from 'mdi-material-ui/Table'
-import CubeOutline from 'mdi-material-ui/CubeOutline'
+
 import HomeOutline from 'mdi-material-ui/HomeOutline'
-import FormatLetterCase from 'mdi-material-ui/FormatLetterCase'
 import AccountCogOutline from 'mdi-material-ui/AccountCogOutline'
-import { AccountAlert, AccountCancel, AccountCheck, AccountRemove, Bank, ChartBar, CreditCardCheck, CreditCardMinus, CreditCardPlus, CreditCardScan, CurrencyUsd, FileAlert, FileCancel, FileChart, FileChartOutline, FileCheck, FileCloud, FileDocumentMultiple, Information, InformationOutline, Lifebuoy, RadioboxBlank, ScaleBalance, ShareAll, ShareCircle } from 'mdi-material-ui'
-import { AutoMode, GroupAddSharp, ManageHistory } from '@mui/icons-material'
+import {
+  AccountAlert, AccountCancel, AccountCheck, AccountRemove,
+  Bank, CreditCardCheck, CreditCardPlus, CreditCardScan,
+  CubeOutline, CurrencyUsd, FileAlert, FileCancel, FileCheck,
+  AccountGroup, Information, InformationOutline, Lifebuoy, // Changed GroupAddSharp to AccountGroup
+  RadioboxBlank, ScaleBalance, BellOutline,
+  Flash, AccessPoint, Television, School, // Changed LightningBolt to Flash
+  Cellphone, Gift, Cog, Star, ViewGrid,
+  ShieldAccount, History, Autorenew,
+} from 'mdi-material-ui'
+//import { Autorenew } from 'mdi-material-ui'
 
 const navigation = () => {
   return [
     {
       title: 'Dashboard',
       icon: HomeOutline,
-      path: '/'
-    },
-    {
-      title: 'Account Settings',
-      icon: AccountCogOutline,
-      path: '/#'
-    },
-    {
-      sectionTitle: 'Users'
+      path: '/',
     },
 
+    { sectionTitle: 'Users' },
     {
       title: 'Active Users',
       icon: AccountCheck,
-
-      //path: '/active-users'
-      path: '/users'
+      path: '/users',
     },
     {
       title: 'Pending Users',
       icon: AccountAlert,
-
-      //path: '/active-users'
-      path: '/users/pending-users'
+      path: '/users/pending-users',
     },
     {
       title: 'Suspended Users',
       icon: AccountCancel,
-
-      //path: '/active-users'
-      path: '/users/suspended-users'
+      path: '/users/suspended-users',
     },
     {
       title: 'Deleted Users',
       icon: AccountRemove,
-
-      //path: '/active-users'
-      path: '/users/deleted-users'
+      path: '/users/deleted-users',
     },
 
-    // {
-    //   title: 'Login',
-    //   icon: Login,
-    //   path: '/pages/login',
-    //   openInNewTab: true
-    // },
-
-    {
-      sectionTitle: 'Documents'
-    },
+    { sectionTitle: 'KYC Documents' },
     {
       title: 'Approved',
       icon: FileCheck,
       path: '/documents/approved',
-
-      //openInNewTab: true
     },
     {
       title: 'Pending',
       icon: FileAlert,
       path: '/documents/pending',
-
-      //openInNewTab: true
     },
     {
       title: 'Rejected',
       icon: FileCancel,
       path: '/documents/rejected',
-
-     // openInNewTab: true
     },
 
+    { sectionTitle: 'Bank Details' },
     {
-      sectionTitle: 'User Bank'
-    },
-    {
-      title: 'Bank Details',
+      title: 'User Bank Details',
       icon: Bank,
-      path: '/bank-details'
+      path: '/bank-details',
     },
 
-    {
-      sectionTitle: 'User Account Statement'
-    },
-
-    // {
-    //   title: 'Funding',
-    //   path: '/account-funding',
-    //   icon: FileChart
-    // },
-    // {
-    //   title: 'Sales',
-    //   icon: FileChartOutline,
-    //   path: '/sales'
-    // },
-    // {
-    //   title: 'Buying',
-    //   icon: FileCloud,
-    //   path: '/buying'
-    // },
-    // {
-    //   icon: CubeOutline,
-    //   title: 'All Transactions',
-    //   path: '/all-transactions'
-    // },
-
-    {
-      sectionTitle: 'Transaction'
-    },
+    { sectionTitle: 'Transactions' },
     {
       icon: CreditCardPlus,
-      title: 'Funding',
-      path: '/account-funding'
+      title: 'Account Funding',
+      path: '/account-funding',
     },
     {
       icon: CreditCardCheck,
       title: 'Sales',
-      path: '/sales'
+      path: '/sales',
     },
     {
       icon: CreditCardScan,
       title: 'Buying',
-      path: '/buying'
+      path: '/buying',
     },
     {
       icon: CubeOutline,
       title: 'All Transactions',
-      path: '/all-transactions'
+      path: '/all-transactions',
     },
 
+    { sectionTitle: 'Bills Management' },
     {
-      sectionTitle: 'Ticket'
+      icon: ViewGrid,
+      title: 'Providers',
+      path: '/bills/providers',
     },
+    {
+      icon: Cog,
+      title: 'Service Config',
+      path: '/bills/services',
+    },
+    {
+      icon: Cellphone,
+      title: 'Airtime',
+      path: '/bills/transactions/airtime',
+    },
+    {
+      icon: AccessPoint,
+      title: 'Mobile Data',
+      path: '/bills/transactions/data',
+    },
+    {
+      icon: Flash,
+      title: 'Electricity',
+      path: '/bills/transactions/electricity',
+    },
+    {
+      icon: Television,
+      title: 'TV Subscription',
+      path: '/bills/transactions/tv',
+    },
+    {
+      icon: School,
+      title: 'Exam Cards',
+      path: '/bills/transactions/exam',
+    },
+
+    { sectionTitle: 'Rewards & Coins' },
+    {
+      icon: Star,
+      title: 'Rewards Settings',
+      path: '/rewards/settings',
+    },
+    {
+      icon: Gift,
+      title: 'Coins History',
+      path: '/rewards/coins-history',
+    },
+    {
+      icon: AccountGroup, // Updated here
+      title: 'Referral Bonus',
+      path: '/referrals',
+    },
+
+    { sectionTitle: 'Support' },
     {
       icon: Lifebuoy,
-      title: 'Support Ticket',
-      path: '/messages'
+      title: 'Support Tickets',
+      path: '/messages',
     },
-
-    // {
-    //   icon: ChartBar,
-    //   title: 'Report',
-    //   path: '/form-layouts'
-    // },
-
     {
-      sectionTitle: 'Application Settings'
+      icon: BellOutline,
+      title: 'Notifications',
+      path: '/notifications',
     },
+
+    { sectionTitle: 'Application Settings' },
     {
       icon: Information,
       title: 'About Us',
-      path: '/about-us'
+      path: '/about-us',
     },
     {
       icon: CurrencyUsd,
       title: 'Trade Rate',
-      path: '/service-rate'
+      path: '/service-rate',
     },
     {
       icon: RadioboxBlank,
       title: 'Terms & Conditions',
-      path: '/terms-conditions'
+      path: '/terms-conditions',
     },
     {
       icon: ScaleBalance,
       title: 'User Policy',
-      path: '/user-policy'
+      path: '/user-policy',
     },
     {
       icon: InformationOutline,
       title: 'App Settings',
-      path: '/app-setting'
+      path: '/app-setting',
     },
 
+    { sectionTitle: 'Admin Users' },
     {
-      sectionTitle: 'Admin Users'
-    },
-    {
-      title: 'Active Users',
-      icon: AccountCheck,
-      path: '/admin-user'
-    },
-    {
-      title: 'Pending Users',
-      icon: AccountAlert,
-      path: '/admin-user/pending'
-    },
-    {
-      title: 'Suspended Users',
-      icon: AccountCancel,
-      path: '/admin-user/suspended'
-    },
-    {
-      title: 'Deleted User',
-      icon: AccountRemove,
-      path: '/admin-user/deleted'
+      title: 'Active Admins',
+      icon: ShieldAccount,
+      path: '/admin-user',
     },
 
-    {
-      sectionTitle: 'System Logs'
-    },
+    { sectionTitle: 'System Logs' },
     {
       title: 'Logs',
-      icon: AutoMode,
-      path: '/logs'
+      icon: Autorenew,
+      path: '/logs',
     },
     {
       title: 'System Activity',
-      icon: ManageHistory,
-      path: '/system-activity'
+      icon: History,
+      path: '/system-activity',
     },
-
-    {
-      sectionTitle: 'Referral Programs'
-    },
-    {
-      title: 'Referral Bonus',
-      icon: GroupAddSharp,
-      path: '/referrals'
-    },
-
   ]
 }
 
