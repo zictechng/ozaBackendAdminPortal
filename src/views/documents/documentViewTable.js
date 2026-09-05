@@ -1,382 +1,244 @@
-// ** React Imports
-import React, { useContext, useEffect, useState, CSSProperties } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import Slide from '@mui/material/Slide'
-
-// ** MUI Imports
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import { styled } from '@mui/material/styles'
-import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
-import FormControl from '@mui/material/FormControl'
-import Stack from '@mui/material/Stack'
+import CardHeader from '@mui/material/CardHeader'
+import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-
-// ** Icons Imports
-import { ActivitiesLoader } from 'src/@core/function/btnIndicator'
-import client from 'src/@core/context/client'
-import { ConfirmDialog, FullPageIndicator, ShowSnackbar } from 'src/@core/function/controlFunction'
-
-import CheckCircle from '@mui/icons-material/CheckCircle'
-
-import Snackbar from '@mui/material/Snackbar'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+import { ArrowLeft, FileCheck, FileCancel } from 'mdi-material-ui'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import moment from 'moment'
 
-// confirm dialog with input fields api
-import TextField from '@mui/material/TextField'
-import IconButton from '@mui/material/IconButton'
-import AlertTitle from '@mui/material/AlertTitle'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
+import StatusBadge from 'src/@core/components/common/StatusBadge'
+import ConfirmDialog from 'src/@core/components/common/ConfirmDialog'
+import client from 'src/@core/context/client'
 
-import Close from 'mdi-material-ui/Close'
-
-// Styled component for the form
-const Form = styled('form')(({ theme }) => ({
-  maxWidth: 700,
-  padding: theme.spacing(12),
-  borderRadius: theme.shape.borderRadius,
-  border: `1px solid ${theme.palette.divider}`
-}))
-
-//Document image styles
-const ImgStyled = styled('img')(({ theme }) => ({
-  width: 600,
-  height: 550,
-  marginRight: theme.spacing(6.25),
-  borderRadius: theme.shape.borderRadius
-}))
-
-// action buttons
-const ResetButtonStyled = styled(Button)(({ theme }) => ({
-  marginLeft: theme.spacing(4.5),
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    marginLeft: 0,
-    textAlign: 'center',
-    marginTop: theme.spacing(4)
-  }
-}))
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />
-})
+const InfoRow = ({ label, value }) => (
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+    <Typography variant='body2' color='text.secondary' sx={{ fontWeight: 500 }}>{label}</Typography>
+    <Typography variant='body2' sx={{ fontWeight: 600 }}>{value || 'N/A'}</Typography>
+  </Box>
+)
 
 const DocumentViewPage = () => {
   const router = useRouter()
   const { docId } = router.query
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
 
-  // ** State
-  const [loadingData, setLoadingData] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [btnConfirm, setBtnConfirm] = useState(false)
-  const [userData, setUserData] = useState('')
-  const userTokenId = localStorage.getItem('userToken')
-  const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
+  const [docData, setDocData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
-  const [open, setOpen] = React.useState(false)
-  const [openSuccess, setOpenSuccess] = React.useState(false)
-  const [openError, setOpenError] = React.useState(false)
-  const [openConfirm, setOpenConfirm] = React.useState(false)
-  const [rejectReason, setRejectReason] = useState('')
-  const [openAlert, setOpenAlert] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  //close warning dialog
-  const closeWarning = () => {
-    setOpenAlert(false)
-  }
-
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true)
-  }
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false)
-  }
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return
-    }
-    setOpen(false)
-    setOpenError(false)
-    setOpenSuccess(false)
-  }
-
-  // get user document details
-  const getDocument = async () => {
-    //console.log('result ID ', docId)
-    setLoadingData(true)
-    try {
-      const res = await client.get(`/api/adminGet_documentDetails/${docId}`, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-
-      //console.log('result ', res.data.feedAll)
-      if (res.data.msg == '200') {
-        setUserData(res.data.feedAll)
-        if (res.data.document.document_url == undefined || res.data.document.document_url == '') {
-          setOpenAlert(true)
-        }
-      } else if (res.data.status == '401') {
-        console.log(res.data.message)
-      } else {
-        console.log(res.data.message)
-      }
-    } catch (error) {
-      console.log(error.message)
-    } finally {
-      setLoadingData(false)
-    }
-  }
-
-  // function to call confirm dialog when it click
-  const handleApproveButton = () => {
-    setBtnConfirm(true)
-  }
-
-  // function to call confirm dialog when it click
-  const handleCloseModal = () => {
-    setBtnConfirm(false)
-  }
-
-  // approve document api request
-  const approvedDocRequest = async data => {
-    const docData = {
-      user_id: userData.user_id,
-      doc_id: docId,
-      action_status: data,
-      doc_name: userData?.document_name,
-      doc_type: userData?.document_category
-    }
+  const fetchDocument = async () => {
+    if (!docId) return
     setLoading(true)
     try {
-      const res = await client.post(`/api/adminApprove_document`, docData, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-      console.log('result ', res.data)
-      if (res.data.msg == '201') {
-        setOpen(true)
-        getDocument()
-        handleCloseModal()
-      } else if (res.data.status == '401') {
-        console.log(res.data.message)
-      } else {
-        console.log(res.data.message)
-        setOpenError(true)
+      const res = await client.get(`/api/adminGet_documentDetails/${docId}`, { headers })
+      if (res.data.msg === '200') {
+        setDocData(res.data.feedAll)
       }
-    } catch (error) {
-      console.log(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // reject document api request
-  const rejectDocRequest = async data => {
-    const docData = {
-      user_id: userData.user_id,
-      doc_id: docId,
-      action_status: data,
-      doc_name: userData?.document_name,
-      doc_type: userData?.document_category,
-      reasons: rejectReason
-    }
-    setLoading(true)
-    try {
-      const res = await client.post(`/api/adminRejected_documentUpload`, docData, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-      if (res.data.msg == '201') {
-        setOpenSuccess(true)
-        getDocument()
-        handleCloseConfirm()
-        setTimeout(() => {
-          router.push('/documents/pending'); // your desired route
-        }, 1000);
-
-      } else if (res.data.status == 404) {
-        setErrorMessage(res.data.message)
-        setOpenError(true)
-        console.log('404 error ', res.data.message)
-      } else {
-        console.log(res.data.message)
-        openSuccess(true)
-
-      }
-    } catch (error) {
-      console.log(error.message)
+    } catch (e) {
+      toast.error('Failed to load document')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    getDocument()
+    if (docId) fetchDocument()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId])
 
+  const handleAction = (action) => {
+    setConfirmAction(action)
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmAction = async () => {
+    setActionLoading(true)
+    try {
+      const endpoint = confirmAction === 'approve'
+        ? '/api/adminApprove_document'
+        : '/api/adminRejected_documentUpload'
+
+      const res = await client.post(endpoint, {
+        doc_id: docId,
+        user_id: docData?.user_id,
+        doc_name: docData?.document_name,
+      }, { headers })
+
+      if (res?.data?.msg === '201' || res?.data?.msg === '200') {
+        toast.success(`Document ${confirmAction === 'approve' ? 'approved' : 'rejected'} successfully`)
+        fetchDocument()
+      } else {
+        toast.error(res?.data?.message || 'Action failed')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setActionLoading(false)
+      setConfirmOpen(false)
+      setConfirmAction(null)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 16 }}>
+        <CircularProgress size={48} />
+      </Box>
+    )
+  }
+
+  if (!docData) {
+    return (
+      <Alert severity='error' sx={{ m: 6 }}>
+        Document not found or failed to load.
+      </Alert>
+    )
+  }
+
+  const isPending = docData.document_status === 'Pending'
+
   return (
-    <Card>
-      {openAlert ? (
-        <Grid item xs={12} sx={{ mb: 3 }}>
-          <Alert
-            severity='warning'
-            sx={{
-              '& a': { fontWeight: 400 },
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 2
-            }}
-            action={
-              <IconButton size='small' color='inherit' aria-label='close' onClick={() => closeWarning(false)}>
-                <Close fontSize='inherit' />
-              </IconButton>
-            }>
-            <AlertTitle>Sorry, this document is not valid or not available at the moment.</AlertTitle>
-            <Link href='/' onClick={e => e.preventDefault()}>
-              Contact User
-            </Link>
-          </Alert>
-        </Grid>
-      ) : null}
+    <Grid container spacing={6}>
+      <ToastContainer position='top-right' autoClose={3000} />
 
-      <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center', marginRight: 5 }}>
-        <CardHeader
-          title={
-            'Document | ' +
-            userData?.owners_name +
-            ' ' +
-            userData?.document_name +
-            ' | Doc ID: ' +
-            userData?.track_document
-          }
-          titleTypographyProps={{ variant: 'h6' }}/>
-      </Stack>
-      <ResetButtonStyled
-        color='error'
-        variant='outlined'
-        disabled={userData?.document_status == 'Rejected' || userData?.document_status == 'Cancelled'}
-        onClick={() => {
-          handleOpenConfirm()
-        }}>
-        Reject
-      </ResetButtonStyled>
-      <ResetButtonStyled
-        color='info'
-        variant='outlined'
-        disabled={userData?.document_status != 'Pending'}
-        onClick={() => {
-          handleApproveButton()
-        }}>
-        Approve
-      </ResetButtonStyled>
-      <CardContent sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {loadingData ? (
-          <ActivitiesLoader />
-        ) : (
-          <Form onSubmit={e => e.preventDefault()}>
-            <Grid container spacing={5}>
-              <Grid item xs={12}>
-                <FormControl>
-                  {userData?.document_url == '' || userData?.document_url == null ? (
-                    <ImgStyled src={imgSrc} alt='Document Pic' />
-                  ) : (
-                    <ImgStyled src={userData.document_url} alt='Document Pic' />
-                  )}
-                </FormControl>
-              </Grid>
-              <Typography sx={{ fontWeight: 500, fontSize: '0.975rem !important', padding: 5 }}>
-                {userData?.reject_document_reason}
-              </Typography>
-            </Grid>
-          </Form>
-        )}
-      </CardContent>
+      {/* Header */}
+      <Grid item xs={12}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant='h5' sx={{ fontWeight: 700 }}>Document Review</Typography>
+            <Typography variant='body2' color='text.secondary'>
+              {docData.document_name} — {docData.owners_name}
+            </Typography>
+          </Box>
+          <Button variant='outlined' startIcon={<ArrowLeft />} onClick={() => router.back()}>
+            Back
+          </Button>
+        </Box>
+      </Grid>
 
-      {/* confirmation dialog popup before approving the document */}
-      <ConfirmDialog
-        openState={btnConfirm}
-        title={'Are you sure you want to do this?'}
-        desc={'Please, ensure you understand your action before continuing'}
-        loadingState={loading}
-        icon1={<CheckCircle />}
-        closeState={handleCloseModal}
-        actionBtn1={() => approvedDocRequest('Approved')}
-        transitionState={Transition}
-      />
-      {/* success notification component */}
-      <ShowSnackbar
-        openAction={open}
-        type={'success'}
-        hideDuration={4000}
-        onCloseAction={handleClose}
-        bgColored={'primary.main'}
-        length={'100%'}
-        desc={'Document approved successfully'}
-        transitionState={Transition}
-      />
-      {/* error notification component */}
-      <ShowSnackbar
-        openAction={openSuccess}
-        type={'error'}
-        hideDuration={4000}
-        bgColored={'warning'}
-        onCloseAction={handleClose}
-        length={'100%'}
-        desc={'Document rejected successfully'}
-        transitionState={Transition}
-      />
-
-      <ShowSnackbar
-        openAction={openError}
-        type={'info'}
-        hideDuration={4000}
-        onCloseAction={handleClose}
-        length={'100%'}
-        desc={errorMessage}
-        transitionState={Transition}
-      />
-
-      {/* Confirm dialog with input for reason of rejecting the document */}
-      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
-        <DialogTitle>Reason</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Please tell us the reason why you want to reject the documents.</DialogContentText>
-          {loading ? <FullPageIndicator /> : null}
-          <TextField
-            autoFocus
-            required
-            margin='dense'
-            id='name'
-            name='reason'
-            label='Give me a reason'
-            type='text'
-            fullWidth
-            variant='standard'
-            onChange={e => setRejectReason(e.target.value)}
+      {/* Document Image */}
+      <Grid item xs={12} md={7}>
+        <Card>
+          <CardHeader
+            title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Document Image</Typography>}
+            subheader={<Typography variant='body2' color='text.secondary'>Uploaded document for review</Typography>}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm}>Cancel</Button>
-          <Button onClick={() => rejectDocRequest('Rejected')}>Submit</Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+          <Divider />
+          <CardContent sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            {docData.document_url ? (
+              <Box
+                component='img'
+                src={docData.document_url}
+                alt='Document'
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: 500,
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <Box sx={{ py: 8, textAlign: 'center' }}>
+                <Typography variant='body2' color='text.secondary'>
+                  No document image available
+                </Typography>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* Document Details + Actions */}
+      <Grid item xs={12} md={5}>
+        <Card sx={{ mb: 4 }}>
+          <CardHeader
+            title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Document Details</Typography>}
+          />
+          <Divider />
+          <CardContent>
+            <InfoRow label='Document ID' value={docData.track_document} />
+            <InfoRow label='Owner Name' value={docData.owners_name} />
+            <InfoRow label='Document Type' value={docData.document_name} />
+            <InfoRow label='Status' value={
+              <StatusBadge status={docData.document_status?.toLowerCase()} />
+            } />
+            <InfoRow label='Submitted' value={moment(docData.createdOn).format('DD MMM YYYY, hh:mm A')} />
+            {docData.reject_document_reason && (
+              <InfoRow label='Rejection Reason' value={docData.reject_document_reason} />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons */}
+        <Card>
+          <CardHeader
+            title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Actions</Typography>}
+            subheader={<Typography variant='body2' color='text.secondary'>Review and take action on this document</Typography>}
+          />
+          <Divider />
+          <CardContent>
+            {!isPending ? (
+              <Alert severity={docData.document_status === 'Approved' ? 'success' : 'error'}>
+                <Typography variant='body2'>
+                  This document has been {docData.document_status?.toLowerCase()}.
+                  No further action is required.
+                </Typography>
+              </Alert>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Button
+                  fullWidth
+                  variant='contained'
+                  color='success'
+                  size='large'
+                  startIcon={<FileCheck />}
+                  onClick={() => handleAction('approve')}>
+                  Approve Document
+                </Button>
+                <Button
+                  fullWidth
+                  variant='outlined'
+                  color='error'
+                  size='large'
+                  startIcon={<FileCancel />}
+                  onClick={() => handleAction('reject')}>
+                  Reject Document
+                </Button>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setConfirmAction(null) }}
+        onConfirm={handleConfirmAction}
+        loading={actionLoading}
+        title={confirmAction === 'approve' ? 'Approve Document' : 'Reject Document'}
+        message={
+          confirmAction === 'approve'
+            ? 'Are you sure you want to approve this document? The user will be notified.'
+            : 'Are you sure you want to reject this document? The user will be notified.'
+        }
+        confirmLabel={confirmAction === 'approve' ? 'Approve' : 'Reject'}
+        confirmColor={confirmAction === 'approve' ? 'success' : 'error'}
+      />
+    </Grid>
   )
 }
 
