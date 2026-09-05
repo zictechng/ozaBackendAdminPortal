@@ -11,6 +11,7 @@ import {
   Cellphone, Gift, Cog, Star, ViewGrid,
   ShieldAccount, History, Autorenew,
 } from 'mdi-material-ui'
+
 //import { Autorenew } from 'mdi-material-ui'
 
 const navigation = () => {
@@ -88,8 +89,13 @@ const navigation = () => {
       title: 'All Transactions',
       path: '/all-transactions',
     },
+    {
+      icon: CubeOutline,
+      title: 'Bills Transactions',
+      path: '/bills/transactions',
+    },
 
-    { sectionTitle: 'Bills Management' },
+    { sectionTitle: 'Service Provider' },
     {
       icon: ViewGrid,
       title: 'Providers',
@@ -100,32 +106,7 @@ const navigation = () => {
       title: 'Service Config',
       path: '/bills/services',
     },
-    {
-      icon: Cellphone,
-      title: 'Airtime',
-      path: '/bills/transactions/airtime',
-    },
-    {
-      icon: AccessPoint,
-      title: 'Mobile Data',
-      path: '/bills/transactions/data',
-    },
-    {
-      icon: Flash,
-      title: 'Electricity',
-      path: '/bills/transactions/electricity',
-    },
-    {
-      icon: Television,
-      title: 'TV Subscription',
-      path: '/bills/transactions/tv',
-    },
-    {
-      icon: School,
-      title: 'Exam Cards',
-      path: '/bills/transactions/exam',
-    },
-
+    
     { sectionTitle: 'Rewards & Coins' },
     {
       icon: Star,

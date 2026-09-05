@@ -88,7 +88,11 @@ const BillsTransactions = () => {
     }
   }
 
-  useEffect(() => { fetchTransactions(page) }, [page, serviceFilter])
+   useEffect(() => {
+    fetchTransactions(page)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, serviceFilter])
+
 
   const handleSearch = (e) => {
     if (e.key === 'Enter') {

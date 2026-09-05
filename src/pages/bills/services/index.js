@@ -57,7 +57,10 @@ const BillsServiceConfig = () => {
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+    useEffect(() => {
+    fetchData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleProviderChange = async (serviceType, providerId) => {
     setSaving(serviceType)
