@@ -1,631 +1,285 @@
-import React, { useContext, useEffect, useState, Fragment } from 'react'
-import moment from 'moment'
-import Link from 'next/link'
-
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-
-// ** MUI Imports
+import moment from 'moment'
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
-import Collapse from '@mui/material/Collapse'
-
-import CardHeader from '@mui/material/CardHeader'
-
 import Card from '@mui/material/Card'
-import Chip from '@mui/material/Chip'
+import CardHeader from '@mui/material/CardHeader'
 import Table from '@mui/material/Table'
 import TableRow from '@mui/material/TableRow'
 import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
 import TableContainer from '@mui/material/TableContainer'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
+import Pagination from '@mui/material/Pagination'
+import CircularProgress from '@mui/material/CircularProgress'
+import Avatar from '@mui/material/Avatar'
+import Chip from '@mui/material/Chip'
+import Divider from '@mui/material/Divider'
+import Tooltip from '@mui/material/Tooltip'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import SearchIcon from '@mui/icons-material/Search'
+import { Eye } from 'mdi-material-ui'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+import EmptyState from 'src/@core/components/common/EmptyState'
+import StatusBadge from 'src/@core/components/common/StatusBadge'
 import client from 'src/@core/context/client'
 
-import { Badge } from '@mui/material'
-import BeatLoader from 'react-spinners/BeatLoader'
-import NoRecordFund from 'src/@core/function/tableNoRecord'
-import Stack from '@mui/material/Stack'
+const ticketStatusColor = (status) => {
+  const s = status?.toLowerCase()
+  if (s === 'completed' || s === 'closed') return 'success'
+  if (s === 'replied' || s === 'ongoing') return 'warning'
 
-// open full dialog import
-
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemButton from '@mui/material/ListItemButton'
-import List from '@mui/material/List'
-import Divider from '@mui/material/Divider'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
-import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
-import Slide from '@mui/material/Slide'
-
-import FormControl from '@mui/material/FormControl'
-import InputAdornment from '@mui/material/InputAdornment'
-import OutlinedInput from '@mui/material/OutlinedInput'
-
-import CircularProgress, { circularProgressClasses } from '@mui/material/CircularProgress'
-import SearchIcon from '@mui/icons-material/Search'
-
-import { FullPageIndicator, ShowSnackbar } from 'src/@core/function/controlFunction'
-
-import Pagination from '@mui/material/Pagination';
-
-// confirm dialog with input fields api
-import TextField from '@mui/material/TextField'
-import AlertTitle from '@mui/material/AlertTitle'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />
-})
+  return 'default'
+}
 
 const AllMessagesTable = () => {
   const router = useRouter()
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
 
-  const [allMessagesData, setAllMessagesData] = useState([])
-  const [loadingData, setLoadingData] = useState(false)
-  const [messageLoading, setMessageLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const userTokenId = localStorage.getItem('userToken')
-  const [open, setOpen] = useState(false)
-  const [loadingSearch, setLoadingSearch] = useState(false)
-
-  const [showAlert, setShowAlert] = useState(false)
-
-  // get current user transaction stats here
-  const [openDialog, setOpenDialog] = useState(false)
-  const [openConfirm, setOpenConfirm] = React.useState(false)
-  const [ticketMessage, setTicketMessage] = useState('')
+  const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(false)
-  const [openTicketConfirm, setOpenTicketConfirm] = useState(false)
-  const [closeTicketData, setCloseTicketData] = useState('')
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [pageNumber, setPageNumber] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const pageLimit = 15
 
-  // pagination state
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10)
-  const [totalPageCount, setTotalPageCount] = React.useState(0)
-
-  const handlePaginateChange = (event, value) => {
-    setPageNumber(value);
-    paginationFunction()
-  };
-
-  const [showAlertStatus, setShowAlertStatus] = useState({
-    alertBgColor: '',
-    alertMessage: '',
-    errorType: ''
-  })
-
-  const [searchInput, setSearchInput] = useState({
-    searchValue: ''
-  })
-
-  const handleCloseAlert = (event, reason) => {
-    if (reason === 'clickaway') {
-      return
-    }
-    setOpen(false)
-    setShowAlert(false)
-  }
-
-  const handleClickOpenDialog = data => {
-    setOpenDialog(true)
-    getMessage(data)
-  }
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false)
-    allTicketSend()
-  }
-
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true)
-  }
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false)
-  }
-
-  // close ticket confirm dialog here
-  const handleTicketCloseConfirm = () => {
-    setOpenTicketConfirm(false)
-  }
-
-  // open close ticket confirm dialog here
-  const handleTicketOpenConfirm = data => {
-    setOpenTicketConfirm(true)
-    setCloseTicketData(data)
-  }
-
-  // get all message from database
-  const getMessage = async dataId => {
-    setMessageLoading(true)
-    try {
-      const res = await client.get(`/api/getUser_message/${dataId}`, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-
-      //console.log('Pending users ' , res.data);
-      if (res.data.msg == '201') {
-        //console.log('Message response ', res.data)
-        setMessage(res.data.feedAll)
-      } else if (res.data.status == '404') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-        setOpenDialog(false)
-      }
-    } catch (error) {
-      console.log(error.message)
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: error.message,
-        errorType: 'error'
-      })
-    } finally {
-      setMessageLoading(false)
-    }
-  }
-
-  // get all message from database
-  const allTicketSend = async () => {
-    setLoadingData(true)
-    try {
-      const res = await client.get(`/api/allUser_messages`, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-
-      //console.log('Pending users ' , res.data);
-      if (res.data.msg == '201') {
-        setTotalPageCount(res.data.totalPage)
-        setAllMessagesData(res.data.feedAll)
-      }
-    } catch (error) {
-      console.log(error.message)
-    } finally {
-      setLoadingData(false)
-    }
-  }
-
-  // function to close ticket totally
-  const handleClickCLoseTicket = async data => {
-    const sendInfo = {
-      tran_id: data
-    }
+  const fetchTickets = async (page = 1) => {
     setLoading(true)
     try {
-      const res = await client.post(`/api/closeUserTicket_message`, sendInfo, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-      if (res.data.msg == '201') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: 'Ticket closed successfully',
-          errorType: 'success'
-        })
-        allTicketSend()
-        setOpenDialog(false)
-      } else if (res.data.status == '404') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-      } else if (res.data.status == '401') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-        router.push('/pages/login')
-        localStorage.clear()
+      const res = await client.get(
+        `/api/allUser_messages?pageNumber=${page}&pageLimit=${pageLimit}`,
+        { headers }
+      )
+      if (res.data.msg === '201') {
+        setTickets(res.data.feedAll || [])
+        setTotalPages(res.data.totalPage || 1)
+        setTotalCount(res.data.totalCount || res.data.feedAll?.length || 0)
       }
-    } catch (error) {
-      console.log(error.message)
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: error.message,
-        errorType: 'error'
-      })
+    } catch (e) {
+      toast.error('Failed to load tickets')
     } finally {
-      setOpen(false)
       setLoading(false)
-      handleTicketCloseConfirm()
     }
   }
 
-  // send message feedback to user
-  const sendMessageFeedBack = async () => {
-    const sendInfo = {
-      tran_id: message._id,
-      sendMessage: ticketMessage
+  const handleSearch = async () => {
+    if (!searchInput.trim()) { fetchTickets(1); 
+
+      return 
     }
-    setLoading(true)
+    setSearchLoading(true)
     try {
-      const res = await client.post(`/api/messageFeedback_send`, sendInfo, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-      if (res.data.msg == '201') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: 'Message sent successfully',
-          errorType: 'success'
-        })
-        allTicketSend()
-        setOpenDialog(false)
-      } else if (res.data.status == '404') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-      } else if (res.data.status == '401') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-        router.push('/pages/login')
-        localStorage.clear()
+      const res = await client.post(
+        '/api/searchTicket_database',
+        { dataInfo: searchInput.trim() },
+        { headers }
+      )
+      if (res.data.msg === '201') {
+        router.push(`/messages/${res.data.feedAll._id}`)
+        setSearchInput('')
+      } else {
+        toast.warning(res.data.message || 'No ticket found')
       }
-    } catch (error) {
-      console.log(error.message)
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: error.message,
-        errorType: 'error'
-      })
+    } catch (e) {
+      toast.error('Search failed')
     } finally {
-      setOpen(false)
-      setLoading(false)
-      setOpenConfirm(false)
+      setSearchLoading(false)
     }
   }
 
-  //pagination function goes here
-  const paginationFunction = async() =>{
-    try {
-      const res = await client.get(`/api/allUser_messages?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    //console.log('Pending users ' , res.data);
-  if(res.data.msg =='201'){
-    setTotalPageCount(res.data.totalPage)
-    setAllMessagesData(res.data.feedAll)
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-  }
-
-  // Search function to search for ticket using ticket ID database goes here
-  const searchQuery = async () => {
-    const paraData = {
-      dataInfo: searchInput
-    }
-    setLoadingSearch(true)
-
-    try {
-      const res = await client.post(`/api/searchTicket_database`, paraData, {
-        headers: {
-          Authorization: 'Bearer ' + userTokenId
-        }
-      })
-      if (res.data.msg == '201') {
-        setMessage(res.data.feedAll)
-        setOpenDialog(true)
-        setSearchInput({
-          searchValue: ''
-        })
-      } else if (res.data.status == '404') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-      } else if (res.data.status == '402') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-      } else if (res.data.status == '500') {
-        setShowAlert(true)
-        setShowAlertStatus({
-          alertMessage: res.data.message,
-          errorType: 'error'
-        })
-      }
-    } catch (error) {
-      console.log(error.message)
-    } finally {
-      setLoadingSearch(false)
-    }
+  const handlePageChange = (_, value) => {
+    setPageNumber(value)
+    fetchTickets(value)
   }
 
   useEffect(() => {
-    // get local storage details
-    const userLocal = localStorage.getItem('userToken')
-    allTicketSend()
-  }, [userTokenId])
+    fetchTickets(1)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const getInitials = (name) =>
+    name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'
+
+  const isClosed = (status) =>
+    status === 'Completed' || status === 'Closed'
 
   return (
     <Card>
-      <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
-        <CardHeader title='Support Tickets' titleTypographyProps={{ variant: 'h6' }} />
-        <Stack direction={'row'}>
-          <FormControl fullWidth margin='dense'>
-            <OutlinedInput
-              placeholder='Search by Ticket ID'
-              onChange={e => setSearchInput(e.target.value.trim())}
-              type={'text'}
-              size='small'
-              name='searchValue'
-              value={searchInput.searchValue}
-              style={{ width: '100%' }}
-              endAdornment={
-                <InputAdornment position='end'>
-                  <IconButton edge='end' onClick={() => searchQuery()}>
-                    {loadingSearch ? <CircularProgress thickness={2} size={27} color='primary' /> : <SearchIcon />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-          <Box
-            sx={{
-              marginRight: 5,
-              marginLeft: 5
-            }}
-          ></Box>
-        </Stack>
-      </Stack>
-          {allMessagesData.length > 0 &&
-          <Box sx={{
-            //marginTop: 10,
-            justifyContent:"right",
-            marginRight:5,
-            display:'flex'
-            }}>
-              <Typography>Page <strong>{pageNumber} / {totalPageCount == 0 || totalPageCount == undefined ? pageNumber: totalPageCount }</strong></Typography>
-              <Pagination count={totalPageCount} page={pageNumber} onChange={handlePaginateChange} />
-          </Box>}
-      <TableContainer>
-        {loadingData && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 5 }}>
-            <BeatLoader color={'#1D2667'} loading={true} size={10} margin={5} />
-          </Box>
-        )}
-        {!loadingData && allMessagesData.length > 0 ? (
-          <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-            <TableHead>
-              <TableRow>
-                <TableCell>Email</TableCell>
-                <TableCell>Sender Name</TableCell>
-                <TableCell>Ticket Type</TableCell>
-                <TableCell>Subject</TableCell>
-                <TableCell>Ticket Status</TableCell>
-                <TableCell>Ticket Action</TableCell>
-                <TableCell>Reg. Date</TableCell>
-                <TableCell>Option</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {allMessagesData.map(row => (
-                <>
-                  <TableRow hover key={row._id} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
-                    <TableCell>{row.user?.email}</TableCell>
-                    <TableCell>{row.user?.display_name}</TableCell>
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
 
-                    <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>
-                          {row.ticket_type}
-                        </Typography>
+      <CardHeader
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant='h6' sx={{ fontWeight: 700 }}>Support Tickets</Typography>
+            {totalCount > 0 && (
+              <Chip
+                label={`${totalCount.toLocaleString()} tickets`}
+                size='small'
+                color='primary'
+                variant='outlined'
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+          </Box>
+        }
+        action={
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', pr: 2 }}>
+            <TextField
+              size='small'
+              placeholder='Search by email or ticket ID'
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              sx={{ minWidth: 280 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <SearchIcon fontSize='small' color='action' />
+                  </InputAdornment>
+                ),
+                endAdornment: searchLoading
+                  ? <InputAdornment position='end'><CircularProgress size={16} /></InputAdornment>
+                  : null,
+              }}
+            />
+            <Button
+              variant='contained'
+              size='small'
+              onClick={handleSearch}
+              disabled={searchLoading}
+              sx={{ borderRadius: 2, px: 3 }}>
+              Search
+            </Button>
+            <Tooltip title='Refresh'>
+              <IconButton size='small' onClick={() => fetchTickets(pageNumber)} disabled={loading}>
+                <RefreshIcon fontSize='small' />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        }
+      />
+      <Divider />
+
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+          <CircularProgress size={40} />
+        </Box>
+      )}
+
+      {!loading && tickets.length === 0 && (
+        <EmptyState title='No Support Tickets' message='No tickets have been submitted yet.' />
+      )}
+
+      {!loading && tickets.length > 0 && (
+        <>
+          <TableContainer>
+            <Table sx={{ minWidth: 900 }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                  {['Sender / Email', 'Subject', 'Type', 'Ticket ID', 'Status', 'Date', 'Action'].map(col => (
+                    <TableCell key={col}>
+                      <Typography variant='body2' sx={{ fontWeight: 700 }}>{col}</Typography>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tickets.map(row => (
+                  <TableRow key={row._id} hover sx={{ '&:last-of-type td': { border: 0 } }}>
+                                        <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.75rem', fontWeight: 700 }}>
+                          {getInitials(row.sender_name || row.user?.display_name)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                            {row.sender_name || row.user?.display_name || '—'}
+                          </Typography>
+                          <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.72rem' }}>
+                            {row.email || row.user?.email || '—'}
+                          </Typography>
+                        </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>{row.subject}</TableCell>
-                    <TableCell>{row.ticket_status}</TableCell>
                     <TableCell>
-                      {row.ticket_closed == 'Ongoing' || row.ticket_closed == 'Replied' ? (
-                        <Chip
-                          label={row.ticket_closed}
-                          color={'info'}
-                          sx={{
-                            height: 18,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '0.75rem',
-                            textTransform: 'capitalize',
-                            '& .MuiChip-label': { fontWeight: 300 },
-                            cursor: 'pointer'
-                          }}
-                        />
-                      ) : row.ticket_closed == 'Completed' || row.ticket_closed == 'Closed' ? (
-                        <Chip
-                          label={row.ticket_closed}
-                          color={'warning'}
-                          sx={{
-                            height: 18,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '0.75rem',
-                            textTransform: 'capitalize',
-                            '& .MuiChip-label': { fontWeight: 300 },
-                            cursor: 'pointer'
-                          }}
-                        />
-                      ) : (
-                        <Chip
-                          label={row.ticket_closed}
-                          color={'secondary'}
-                          sx={{
-                            height: 18,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontSize: '0.75rem',
-                            textTransform: 'capitalize',
-                            '& .MuiChip-label': { fontWeight: 300 },
-                            cursor: 'pointer'
-                          }}
-                        />
-                      )}
+                      <Tooltip title={row.subject}>
+                        <Typography variant='body2' sx={{ fontWeight: 600, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {row.subject || '—'}
+                        </Typography>
+                      </Tooltip>
                     </TableCell>
-                    <TableCell>{moment(row.createdOn).format('YYYY-MM-DD')}</TableCell>
-
                     <TableCell>
-                      {/* <Link href={`query/${row._id}`}>Here</Link> */}
-                      <Stack direction='row' spacing={1}>
-                        <Link href='#' passHref>
-                          <Chip
-                            disabled={row.ticket_closed == 'Completed' || row.ticket_closed == 'Closed'}
-                            onClick={() => handleClickOpenDialog(row._id)}
-                            label={'Open'}
-                            color={'primary'}
-                            sx={{
-                              height: 25,
-                              fontSize: '0.75rem',
-                              textTransform: 'capitalize',
-                              '& .MuiChip-label': { fontWeight: 500 },
-                              cursor: 'pointer'
-                            }}
-                          />
-                        </Link>
-                        <Link href={'#'} passHref>
-                          <Chip
-                            onClick={() => handleTicketOpenConfirm(row._id)}
-                            disabled={row.ticket_closed == 'Completed' || row.ticket_closed == 'Closed'}
-                            label={'Close Ticket'}
-                            color={'error'}
-                            sx={{
-                              height: 25,
-                              fontSize: '0.75rem',
-                              textTransform: 'capitalize',
-                              '& .MuiChip-label': { fontWeight: 500 },
-                              cursor: 'pointer'
-                            }}
-                          />
-                        </Link>
-                        {/* <Chip label="success" color="success" variant="outlined" /> */}
-                      </Stack>
+                      <Chip label={row.ticket_type || 'General'} size='small' variant='outlined' sx={{ fontSize: '0.7rem' }} />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant='body2' sx={{ fontWeight: 700, fontFamily: 'monospace', color: 'primary.main' }}>
+                        #{row.tick_id}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row.ticket_closed || 'Opened'}
+                        size='small'
+                        color={ticketStatusColor(row.ticket_closed)}
+                        sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant='body2' color='text.secondary'>
+                        {moment(row.createdOn).format('DD MMM, YYYY')}
+                      </Typography>
+                      <Typography variant='body2' color='text.disabled'>
+                        {moment(row.createdOn).format('hh:mm A')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title='View & Reply'>
+                        <Button
+                          size='small'
+                          variant='outlined'
+                          startIcon={<Eye fontSize='small' />}
+                          onClick={() => router.push(`/messages/${row._id}`)}
+                          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+                          View
+                        </Button>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
-                </>
-              ))}
-            </TableBody>
-          </Table>
-        ) : null}
-        {!loadingData && allMessagesData.length < 1 && <NoRecordFund />}
-      </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-      {/* Alert warning */}
-      <ShowSnackbar
-        openAction={showAlert}
-        type={showAlertStatus.errorType}
-        hideDuration={3000}
-        bgColored={showAlertStatus.alertBgColor}
-        onCloseAction={handleCloseAlert}
-        length={'100%'}
-        desc={showAlertStatus.alertMessage}
-        transitionState={Transition}
-      />
-
-      {/* full dialog that display message details */}
-      <Dialog fullScreen open={openDialog} onClose={handleCloseDialog} TransitionComponent={Transition}>
-        <AppBar sx={{ position: 'relative' }}>
-          <Toolbar>
-            <IconButton edge='start' color='inherit' onClick={handleCloseDialog} aria-label='close'>
-              <CloseIcon />
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1, color: 'white' }} variant='h6' component='div'>
-              {'Subject :' + message?.subject} | Ticket ID: {message?.tick_id}
+          <Box sx={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            px: 4, py: 3, borderTop: '1px solid', borderColor: 'divider',
+          }}>
+            <Typography variant='body2' color='text.secondary'>
+              Page <strong>{pageNumber}</strong> of <strong>{totalPages}</strong>
+              {' '}· {totalCount.toLocaleString()} total tickets
             </Typography>
-            <Button autoFocus color='inherit' onClick={handleOpenConfirm}>
-              Reply Ticket
-            </Button>
-            <Button autoFocus color='inherit' onClick={() => handleTicketOpenConfirm(message._id)}>
-              Close This Ticket
-            </Button>
-          </Toolbar>
-        </AppBar>
-        {messageLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 5 }}>
-            <BeatLoader color={'#1D2667'} loading={true} size={10} margin={5} />
+            <Pagination
+              count={totalPages}
+              page={pageNumber}
+              onChange={handlePageChange}
+              color='primary'
+              shape='rounded'
+              size='small'
+            />
           </Box>
-        ) : (
-          <List>
-            <ListItemButton>
-              <ListItemText primary={message.sender_name} secondary='Sender Name' />
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary='Date' secondary={moment(message.createdOn).format('YYYY-MM-DD')} />
-            </ListItemButton>
-            <Divider />
-            <ListItemButton>
-              <ListItemText secondary={'Status: ' + message.ticket_status} />
-            </ListItemButton>
-            <Typography sx={{ ml: 2, flex: 1, color: 'gray' }} variant='h7' component='div'>
-              {message?.ticket_message}
-            </Typography>
-          </List>
-        )}
-      </Dialog>
+        </>
+      )}
 
-      {/* Confirm dialog with input to reply ticket message */}
-      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
-        <DialogTitle>Enter message response</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Please be brief as possible you can while sending response to a user.</DialogContentText>
-          {loading ? <FullPageIndicator /> : null}
-          <TextField
-            autoFocus
-            required
-            multiline
-            margin='dense'
-            id='name'
-            name='reason'
-            label='Give me a reason'
-            type='text'
-            fullWidth
-            variant='standard'
-            onChange={e => setTicketMessage(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm}>Cancel</Button>
-          <Button onClick={() => sendMessageFeedBack()}>Submit</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Confirm dialog before deleting/closing ticket */}
-      <Dialog open={openTicketConfirm} onClose={handleTicketCloseConfirm}>
-        <DialogTitle>Confirm</DialogTitle>
-        <Divider></Divider>
-        {loading ? <FullPageIndicator /> : null}
-        <DialogContent>Are you sure you want to do this?</DialogContent>
-        <DialogActions>
-          <Button onClick={handleTicketCloseConfirm}>Cancel</Button>
-          <Button onClick={() => handleClickCLoseTicket(closeTicketData)}>Yes</Button>
-        </DialogActions>
-      </Dialog>
     </Card>
   )
 }

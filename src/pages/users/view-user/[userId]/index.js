@@ -111,6 +111,9 @@ const ViewUserDetails = () => {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
   const [txLoading, setTxLoading] = useState(false)
+  const [txPage, setTxPage] = useState(1)
+  const [txTotalPages, setTxTotalPages] = useState(1)
+  const [txTotal, setTxTotal] = useState(0)
   const [processing, setProcessing] = useState(false)
   const [tab, setTab] = useState(0)
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
@@ -142,14 +145,27 @@ const ViewUserDetails = () => {
     }
   }
 
-  const fetchTransactions = async () => {
+
+    const fetchTransactions = async (pageNum = 1) => {
     if (!userId) return
     setTxLoading(true)
     try {
-      const res = await client.get(`/api/recent_transactions/${userId}`, { headers })
-      if (res.data) setTransactions(res.data)
+      const res = await client.get(
+        `/api/all_historyMobile/${userId}?page=${pageNum}`,
+        { headers }
+      )
+      
+      // API returns array on success, object with status on error/empty
+      if (Array.isArray(res.data)) {
+        setTransactions(res.data)
+        setTxTotal(res.data.length || 0)
+      } else {
+        setTransactions([])
+        setTxTotal(0)
+      }
     } catch (e) {
       console.log('Tx error:', e.message)
+      setTransactions([])
     } finally {
       setTxLoading(false)
     }
@@ -551,7 +567,7 @@ const ViewUserDetails = () => {
             </CardContent>
           )}
 
-          {/* Transactions Tab */}
+                    {/* Transactions Tab */}
           {tab === 3 && (
             <CardContent sx={{ p: 0 }}>
               {txLoading ? (
@@ -561,52 +577,83 @@ const ViewUserDetails = () => {
               ) : transactions.length === 0 ? (
                 <EmptyState title='No Transactions' message='This user has no recent transactions.' />
               ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: 'action.hover' }}>
-                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Description</Typography></TableCell>
-                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Amount</Typography></TableCell>
-                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Type</Typography></TableCell>
-                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Status</Typography></TableCell>
-                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Date</Typography></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {transactions.map(tx => (
-                        <TableRow key={tx._id} hover>
-                          <TableCell>
-                            <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                              {tx.transac_nature || tx.tran_desc || 'Transaction'}
-                            </Typography>
-                            <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.75rem' }}>
-                              {tx.tid}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant='body2' sx={{
-                              fontWeight: 700,
-                              color: tx.tran_type === 'Credit' ? 'success.main' : 'error.main'
-                            }}>
-                              ₦{Number(tx.amount || 0).toLocaleString()}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant='body2'>{tx.tran_type}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={tx.transaction_status?.toLowerCase()} />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant='body2' color='text.secondary'>
-                              {moment(tx.creditOn).format('DD MMM, YYYY')}
-                            </Typography>
-                          </TableCell>
+                <>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                          <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Description</Typography></TableCell>
+                          <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Amount</Typography></TableCell>
+                          <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Type</Typography></TableCell>
+                          <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Status</Typography></TableCell>
+                          <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Date</Typography></TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {transactions.map(tx => (
+                          <TableRow key={tx._id} hover>
+                            <TableCell>
+                              <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                                {tx.transac_nature || tx.tran_desc || 'Transaction'}
+                              </Typography>
+                              <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.75rem' }}>
+                                {tx.tid}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant='body2' sx={{
+                                fontWeight: 700,
+                                color: tx.tran_type === 'Credit' ? 'success.main' : 'error.main'
+                              }}>
+                                ₦{Number(tx.amount || 0).toLocaleString()}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant='body2'>{tx.tran_type}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <StatusBadge status={tx.transaction_status?.toLowerCase()} />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant='body2' color='text.secondary'>
+                                {moment(tx.creditOn).format('DD MMM, YYYY')}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 4, py: 3 }}>
+                    <Typography variant='body2' color='text.secondary'>
+                      Page {txPage} — {transactions.length} records shown
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        disabled={txPage === 1 || txLoading}
+                        onClick={() => {
+                          const prev = txPage - 1
+                          setTxPage(prev)
+                          fetchTransactions(prev)
+                        }}>
+                        Previous
+                      </Button>
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        disabled={transactions.length < 10 || txLoading}
+                        onClick={() => {
+                          const next = txPage + 1
+                          setTxPage(next)
+                          fetchTransactions(next)
+                        }}>
+                        Next
+                      </Button>
+                    </Box>
+                  </Box>
+                </>
               )}
             </CardContent>
           )}

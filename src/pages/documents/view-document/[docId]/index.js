@@ -18,15 +18,10 @@ const ViewDocuments = () => {
 
   return (
     <Grid container spacing={6}>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Typography variant='h5'>
           <Stack direction='row' sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
            User Documents OverView
-            <Link href='#' passHref>
-              <ArrowCircleLeftOutlinedIcon fontSize='large' color={'#595F90'} cursor='pointer'
-               onClick={() => router.back()}
-               />
-            </Link>
           </Stack>
         </Typography>
         <Typography
@@ -38,7 +33,7 @@ const ViewDocuments = () => {
         >
           Preview of user document and take actions{' '}
         </Typography>
-      </Grid>
+      </Grid> */}
 
       <Grid item xs={12}>
         <DocumentViewPage />
