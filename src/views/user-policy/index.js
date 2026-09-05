@@ -1,263 +1,171 @@
-import React, {useContext, useEffect, useState, Fragment, forwardRef, useRef } from 'react'
-
-import { useRouter } from 'next/router'
-import { Editor } from '@tinymce/tinymce-react';
-
-// ** MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-
-// ** MUI Imports
+import { useState, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
-import TableContainer from '@mui/material/TableContainer'
-import client from 'src/@core/context/client'
-import Link from '@mui/material/Link'
-import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
-import BeatLoader from "react-spinners/BeatLoader";
-import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import CardContent from '@mui/material/CardContent'
-import CardActions from '@mui/material/CardActions'
+import CircularProgress from '@mui/material/CircularProgress'
 import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import { Bounce, ToastContainer, toast } from 'react-toastify';
-
-import 'react-toastify/dist/ReactToastify.css';
-
-// ** Third Party Imports
-import { AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
-import { BtnLoaderIndicator } from 'src/@core/function/btnIndicator';
+import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import Alert from '@mui/material/Alert'
+import { ShieldLock } from 'mdi-material-ui'
+import { Editor } from '@tinymce/tinymce-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+import client from 'src/@core/context/client'
 
 const UserPolicyView = () => {
-  const router = useRouter()
-  const [loadingData, setLoadingData] = useState(false);
-  const [updateLoadingData, setUpdateLoadingData] = useState(false);
-  const [textEditorKey, setTextEditorKey] = useState('');
-  const userTokenId = localStorage.getItem('userToken')
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
 
-  const editorRef = useRef(null);
+  const editorRef = useRef(null)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [policyContent, setPolicyContent] = useState('')
+  const [policyStatus, setPolicyStatus] = useState('Active')
+  const [editorKey, setEditorKey] = useState('')
 
-    // check user login authentication
-
-    const userAuthCheck = () =>{
-      const handleRedirect = PageRedirect('/pages/login')
-
-      AuthenticateUserCheck(userTokenId).then((res)=>
-        {
-          if(res.status == '401'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-          else if(res.status == '402'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-         });
+  useEffect(() => {
+    const stored = localStorage.getItem('AppSettingData')
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        setEditorKey(parsed?.app_textEditor_key || '')
+      } catch (e) {}
     }
+  }, [])
 
-   // get current user transaction stats here
-
-  const [termsCondition, setTermCondition] = useState("")
-  const [policyStatus, setPolicyStatus] = useState("")
-
-
-useEffect(() => {
-  userAuthCheck()
-
-  const getUserPolicy = async() =>{
-    setLoadingData(true);
+  const fetchData = async () => {
+    setLoading(true)
     try {
-      const res = await client.get(`/api/allAbout_us`, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    console.log('Pending users ' , res.data.policy_status);
-  if(res.data.msg =='201'){
-     setTermCondition(res.data.feedAll[0]?.company_privacy_policy)
-     setPolicyStatus(res.data.feedAll[0]?.policy_status)
-
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setLoadingData(false)
-    }
-}
-
-// get local storage details
-const userLocal = localStorage.getItem('AppSettingData')
-
-// get the editor api key from database via local storage
-const appSettingDetails = JSON.parse(userLocal)
-setTextEditorKey(appSettingDetails.app_textEditor_key)
-
-getUserPolicy()
-
-}, [userTokenId])
-
-  // handle update info
-  const submitUpdate = async (e) => {
-    event.preventDefault()
-
-    const data ={
-      "user_policyDesc": editorRef.current.getContent(),
-      "policyStatus": policyStatus
-    }
-
-    if(data.user_policyDesc == ''){
-       return toast.warn('Please enter a user policy content',
-          {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          transition: Bounce,
-          newestOnTop: false,
-          theme: "colored",
-          });
-          }
-    if(data.policy_status == ''){
-      return toast.warn('Please select policy status',
-          {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          transition: Bounce,
-          newestOnTop: false,
-          theme: "colored",
-          });
-          }
-
-   setUpdateLoadingData(true)
-
-    try {
-      const res = await client.post(`/api/update_userPolicy`, data, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-  if(res.data.msg =='201'){
-    toast.success(res.data.message,
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          transition: Bounce,
-          newestOnTop: false,
-          theme: "light",
-          });
-    }
-    else if(res.data.status =='500'){
-      toast.error(res.data.message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      const res = await client.get('/api/allAbout_us', { headers })
+      if (res.data.msg === '201' && res.data.feedAll?.[0]) {
+        setPolicyContent(res.data.feedAll[0]?.company_privacy_policy || '')
+        setPolicyStatus(res.data.feedAll[0]?.policy_status || 'Active')
       }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setUpdateLoadingData(false)
+    } catch (e) {
+      toast.error('Failed to load policy')
+    } finally {
+      setLoading(false)
     }
   }
 
+   const handleSave = async () => {
+    const content = editorRef.current ? editorRef.current.getContent() : policyContent
+    if (!content.trim()) {
+      toast.warning('Please enter user policy content')
+
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await client.post('/api/update_userPolicy', {
+        user_policyDesc: content,
+        policyStatus,
+      }, { headers })
+      if (res.data.msg === '201') {
+        toast.success('User policy updated successfully')
+      } else {
+        toast.error(res.data.message || 'Failed to update')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleChange = (value) => setPolicyContent(value)
+
+  useEffect(() => {
+    fetchData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}><CircularProgress size={40} /></Box>
+
   return (
-    <Card>
-      <Divider sx={{ margin: 0 }} />
-      {loadingData ?
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
-                 <BeatLoader
-                  color={'#1D2667'}
-                  loading={true}
-                  size={10}
-                  margin={5}
-                />
+    <Box>
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
+
+      <Card>
+        <CardHeader
+          title={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#D1FAE5', color: '#10B981' }}>
+                <ShieldLock />
               </Box>
-              :
-      <form onSubmit={e => e.preventDefault()}>
-        <CardContent>
-          <Grid container spacing={5}>
-            <Grid item xs={12}>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Information about the company user policy of the product
-              </Typography>
-            </Grid>
-            <ToastContainer/>
-
-            <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-                <InputLabel id='form-layouts-separator-select-label'>Status</InputLabel>
-                <Select
-                  label='Status'
-                  defaultValue={policyStatus}
-                  id='form-layouts-separator-select'
-                  onChange={(e) => setPolicyStatus(e.target.value)}
-                  labelId='form-layouts-separator-select-label'
-                >
-                  <MenuItem value=''></MenuItem>
+              <Box>
+                <Typography variant='h6' sx={{ fontWeight: 700 }}>User Policy</Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Manage your platform privacy and user policy
+                </Typography>
+              </Box>
+            </Box>
+          }
+          action={
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', pr: 2 }}>
+              <FormControl size='small' sx={{ minWidth: 140 }}>
+                <InputLabel>Status</InputLabel>
+                <Select label='Status' value={policyStatus} onChange={e => setPolicyStatus(e.target.value)}>
                   <MenuItem value='Active'>Active</MenuItem>
-                  <MenuItem value='Pending'>Pending</MenuItem>
-
+                  <MenuItem value='Inactive'>Inactive</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
+              <Button variant='contained' onClick={handleSave} disabled={saving}
+                startIcon={saving ? <CircularProgress size={16} color='inherit' /> : null}
+                sx={{ borderRadius: 2, px: 4 }}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </Box>
+          }
+        />
+        <Divider />
+        <CardContent>
+          <Alert severity='info' sx={{ mb: 3, borderRadius: 2 }}>
+            <Typography variant='body2'>
+              This content will be displayed to users on the Privacy Policy page. You can use HTML formatting for better presentation.
+            </Typography>
+          </Alert>
 
-            <Grid item xs={12} sm={10}>
-              <FormControl>
-              <Editor
-                apiKey='ejtsvhwpodr92mffqzn9yhr7oo4xjfw4tmy4eycq8jagks5u'
-                onInit={(evt, editor) => editorRef.current = editor}
-                placeholder="User Policy"
-                initialValue={termsCondition}
-                onChange={(e) => setTermCondition(e.target.value)}
-                init={{
+          {editorKey ? (
+            <Editor
+              apiKey={editorKey}
+              onInit={(evt, editor) => editorRef.current = editor}
+              initialValue={policyContent}
+              init={{
                 height: 500,
-                menubar: false,
-                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | numlist bullist indent outdent | emoticons charmap | removeformat|backcolor |'
-                +'| casechange blocks|a11ycheck code table',
-                contentStyle: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                menubar: true,
+                plugins: [
+                  'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                  'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                  'fullscreen', 'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                content_style: 'body { font-family: Inter, sans-serif; font-size: 14px }',
               }}
-              />
-              </FormControl>
-            </Grid>
-
-          </Grid>
+            />
+          ) : (
+            <TextField
+              fullWidth
+              multiline
+              rows={20}
+              label='User Policy Content'
+              value={policyContent}
+              onChange={e => setPolicyContent(e.target.value)}
+              placeholder='Enter your privacy policy here. HTML formatting is supported...'
+              helperText={`${policyContent.length} characters`}
+            />
+          )}
         </CardContent>
-        <Divider sx={{ margin: 0 }} />
-        <CardActions>
-          <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'
-          onClick={() => submitUpdate()}
-          disabled={updateLoadingData}>
-
-            {updateLoadingData? <BtnLoaderIndicator /> : "Update"}
-          </Button>
-        </CardActions>
-      </form>
-      }
-    </Card>
+      </Card>
+    </Box>
   )
 }
 

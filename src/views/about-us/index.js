@@ -1,289 +1,206 @@
-import React, {useContext, useEffect, useState, Fragment, forwardRef, useRef } from 'react'
-
-import { useRouter } from 'next/router'
-import { Editor } from '@tinymce/tinymce-react';
-import Link from 'next/link'
-
-// render version for deployment
-
-// ** MUI Imports
-import Card from '@mui/material/Card'
+import { useState, useEffect, useRef } from 'react'
 import Grid from '@mui/material/Grid'
-
-// ** MUI Imports
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TableContainer from '@mui/material/TableContainer'
-import client from 'src/@core/context/client'
-import { Badge, TextareaAutosize, } from '@mui/material';
-import BeatLoader from "react-spinners/BeatLoader";
-import Divider from '@mui/material/Divider'
 import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
-import CardContent from '@mui/material/CardContent'
-import CardActions from '@mui/material/CardActions'
-import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import { Bounce, ToastContainer, toast } from 'react-toastify';
-import LoadingButton from '@mui/lab/LoadingButton';
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import { Information, Domain, Email, Phone } from 'mdi-material-ui'
+import { Editor } from '@tinymce/tinymce-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-import 'react-toastify/dist/ReactToastify.css';
+import client from 'src/@core/context/client'
 
-// ** Third Party Imports
-import { AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
-import { BtnLoaderIndicator } from 'src/@core/function/btnIndicator';
-
-const AboutUsTable = () => {
-  const router = useRouter()
-  const [allAboutUsData, setAllAboutUsData] = useState({});
-  const [loadingData, setLoadingData] = useState(false);
-  const [updateLoadingData, setUpdateLoadingData] = useState(false);
-  const [textEditorKey, setTextEditorKey] = useState('');
-  const userTokenId = localStorage.getItem('userToken')
-
-  const editorRef = useRef(null);
-
-  const log = () => {
-
-    if (editorRef.current) {
-        //console.log(editorRef.current.getContent());
-    }
-
-  };
-
-    // check user login authentication
-
-    const userAuthCheck = () =>{
-      const handleRedirect = PageRedirect('/pages/login')
-
-      AuthenticateUserCheck(userTokenId).then((res)=>
-        {
-          if(res.status == '401'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-          else if(res.status == '402'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-         });
-    }
-
-   // get current user transaction stats here
-  const [companyName, setCompanyName] = useState({})
-
-  const [companyName2, setCompanyName2] = useState("")
-  const [companyDesc, setCompanyDesc] = useState("")
-  const [companyEmail, setCompanyEmail] = useState("")
-  const [companyRegId, setCompanyRegId] = useState({})
-
-
-useEffect(() => {
-  userAuthCheck()
-
-  const getAboutUs = async() =>{
-    setLoadingData(true);
-    try {
-      const res = await client.get(`/api/allAbout_us`, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    //console.log('Pending users ' , res.data);
-  if(res.data.msg =='201'){
-    //console.log('company info ' , res.data);
-
-    setCompanyName(res.data.feedAll)
-
-    setCompanyName2(res.data.feedAll[0]?.company_name)
-    setCompanyDesc(res.data.feedAll[0]?.company_desc)
-    setCompanyEmail(res.data.feedAll[0]?.company_email)
-    setCompanyRegId(res.data.feedAll[0]?.company_regId)
-
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setLoadingData(false)
-    }
-}
-
-
-// get local storage details
-const userLocal = localStorage.getItem('AppSettingData')
-
-// get the editor api key from database via local storage
-const appSettingDetails = JSON.parse(userLocal)
-setTextEditorKey(appSettingDetails.app_textEditor_key)
-
-//console.log(appSettingDetails.app_textEditor_key)
-getAboutUs()
-
-}, [userTokenId])
-
-  // handle update info
-  const submitUpdate = async (e) => {
-    event.preventDefault()
-
-    const data ={
-      company_name: companyName2,
-      company_email: companyEmail,
-      company_regId: companyRegId,
-      description: editorRef.current.getContent()
-    }
-    setUpdateLoadingData(true)
-    try {
-      const res = await client.post(`/api/updateAbout_us`, data, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    //console.log('Updated  ' , res.data.msg);
-  if(res.data.msg =='201'){
-    //alert('updated successfully')
-
-        toast.success('Updated successfully',
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          transition: Bounce,
-          newestOnTop: false,
-          theme: "light",
-          });
-    }
-    else{
-      toast.error('Sorry, something went wrong', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+const SectionCard = ({ title, icon, iconColor, iconBg, children }) => (
+  <Card sx={{ mb: 4 }}>
+    <CardHeader
+      title={
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ width: 40, height: 40, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: iconBg, color: iconColor }}>
+            {icon}
+          </Box>
+          <Typography variant='h6' sx={{ fontWeight: 700 }}>{title}</Typography>
+        </Box>
       }
-    } catch (error) {
-      console.log(error.message)
+    />
+    <Divider />
+    <CardContent>{children}</CardContent>
+  </Card>
+)
+
+const AboutUsView = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
+  const editorRef = useRef(null)
+
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editorKey, setEditorKey] = useState('')
+  
+  const [form, setForm] = useState({
+    company_name: '',
+    company_desc: '',
+    company_email: '',
+    company_regId: '',
+    company_address: '',
+    company_phone: '',
+  })
+
+  useEffect(() => {
+    const stored = localStorage.getItem('AppSettingData')
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        setEditorKey(parsed?.app_textEditor_key || '')
+      } catch (e) {}
     }
-    finally{
-      setUpdateLoadingData(false)
+  }, [])
+
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const res = await client.get('/api/allAbout_us', { headers })
+      if (res.data.msg === '201' && res.data.feedAll?.[0]) {
+        const d = res.data.feedAll[0]
+        setForm({
+          company_name: d.company_name || '',
+          company_desc: d.company_desc || '',
+          company_email: d.company_email || '',
+          company_regId: d.company_regId || '',
+          company_address: d.company_address || '',
+          company_phone: d.company_phone || '',
+        })
+      }
+    } catch (e) {
+      toast.error('Failed to load company info')
+    } finally {
+      setLoading(false)
     }
   }
 
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const desc = editorRef.current ? editorRef.current.getContent() : form.company_desc
 
+      const res = await client.post('/api/updateAbout_us', {
+        ...form,
+        company_desc: desc,
+      }, { headers })
 
+      if (res.data.msg === '201') {
+        toast.success('Company information updated successfully')
+      } else {
+        toast.error(res.data.message || 'Failed to update')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
+
+  useEffect(() => {
+    fetchData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}><CircularProgress size={40} /></Box>
 
   return (
-    <Card>
+    <Box>
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
+        <Button variant='contained' onClick={handleSave} disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} color='inherit' /> : null}
+          sx={{ borderRadius: 2, px: 4 }}>
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </Box>
 
-      <Divider sx={{ margin: 0 }} />
-      {loadingData ?
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
-                 <BeatLoader
-                  color={'#1D2667'}
-                  loading={true}
-                  size={10}
-                  margin={5}
-                />
-              </Box>
-              :
-      <form onSubmit={e => e.preventDefault()}>
-        <CardContent>
-          <Grid container spacing={5}>
-            <Grid item xs={12}>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Information about the company
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={6}>
+          <SectionCard title='Basic Information' icon={<Information />} iconColor='#4C5FD5' iconBg='#EEF2FF'>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Company Name'
+                  value={form.company_name} onChange={e => handleChange('company_name', e.target.value)} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Registration ID'
+                  value={form.company_regId} onChange={e => handleChange('company_regId', e.target.value)} />
+              </Grid>
+            </Grid>
+          </SectionCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <SectionCard title='Contact Information' icon={<Email />} iconColor='#10B981' iconBg='#D1FAE5'>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Company Email'
+                  type='email' value={form.company_email}
+                  onChange={e => handleChange('company_email', e.target.value)} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Phone Number'
+                  value={form.company_phone} onChange={e => handleChange('company_phone', e.target.value)} />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Company Address' multiline rows={3}
+                  value={form.company_address} onChange={e => handleChange('company_address', e.target.value)} />
+              </Grid>
+            </Grid>
+          </SectionCard>
+        </Grid>
+
+        <Grid item xs={12}>
+          <SectionCard title='Company Description' icon={<Domain />} iconColor='#F59E0B' iconBg='#FEF3C7'>
+            <Alert severity='info' sx={{ mb: 3, borderRadius: 2 }}>
+              <Typography variant='body2'>
+                This description is shown to users on the About Us page. HTML formatting is supported.
               </Typography>
-            </Grid>
-            <ToastContainer/>
-            <Grid item xs={12} sm={5}>
-              <FormControl fullWidth>
-
-                <TextField
-                  required
-                  label="Company Name"
-                  name='company_name'
-                  defaultValue={companyName2}
-                  onChange={(e) => setCompanyName2(e.target.value)}
-                  type={'text'}
-                  fullWidth
-                />
-
-              </FormControl>
-
-             </Grid>
-
-            <Grid item xs={12} sm={5}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Registration Number </InputLabel>
-                <OutlinedInput
-                  label='Registration Number'
-                  name='company_regId'
-                  onChange={(e) => setCompanyRegId(e.target.value)}
-                  value={companyRegId}
-                  type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Company Email</InputLabel>
-                <OutlinedInput
-                   name='company_email'
-                   onChange={(e) => setCompanyEmail(e.target.value)}
-                   value={companyEmail}
-                   label='Company Email'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={10}>
+            </Alert>
+            {editorKey ? (
               <Editor
-                  apiKey={textEditorKey}
-                  onInit={(evt, editor) => editorRef.current = editor}
-                  initialValue={companyDesc}
-                  onChange={(e) => setCompanyDesc(e.target.value)}
-                  init={{
-                  height: 500,
-                  menubar: false,
-                  plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | numlist bullist indent outdent | emoticons charmap | removeformat|backcolor |'
-                  +'| casechange blocks|a11ycheck code table',
-                  contentStyle: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                apiKey={editorKey}
+                onInit={(evt, editor) => editorRef.current = editor}
+                initialValue={form.company_desc}
+                init={{
+                  height: 400,
+                  menubar: true,
+                  plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                    'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                    'fullscreen', 'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                  ],
+                  toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                  content_style: 'body { font-family: Inter, sans-serif; font-size: 14px }',
                 }}
               />
-            </Grid>
-
-          </Grid>
-        </CardContent>
-        <Divider sx={{ margin: 0 }} />
-        <CardActions>
-          {/* <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'
-          onClick={() => submitUpdate()}
-          disabled={updateLoadingData}>
-            <ToastContainer/>
-            {updateLoadingData? <BtnLoaderIndicator /> : "Update"}
-          </Button> */}
-            <LoadingButton size='large' type='submit' sx={{ mr: 2}} loading={updateLoadingData} variant="contained"
-            onClick={() => submitUpdate()}
-            disabled={updateLoadingData}>
-               Update
-            </LoadingButton>
-
-        </CardActions>
-      </form>
-      }
-    </Card>
+            ) : (
+              <TextField
+                fullWidth multiline rows={10}
+                label='Company Description'
+                value={form.company_desc}
+                onChange={e => handleChange('company_desc', e.target.value)}
+                placeholder='Enter company description here...'
+                helperText={`${form.company_desc.length} characters`}
+              />
+            )}
+          </SectionCard>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
 
-export default AboutUsTable
+export default AboutUsView

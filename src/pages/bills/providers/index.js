@@ -75,7 +75,9 @@ const BillsProviders = () => {
     }
   }
 
-  useEffect(() => { fetchProviders() }, [])
+  useEffect(() => { fetchProviders() }, 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [])
 
   // Handle form change
   const handleFormChange = (field, value) => {
@@ -96,6 +98,7 @@ const BillsProviders = () => {
   const handleAddProvider = async () => {
     if (!form.name || !form.slug || !form.api_key || !form.base_url || !form.adapter_name) {
       toast.warning('Please fill all required fields')
+
       return
     }
     setSaving(true)

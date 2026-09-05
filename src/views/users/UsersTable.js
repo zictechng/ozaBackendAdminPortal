@@ -150,7 +150,7 @@ const UserTableData = ({ userType = 'active' }) => {
     const handleAction = (action, user) => {
     if (action === 'view') {
       router.push(`/users/view-user/${user._id}`)
-      
+
       return
     }
     setConfirmAction({ action, user })
@@ -275,7 +275,7 @@ const UserTableData = ({ userType = 'active' }) => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar
                           src={user.profile_photo}
-                          sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem' }}>
+                          sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem', color: '#ffffff' }}>
                           {user.display_name?.charAt(0)?.toUpperCase()}
                         </Avatar>
                         <Box>

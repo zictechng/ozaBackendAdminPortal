@@ -1,331 +1,208 @@
-import React, {useContext, useEffect, useState, Fragment, forwardRef, useRef } from 'react'
-
-import { useRouter } from 'next/router'
-import { Editor } from '@tinymce/tinymce-react';
-
-// ** MUI Imports
-import Card from '@mui/material/Card'
+import { useState, useEffect } from 'react'
 import Grid from '@mui/material/Grid'
-
-// ** MUI Imports
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TableContainer from '@mui/material/TableContainer'
-import client from 'src/@core/context/client'
-import Link from '@mui/material/Link'
-import { Badge, TextareaAutosize, } from '@mui/material';
-import BeatLoader from "react-spinners/BeatLoader";
-import IconButton from '@mui/material/IconButton'
+import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import CardHeader from '@mui/material/CardHeader'
-import InputLabel from '@mui/material/InputLabel'
-import CardContent from '@mui/material/CardContent'
-import CardActions from '@mui/material/CardActions'
-import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import CircularProgress from '@mui/material/CircularProgress'
+import InputAdornment from '@mui/material/InputAdornment'
+import { CurrencyUsd, Bitcoin, TrendingUp, TrendingDown, Gift } from 'mdi-material-ui'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-import 'react-toastify/dist/ReactToastify.css';
+import client from 'src/@core/context/client'
 
-// ** Third Party Imports
-import { AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
-import { BtnLoaderIndicator } from 'src/@core/function/btnIndicator';
+const RateCard = ({ title, icon, iconColor, iconBg, children }) => (
+  <Card sx={{ height: '100%' }}>
+    <CardHeader
+      title={
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ width: 40, height: 40, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: iconBg, color: iconColor }}>
+            {icon}
+          </Box>
+          <Typography variant='h6' sx={{ fontWeight: 700 }}>{title}</Typography>
+        </Box>
+      }
+    />
+    <Divider />
+    <CardContent>{children}</CardContent>
+  </Card>
+)
 
 const ServiceRateView = () => {
-  const router = useRouter()
-  const [allAboutUsData, setAllAboutUsData] = useState({});
-  const [loadingData, setLoadingData] = useState(false);
-  const [updateLoadingData, setUpdateLoadingData] = useState(false);
-  const userTokenId = localStorage.getItem('userToken')
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
 
-    // check user login authentication
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-    const userAuthCheck = () =>{
-      const handleRedirect = PageRedirect('/pages/login')
+  const [rates, setRates] = useState({
+    paypal_selling: '',
+    paypal_buying: '',
+    payoneer_selling: '',
+    payoneer_buying: '',
+    btc_selling: '',
+    btc_buying: '',
+    bonus_rate: '',
+    signup_bonus_rate: '',
+  })
 
-      AuthenticateUserCheck(userTokenId).then((res)=>
-        {
-          if(res.status == '401'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-          else if(res.status == '402'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-         });
-    }
-
-   // get current user transaction stats here
-
-  const [paypalSale, setPaypalSale] = useState('')
-  const [paypalBuy, setPaypalBuy] = useState("")
-  const [payoneerSale, setPayoneerSale] = useState("")
-  const [payoneerBuy, setPayoneerBuy] = useState("")
-  const [bitcoinSale, setBitcoinSale] = useState("")
-  const [bonusAmt, setBonusAmt] = useState("")
-  const [bitcoinBuy, setBitcoinBuy] = useState("")
-  const [signupBonusAmt, setSignupBonusAmt] = useState("")
-
-
-
-useEffect(() => {
-  userAuthCheck()
-
-  const getAboutUs = async() =>{
-    setLoadingData(true);
+  const fetchRates = async () => {
+    setLoading(true)
     try {
-      const res = await client.get(`/api/service_rate`, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-  if(res.data.msg =='201'){
-    //console.log('rate data ' , res.data);
-
-    setPaypalSale(res.data.feedAll[0]?.paypal_selling)
-    setPaypalBuy(res.data.feedAll[0]?.paypal_buying)
-    setPayoneerSale(res.data.feedAll[0]?.payoneer_selling)
-    setPayoneerBuy(res.data.feedAll[0]?.payoneer_buying)
-    setBitcoinSale(res.data.feedAll[0]?.btc_selling)
-    setBitcoinBuy(res.data.feedAll[0]?.btc_buying)
-    setBonusAmt(res.data.feedAll[0]?.bonus_rate)
-    setSignupBonusAmt(res.data.feedAll[0]?.signup_bonus_rate)
-
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setLoadingData(false)
-    }
-}
-
-// get local storage details
-const userLocal = localStorage.getItem('userToken')
-getAboutUs()
-
-}, [userTokenId])
-
-
-  // handle update info
-  const submitUpdate = async (e) => {
-    event.preventDefault()
-
-    const data ={
-      btc_selling: bitcoinSale,
-      btc_buying: bitcoinBuy,
-      paypal_buying: paypalBuy,
-      paypal_selling: paypalSale,
-      payoneer_buying: payoneerBuy,
-      payoneer_selling: payoneerSale,
-      referral_bonus_amt: bonusAmt,
-      signup_bonus: signupBonusAmt,
-    }
-    setUpdateLoadingData(true)
-    try {
-      const res = await client.post(`/api/updateService_rate`, data, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    console.log('Updated  ' , res.data.msg);
-  if(res.data.msg =='201'){
-    //alert('updated successfully')
-
-        toast.success('Updated successfully',
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          transition: Bounce,
-          newestOnTop: false,
-          theme: "light",
-          });
-    }
-    else if (res.data.status =='402'){
-      toast.error(res.data.message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
-    }
-    else{
-      toast.error('Sorry, something went wrong', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        });
+      const res = await client.get('/api/service_rate', { headers })
+      if (res.data.msg === '201' && res.data.feedAll?.[0]) {
+        const r = res.data.feedAll[0]
+        setRates({
+          paypal_selling: r.paypal_selling || '',
+          paypal_buying: r.paypal_buying || '',
+          payoneer_selling: r.payoneer_selling || '',
+          payoneer_buying: r.payoneer_buying || '',
+          btc_selling: r.btc_selling || '',
+          btc_buying: r.btc_buying || '',
+          bonus_rate: r.bonus_rate || '',
+          signup_bonus_rate: r.signup_bonus_rate || '',
+        })
       }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setUpdateLoadingData(false)
+    } catch (e) {
+      toast.error('Failed to load rates')
+    } finally {
+      setLoading(false)
     }
   }
 
-  return (
-    <Card>
-
-      <Divider sx={{ margin: 0 }} />
-      {loadingData ?
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
-                 <BeatLoader
-                  color={'#1D2667'}
-                  loading={true}
-                  size={10}
-                  margin={5}
-                />
-              </Box>
-              :
-      <form onSubmit={e => e.preventDefault()}>
-        <CardContent>
-          <Grid container spacing={5}>
-            <Grid item xs={12}>
-              <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                Information about the company current business rate
-              </Typography>
-            </Grid>
-            <ToastContainer/>
-            <Grid item xs={12} sm={5}>
-              <FormControl fullWidth>
-
-                <TextField
-                  required
-                  label="PayPal Selling Rate ($)"
-                  name='paypal_selling'
-                  defaultValue={paypalSale}
-                  onChange={(e) => setPaypalSale(e.target.value)}
-                  type={'text'}
-                  fullWidth
-                />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Paypal Buying Rate ($)</InputLabel>
-                <OutlinedInput
-                  label='Paypal Buying Rate($)'
-                  name='paypal_buying'
-                  onChange={(e) => setPaypalBuy(e.target.value)}
-                  value={paypalBuy}
-                  type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Payoneer Selling Rate ($)</InputLabel>
-                <OutlinedInput
-                   name='payoneer_selling'
-                   onChange={(e) => setPayoneerSale(e.target.value)}
-                   value={payoneerSale}
-                   label='Payoneer Selling Rate($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Payoneer Buying ($)</InputLabel>
-                <OutlinedInput
-                   name='payoneer_buying'
-                   onChange={(e) => setPayoneerBuy(e.target.value)}
-                   value={payoneerBuy}
-                   label='Payoneer Buying Rate($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Bitcoin Buying Rate ($)</InputLabel>
-                <OutlinedInput
-                   name='btc_buying'
-                   onChange={(e) => setBitcoinBuy(e.target.value)}
-                   value={bitcoinBuy}
-                   label='Bitcoin Buying Rate($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'>Bitcoin Selling Rate ($)</InputLabel>
-                <OutlinedInput
-                   name='btc_selling'
-                   onChange={(e) => setBitcoinSale(e.target.value)}
-                   value={bitcoinSale}
-                   label='Bitcoin Selling Rate($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-              Referral Bonus Amount
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'></InputLabel>
-                <OutlinedInput
-                   name='referral_bonus_amt'
-                   onChange={(e) => setBonusAmt(e.target.value)}
-                   value={bonusAmt}
-                   label='Referral Bonus Amount($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={5}>
-              Signup Bonus Amount
-            <FormControl fullWidth>
-                <InputLabel htmlFor='form-layouts-separator-password-2'></InputLabel>
-                <OutlinedInput
-                   name='referral_bonus_amt'
-                   onChange={(e) => setSignupBonusAmt(e.target.value)}
-                   value={signupBonusAmt}
-                   label='Referral Bonus Amount($)'
-                   type={'text'}
-                  />
-              </FormControl>
-            </Grid>
-
-          </Grid>
-        </CardContent>
-        <Divider sx={{ margin: 0 }} />
-        <CardActions>
-          <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'
-              onClick={() => submitUpdate()}
-              disabled={updateLoadingData}>
-            {updateLoadingData? <BtnLoaderIndicator /> : "Update"}
-          </Button>
-        </CardActions>
-      </form>
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const res = await client.post('/api/updateService_rate', rates, { headers })
+      if (res.data.msg === '201') {
+        toast.success('Rates updated successfully')
+      } else {
+        toast.error(res.data.message || 'Failed to update rates')
       }
-    </Card>
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleChange = (field, value) => setRates(prev => ({ ...prev, [field]: value }))
+
+  useEffect(() => { fetchRates() },
+  // eslint-disable-next-line react-hooks/exhaustive-deps 
+  [])
+
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}><CircularProgress size={40} /></Box>
+
+  return (
+    <Box>
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 4 }}>
+        <Button variant='contained' onClick={handleSave} disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} color='inherit' /> : null}
+          sx={{ borderRadius: 2, px: 4 }}>
+          {saving ? 'Saving...' : 'Save All Rates'}
+        </Button>
+      </Box>
+
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={4}>
+          <RateCard title='PayPal Rates' icon={<CurrencyUsd />} iconColor='#1565C0' iconBg='#E3F2FD'>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Selling Rate (₦ per $)'
+                  value={rates.paypal_selling}
+                  onChange={e => handleChange('paypal_selling', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which users sell PayPal to you'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Buying Rate (₦ per $)'
+                  value={rates.paypal_buying}
+                  onChange={e => handleChange('paypal_buying', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which you sell PayPal to users'
+                />
+              </Grid>
+            </Grid>
+          </RateCard>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <RateCard title='Payoneer Rates' icon={<CurrencyUsd />} iconColor='#E65100' iconBg='#FFF3E0'>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Selling Rate (₦ per $)'
+                  value={rates.payoneer_selling}
+                  onChange={e => handleChange('payoneer_selling', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which users sell Payoneer to you'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Buying Rate (₦ per $)'
+                  value={rates.payoneer_buying}
+                  onChange={e => handleChange('payoneer_buying', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which you sell Payoneer to users'
+                />
+              </Grid>
+            </Grid>
+          </RateCard>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <RateCard title='Bitcoin Rates' icon={<Bitcoin />} iconColor='#F57F17' iconBg='#FFFDE7'>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Selling Rate (₦ per $)'
+                  value={rates.btc_selling}
+                  onChange={e => handleChange('btc_selling', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which users sell Bitcoin to you'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField fullWidth size='small' label='Buying Rate (₦ per $)'
+                  value={rates.btc_buying}
+                  onChange={e => handleChange('btc_buying', e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                  helperText='Rate at which you sell Bitcoin to users'
+                />
+              </Grid>
+            </Grid>
+          </RateCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <RateCard title='Referral Bonus Rate' icon={<Gift />} iconColor='#2E7D32' iconBg='#E8F5E9'>
+            <TextField fullWidth size='small' label='Referral Bonus Rate'
+              value={rates.bonus_rate}
+              onChange={e => handleChange('bonus_rate', e.target.value)}
+              InputProps={{ endAdornment: <InputAdornment position='end'>%</InputAdornment> }}
+              helperText='Commission rate paid to referrers when their referred users make purchases'
+            />
+          </RateCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <RateCard title='Signup Bonus Rate' icon={<TrendingUp />} iconColor='#6A1B9A' iconBg='#F3E5F5'>
+            <TextField fullWidth size='small' label='Signup Bonus Amount (₦)'
+              value={rates.signup_bonus_rate}
+              onChange={e => handleChange('signup_bonus_rate', e.target.value)}
+              InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+              helperText='Bonus amount credited to new users upon successful registration'
+            />
+          </RateCard>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
 

@@ -198,7 +198,7 @@ const AllMessagesTable = () => {
                   <TableRow key={row._id} hover sx={{ '&:last-of-type td': { border: 0 } }}>
                                         <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.75rem', fontWeight: 700 }}>
+                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.75rem', fontWeight: 700, color: '#ffffff' }}>
                           {getInitials(row.sender_name || row.user?.display_name)}
                         </Avatar>
                         <Box>

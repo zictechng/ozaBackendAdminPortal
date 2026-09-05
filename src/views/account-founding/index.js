@@ -1,730 +1,425 @@
-import React, {useContext, useEffect, useState, CSSProperties } from 'react'
-
-import moment from 'moment';
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-
-// ** MUI Imports
+import { useState, useEffect } from 'react'
+import moment from 'moment'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
-import FormControl from '@mui/material/FormControl'
-
-import Chip from '@mui/material/Chip'
+import CardHeader from '@mui/material/CardHeader'
 import Table from '@mui/material/Table'
 import TableRow from '@mui/material/TableRow'
 import TableHead from '@mui/material/TableHead'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
 import TableContainer from '@mui/material/TableContainer'
-import client from 'src/@core/context/client'
-import BeatLoader from "react-spinners/BeatLoader";
-import NoRecordFund from 'src/@core/function/tableNoRecord';
-import { NumberValueFormat } from 'src/@core/function/formatNumberValue';
-import Stack from '@mui/material/Stack';
-import CardHeader from '@mui/material/CardHeader'
-
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import FilePresentSharpIcon from '@mui/icons-material/FilePresentSharp';
+import TextField from '@mui/material/TextField'
+import Pagination from '@mui/material/Pagination'
+import CircularProgress from '@mui/material/CircularProgress'
+import Avatar from '@mui/material/Avatar'
+import Chip from '@mui/material/Chip'
+import Divider from '@mui/material/Divider'
+import Tooltip from '@mui/material/Tooltip'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Grid from '@mui/material/Grid'
+import Alert from '@mui/material/Alert'
+import { styled } from '@mui/material/styles'
+import CloseIcon from '@mui/icons-material/Close'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import SearchIcon from '@mui/icons-material/Search'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CancelIcon from '@mui/icons-material/Cancel'
+import { Eye, CreditCardCheck, CreditCardMinus } from 'mdi-material-ui'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-//dialog modal import
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import ErrorOutline from '@mui/icons-material/ErrorOutline'
-import Cancel from '@mui/icons-material/Cancel'
-import SearchIcon from '@mui/icons-material/Search';
-import Pagination from '@mui/material/Pagination';
+import EmptyState from 'src/@core/components/common/EmptyState'
+import StatusBadge from 'src/@core/components/common/StatusBadge'
+import ConfirmDialog from 'src/@core/components/common/ConfirmDialog'
+import client from 'src/@core/context/client'
 
-import CircularProgress, {
-  circularProgressClasses,
-} from '@mui/material/CircularProgress';
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
-
-import Slide from '@mui/material/Slide'
-
-// modal inner table import
-import Paper from '@mui/material/Paper';
-import { ConfirmDialog, ConfirmDialogDelete, FullPageIndicator, ShowSnackbar } from 'src/@core/function/controlFunction';
-
-
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialogContent-root': {
-    padding: theme.spacing(2),
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    borderRadius: theme.shape.borderRadius * 3,
+    minWidth: 520,
+    [theme.breakpoints.down('sm')]: { minWidth: '95vw' },
   },
-  '& .MuiDialogActions-root': {
-    padding: theme.spacing(1),
-  },
-}));
-
-// action buttons
-const ResetButtonStyled = styled(Button)(({ theme }) => ({
-  marginLeft: theme.spacing(4.5),
-  [theme.breakpoints.down('sm')]: {
-    width: '100%',
-    marginLeft: 0,
-    textAlign: 'center',
-    marginTop: theme.spacing(4)
-  }
 }))
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />
-});
+const DetailRow = ({ label, value, highlight }) => (
+  <Box sx={{
+    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+    py: 1.5, borderBottom: '1px solid', borderColor: 'divider', gap: 2,
+    '&:last-child': { borderBottom: 'none' },
+  }}>
+    <Typography variant='body2' color='text.secondary' sx={{ fontWeight: 500, minWidth: 140 }}>
+      {label}
+    </Typography>
+    <Typography variant='body2' sx={{ fontWeight: 600, textAlign: 'right', color: highlight || 'text.primary', wordBreak: 'break-all' }}>
+      {value || '—'}
+    </Typography>
+  </Box>
+)
 
-const AccountFoundingTable = (props) => {
-  const router = useRouter()
+const AccountFundingTable = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
+  const headers = { Authorization: 'Bearer ' + token }
 
-  const [acctFundUserData, setAcctFundUserData] = useState([]);
-  const [loadingData, setLoadingData] = useState(false);
-  const userTokenId = localStorage.getItem('userToken')
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [pageNumber, setPageNumber] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const pageLimit = 15
 
-  const [open, setOpen] = React.useState(false);
-  const [getFundId, setGetFundId] = useState();
-  const [loading, setLoading] = useState(false);
-  const [loadingSearch, setLoadingSearch] = useState(false);
-  const [loadingApprove, setLoadingApprove] = useState(false);
-  const [fetchData, setFetchData] = useState('');
-  const [showAlert, setShowAlert] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalData, setModalData] = useState(null)
+  const [modalLoading, setModalLoading] = useState(false)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [rejectNote, setRejectNote] = useState('')
 
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
-  // pagination state
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10)
-  const [totalPageCount, setTotalPageCount] = React.useState(0)
-
-  const handlePaginateChange = (event, value) => {
-    setPageNumber(value);
-    paginationFunction()
-  };
-
-  const [showAlertStatus, setShowAlertStatus] = useState({
-        alertBgColor: '',
-        alertMessage:'',
-        errorType:'',
-        });
-
-  const [searchInput, setSearchInput] = useState({
-        searchValue: '',
-        })
-
-      const handleClickOpen = (dataId) => {
-        setOpen(true);
-        setGetFundId(dataId);
-        fetchTransaction(dataId);
-      };
-
-      const handleClose = () => {
-        setOpen(false);
-        setShowConfirmDialog(false);
-      };
-
-  // function to open confirm dialog when it click
-      const handleConfirmDialog = (data) => {
-        setOpen(false);
-        setShowConfirmDialog(true);
-      }
-
-  // function to close confirm dialog when it click
-    const handleCloseConfirmModal= () => {
-      setShowConfirmDialog(false)
-      setOpen(true);
-    }
-
-      const handleCloseAlert = (event, reason) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-        setOpen(false);
-        setShowAlert(false)
-      };
-
-      const handleApproveButton = (dataId) => {
-        approveFunding(dataId);
-       };
-
-// handleRejectApproveAction
-      const approveRejectBtn = (dataId) => {
-       rejectApprovalFunding(dataId)
-
-      };
-
-  // get transaction details with the ID received from database
-      const fetchTransaction = async(data) => {
-        setLoading(true);
-        try {
-          const res = await client.get(`/api/getAcctFunding_details/${data}`, {
-            headers: {
-            'Authorization': 'Bearer '+userTokenId,
-            }
-          })
-
-        //console.log('Data ' , res.data);
-      if(res.data.msg =='201'){
-        //console.log('Pending trans ' , res.data);
-        setFetchData(res.data.feedAll)
-        }
-        else if(res.data.status =='401'){
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: res.data.message,
-            errorType:'error',
-          })
-            router.push('/pages/login')
-            localStorage.clear();
-          }
-        } catch (error) {
-          console.log(error.message)
-        }
-        finally{
-          setLoading(false)
-        }
-      }
-
-  // send approval transaction request to database
-      const approveFunding = async(data) => {
-        const sendInfo = {
-          "tran_id": data,
-        }
-        setLoadingApprove(true);
-        try {
-          const res = await client.post(`/api/approveAcctFunding`, sendInfo, {
-            headers: {
-            'Authorization': 'Bearer '+userTokenId,
-            }
-          })
-      if(res.data.msg =='201'){
-            setShowAlert(true)
-            setShowAlertStatus({
-              alertMessage: 'Fund approved successfully',
-              errorType:'success',
-            })
-          allUserFunding_details()
-          }
-        else if(res.data.status =='404'){
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: res.data.message,
-            errorType:'error',
-          })
-        }
-        else if(res.data.status =='401'){
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: res.data.message,
-            errorType:'error',
-          })
-            router.push('/pages/login')
-            localStorage.clear();
-          }
-        } catch (error) {
-          console.log(error.message)
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: error.message,
-            errorType:'error',
-          })
-        }
-        finally{
-          setOpen(false)
-          setLoadingApprove(false)
-        }
-      }
-
-      // send approval transaction request to database
-      const rejectApprovalFunding = async(data) => {
-        const sendInfo = {
-          "tran_id": data,
-        }
-        setLoading(true);
-        try {
-          const res = await client.post(`/api/rejectApproveAcctFunding`, sendInfo, {
-            headers: {
-            'Authorization': 'Bearer '+userTokenId,
-            }
-          })
-      if(res.data.msg =='201'){
-            setShowAlert(true)
-            setShowAlertStatus({
-              alertMessage: 'Funding rejected successfully',
-              errorType:'success',
-            })
-          allUserFunding_details()
-          }
-        else if(res.data.status =='404'){
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: res.data.message,
-            errorType:'error',
-            })
-          }
-        else if(res.data.status =='401'){
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: res.data.message,
-            errorType:'error',
-          })
-            router.push('/pages/login')
-            localStorage.clear();
-          }
-        } catch (error) {
-          console.log(error.message)
-          setShowAlert(true)
-          setShowAlertStatus({
-            alertMessage: error.message,
-            errorType:'error',
-          })
-        }
-        finally{
-          setShowConfirmDialog(false)
-          setLoading(false);
-          setOpen(false)
-
-        }
-      }
-
-   // get current user transaction stats here
-   const allUserFunding_details = async() =>{
-    setLoadingData(true);
+  const fetchData = async (page = 1) => {
+    setLoading(true)
     try {
-      const res = await client.get(`/api/userAcctFunding_details`, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    //console.log('Pending users ' , res.data);
-    if(res.data.msg =='201'){
-    setAcctFundUserData(res.data.feedAll)
-    setTotalPageCount(res.data.totalPage)
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setLoadingData(false)
-    }
+      const res = await client.get(
+        `/api/userAcctFunding_details?pageNumber=${page}&pageLimit=${pageLimit}`,
+        { headers }
+      )
+      if (res.data.msg === '201') {
+        setData(res.data.feedAll || [])
+        setTotalPages(res.data.totalPage || 1)
+        setTotalCount(res.data.totalCount || res.data.feedAll?.length || 0)
       }
-
-  // Search function to query database goes here
-   const searchQuery = async() => {
-    const paraData = {
-      queryData: searchInput
-    }
-    console.log("Send data ", paraData)
-    setLoadingSearch(true)
-
-    try {
-      const res = await client.post(`/api/searchFunding_database`, paraData, {
-        headers: {
-        'Authorization': 'Bearer '+userTokenId,
-        }
-      })
-
-    if(res.data.msg =='201'){
-      handleClickOpen(res.data.feedAll._id);
-      setSearchInput({
-        searchValue:''
-         })
-      }
-    else if(res.data.status == '404'){
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: res.data.message,
-        errorType:'error',
-      })
-    }
-    else if(res.data.status == '402'){
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: res.data.message,
-        errorType:'error',
-      })
-    }
-    else if(res.data.status == '500'){
-      setShowAlert(true)
-      setShowAlertStatus({
-        alertMessage: res.data.message,
-        errorType:'error',
-      })
-    }
-    } catch (error) {
-      console.log(error.message)
-    }
-    finally{
-      setLoadingSearch(false)
-    }
-   }
-
-    //pagination function goes here
- const paginationFunction = async() =>{
-  try {
-    const res = await client.get(`/api/userAcctFunding_details?pageNumber=${pageNumber}&pageLimit=${pageLimit}`, {
-      headers: {
-      'Authorization': 'Bearer '+userTokenId,
-      }
-    })
-
-  //console.log('Pending users ' , res.data);
-  if(res.data.msg =='201'){
-    setTotalPageCount(res.data.totalPage)
-    setAcctFundUserData(res.data.feedAll)
-    }
-    } catch (error) {
-      console.log(error.message)
+    } catch (e) {
+      toast.error('Failed to load funding records')
+    } finally {
+      setLoading(false)
     }
   }
 
-  useEffect(() => {
+  const handleSearch = async () => {
+    if (!searchInput.trim()) 
+      { fetchData(1); 
 
-// get local storage details
-const userLocal = localStorage.getItem('userToken')
-allUserFunding_details()
+      return 
+    }
+    setSearchLoading(true)
+    try {
+      const res = await client.post('/api/searchFunding_database',
+        { dataInfo: searchInput.trim() }, { headers })
+      if (res.data.msg === '201') {
+        openModal(res.data.feedAll)
+        setSearchInput('')
+      } else {
+        toast.warning(res.data.message || 'No record found')
+      }
+    } catch (e) {
+      toast.error('Search failed')
+    } finally {
+      setSearchLoading(false)
+    }
+  }
 
-}, [userTokenId])
+  const fetchDetail = async (id) => {
+    setModalLoading(true)
+    setModalOpen(true)
+    setModalData(null)
+    try {
+      const res = await client.get(`/api/getAcctFunding_details/${id}`, { headers })
+      if (res.data.msg === '201') setModalData(res.data.feedAll)
+      else { toast.error('Failed to load details'); setModalOpen(false) }
+    } catch (e) {
+      toast.error('Failed to load details')
+      setModalOpen(false)
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  const openModal = (d) => { setModalData(d); setModalOpen(true) }
+
+  const handleAction = (action) => {
+    setConfirmAction(action)
+    setConfirmOpen(true)
+  }
+
+    const handleConfirmAction = async () => {
+    setActionLoading(true)
+    try {
+      const endpoint = confirmAction === 'approve'
+        ? '/api/approveAcctFunding'
+        : '/api/rejectApproveAcctFunding'
+
+      const res = await client.post(endpoint, {
+        tran_id: modalData._id,
+        reject_note: rejectNote,
+      }, { headers })
+      
+      if (res.data.msg === '201') {
+        toast.success(`Funding ${confirmAction === 'approve' ? 'approved' : 'rejected'} successfully`)
+        fetchDetail(modalData._id)
+        fetchData(pageNumber)
+      } else {
+        toast.error(res.data.message || 'Action failed')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setActionLoading(false)
+      setConfirmOpen(false)
+      setConfirmAction(null)
+      setRejectNote('')
+    }
+  }
+
+  const handlePageChange = (_, value) => { setPageNumber(value); fetchData(value) }
+  const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'
+  const isProcessed = (status) => status === 'Approved' || status === 'Rejected'
+
+  useEffect(() => { fetchData(1) },
+  // eslint-disable-next-line react-hooks/exhaustive-deps 
+  [])
 
   return (
     <Card>
-      <Stack direction={'row'} justifyContent={'space-between'} spacing={2}>
-      <CardHeader title='Funding Details' titleTypographyProps={{ variant: 'h6' }} />
-            <Stack direction={'row'} >
-              <FormControl fullWidth margin='dense'>
-                <OutlinedInput
-                  placeholder='search with TID'
-                  onChange={(e) => setSearchInput(e.target.value.trim())}
-                  type={'text'}
-                  size="small"
-                  name="searchValue"
-                  value={searchInput.searchValue}
-                  endAdornment={
-                    <InputAdornment position='end'>
-                      <IconButton
-                        edge='end'
-                        onClick={() =>searchQuery()}>
-                       {loadingSearch ? <CircularProgress thickness={2} size={27} color="primary"/>:
-                       <SearchIcon /> }
-                      </IconButton>
-                    </InputAdornment>
-                    }
-                 />
-              </FormControl>
-                <Box sx={{
-                  marginRight:5,
-                  marginLeft:5
-                }}>
-              </Box>
-
-            </Stack>
-      </Stack>
-          {acctFundUserData.length > 0 &&
-          <Box sx={{
-            //marginTop: 10,
-            justifyContent:"right",
-            marginRight:5,
-            display:'flex'
-            }}>
-              <Typography>Page <strong>{pageNumber} / {totalPageCount == 0 || totalPageCount == undefined ? pageNumber: totalPageCount }</strong></Typography>
-              <Pagination count={totalPageCount} page={pageNumber} onChange={handlePaginateChange} />
-          </Box>}
-      <TableContainer>
-      {loadingData &&
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
-                 <BeatLoader
-                  color={'#1D2667'}
-                  loading={true}
-                  size={10}
-                  margin={5}
-                />
-              </Box>
-            }
-        {!loadingData && acctFundUserData.length > 0 ?
-        <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Tag ID</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>TID</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Reg. Date</TableCell>
-              <TableCell>Option</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {acctFundUserData.map(row => (
-              <TableRow hover key={row._id} sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}>
-                <TableCell>{row.fund_name}</TableCell>
-
-                <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
-                  {row.fund_tag_id}
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}><NumberValueFormat value={row.amount} /></Typography>
-                  </Box>
-                </TableCell>
-                <TableCell>{row.fund_email}</TableCell>
-                <TableCell>{row.fund_type}</TableCell>
-                <TableCell>{row.fund_number}</TableCell>
-                <TableCell>
-                  {row.fund_status == 'Approved' ?
-                  (
-                    <Chip
-                      label={row.fund_status}
-                      color={'success'}
-                      sx={{
-                        height: 20,
-                        fontSize: '0.75rem',
-                        textTransform: 'capitalize',
-                        '& .MuiChip-label': { fontWeight: 500 },
-                        cursor: 'pointer'
-                      }}
-                    />
-                    ):
-                  row.fund_status == 'Rejected'?
-                  (
-                    <Chip
-                      label={row.fund_status}
-                      color={'warning'}
-                      sx={{
-                        height: 20,
-                        fontSize: '0.75rem',
-                        textTransform: 'capitalize',
-                        '& .MuiChip-label': { fontWeight: 500 },
-                        cursor: 'pointer'
-                      }}
-                    />
-                    ):
-                    <Chip
-                      label={row.fund_status}
-                      color={'secondary'}
-                      sx={{
-                        height: 20,
-                        fontSize: '0.75rem',
-                        textTransform: 'capitalize',
-                        '& .MuiChip-label': { fontWeight: 500 },
-                        cursor: 'pointer'
-                      }}
-                    />}
-                </TableCell>
-                <TableCell>{moment(row.createdOn).format('YYYY-MM-DD')}</TableCell>
-
-                <TableCell>
-                {/* <Link href={`query/${row._id}`}>Here</Link> */}
-                <Stack direction="row" spacing={1}>
-                  <Link
-                  href={`#`}>
-                  <Chip
-                    label={'View'}
-                    color={'primary'}
-                    sx={{
-                      height: 30,
-                      fontSize: '0.75rem',
-                      textTransform: 'capitalize',
-                      '& .MuiChip-label': { fontWeight: 500 },
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handleClickOpen(row._id)}
-                  />
-                </Link>
-                <Link
-                  href={'#'}>
-                  <Chip
-                    label={'Delete'}
-                    color={'error'}
-                    sx={{
-                      height: 30,
-                      fontSize: '0.75rem',
-                      textTransform: 'capitalize',
-                      '& .MuiChip-label': { fontWeight: 500 },
-                      cursor: 'pointer'
-                    }}
-                  />
-                </Link>
-                    {/* <Chip label="success" color="success" variant="outlined" /> */}
-                </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        :null
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
+      <CardHeader
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant='h6' sx={{ fontWeight: 700 }}>Account Funding</Typography>
+            {totalCount > 0 && (
+              <Chip label={`${totalCount.toLocaleString()} records`} size='small' color='primary' variant='outlined' sx={{ fontWeight: 600 }} />
+            )}
+          </Box>
         }
-      {!loadingData && acctFundUserData.length < 1 &&
-        <NoRecordFund />
-        }
-      </TableContainer>
-
-      {/* show alert error/success notification */}
-      <ShowSnackbar
-        openAction={showAlert}
-        type={showAlertStatus.errorType}
-        hideDuration={4000}
-        bgColored={showAlertStatus.alertBgColor}
-        onCloseAction={handleCloseAlert}
-        length={"100%"}
-        desc={showAlertStatus.alertMessage}
-        transitionState={Transition}
-      />
-
-      <ConfirmDialogDelete
-        openState={showConfirmDialog}
-        title={'Are you sure you want to this?'}
-        loadingState={loading}
-        icon1={<Cancel/>}
-        closeState={handleCloseConfirmModal}
-        actionBtn1={() => approveRejectBtn(fetchData._id)}
-        transitionState={Transition}
-        btnLable={'Reject Transaction'}
-      />
-
-        {/* modal to show funding details */}
-      <BootstrapDialog
-
-        //onClose={handleClose}
-        aria-labelledby="customized-dialog-title"
-        open={open}>
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-        {loading ?  'Please wait...' : fetchData?.fund_name + " Funding Details" }
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}>
-          <CloseIcon />
-        </IconButton>
-
-        <DialogContent dividers>
-          {loadingApprove &&
-          <FullPageIndicator />}
-        {loading ?
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop:5, marginBottom:5 }}>
-                 <BeatLoader
-                  color={'#1D2667'}
-                  loading={true}
-                  size={10}
-                  margin={5}
-                />
-              </Box>:
-          <Box>
-
-            <Typography gutterBottom>
-            Payment Status: <strong>{fetchData.fund_status}</strong><br />
-            Transaction ID: <strong>{fetchData.fund_number}</strong><br />
-            Payment ID: <br />
-            Date: <strong>{fetchData.createdOn !== null ?moment(fetchData.createdOn).format('YYYY-MM-DD'): ''} </strong><br /><br/>
-
-            Proof of payment: {' '}
-            {fetchData?.fund_payment_proof_url ? (
-              <IconButton
-                component="a"
-                href={fetchData.fund_payment_proof_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ ml: 1}}>
-                <FilePresentSharpIcon sx={{ fontSize: 35, color: '#1D2667' }} />
-              </IconButton>
-            ) : (
-              <Chip
-              label={'Not Provided'}
-              color={'secondary'}
-              sx={{
-                height: 20,
-                fontSize: '0.75rem',
-                textTransform: 'capitalize',
-                '& .MuiChip-label': { fontWeight: 500 },
-                cursor: 'pointer'
+        action={
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', pr: 2 }}>
+            <TextField
+              size='small' placeholder='Search by tag ID or email'
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              sx={{ minWidth: 260 }}
+              InputProps={{
+                startAdornment: <InputAdornment position='start'><SearchIcon fontSize='small' color='action' /></InputAdornment>,
+                endAdornment: searchLoading ? <InputAdornment position='end'><CircularProgress size={16} /></InputAdornment> : null,
               }}
             />
-            )}<br />
-          </Typography>
-
-          <TableContainer component={Paper} sx={{ padding: 4 }}>
-          <Table sx={{ minWidth: 400, border: 0.9 }} size="small" aria-label="a dense table" >
-          <TableBody>
-
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell component="th" scope="column">
-                Amount
-              </TableCell>
-              <TableCell align="right">
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}><NumberValueFormat value={fetchData?.amount} /></Typography>
-                  </Box>
-                </TableCell>
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-              <TableCell component="th" scope="column">
-                Tag ID
-              </TableCell>
-              <TableCell align="right">{fetchData.fund_tag_id}</TableCell>
-
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-              <TableCell component="th" scope="column">
-                Email Address
-              </TableCell>
-              <TableCell align="right">{fetchData?.fund_email}</TableCell>
-
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-              <TableCell component="th" scope="column">
-                Funding Type
-              </TableCell>
-              <TableCell align="right">{fetchData?.fund_type}</TableCell>
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-              <TableCell component="th" scope="column">
-                Check
-              </TableCell>
-              <TableCell align="right">{fetchData?.checked}</TableCell>
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-              <TableCell component="th" scope="column">
-                Note
-              </TableCell>
-              <TableCell>{fetchData?.fund_note}</TableCell>
-            </TableRow>
-            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0.3 } }}>
-            </TableRow>
-        </TableBody>
-      </Table>
-        </TableContainer>
-        </Box>
+            <Button variant='contained' size='small' onClick={handleSearch} disabled={searchLoading} sx={{ borderRadius: 2, px: 3 }}>
+              Search
+            </Button>
+            <Tooltip title='Refresh'>
+              <IconButton size='small' onClick={() => fetchData(pageNumber)} disabled={loading}>
+                <RefreshIcon fontSize='small' />
+              </IconButton>
+            </Tooltip>
+          </Box>
         }
-       </DialogContent>
-        <DialogActions>
+      />
+      <Divider />
 
-          <ResetButtonStyled color='primary' variant='outlined'
-            disabled={loading || fetchData.fund_status =="Approved" || fetchData.fund_status =="Rejected"}
-            onClick={() => {handleApproveButton(fetchData._id)}} sx={{ marginTop:2, marginBottom:2 }}>
-              Approve
-          </ResetButtonStyled>
-          <ResetButtonStyled color='error' variant='outlined'
-            disabled={loading}
-            onClick={() => {handleConfirmDialog(fetchData._id)}} sx={{ marginTop:2, marginBottom:2 }}>
-              Reject
-          </ResetButtonStyled>
+      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}><CircularProgress size={40} /></Box>}
+      {!loading && data.length === 0 && <EmptyState title='No Funding Records' message='No account funding records found.' />}
+
+      {!loading && data.length > 0 && (
+        <>
+          <TableContainer>
+            <Table sx={{ minWidth: 900 }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                  {['User', 'Tag ID', 'Amount', 'Method', 'Status', 'Date', 'Action'].map(col => (
+                    <TableCell key={col}><Typography variant='body2' sx={{ fontWeight: 700 }}>{col}</Typography></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map(row => (
+                  <TableRow key={row._id} hover sx={{ '&:last-of-type td': { border: 0 } }}>
+                                        <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.75rem', fontWeight: 700, color: '#ffffff' }}>
+                          {getInitials(row.fund_name)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                            {row.fund_name || '—'}
+                          </Typography>
+                          <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.72rem' }}>
+                            {row.fund_email}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={row.fund_tag_id || '—'} size='small' variant='outlined' color='primary' sx={{ fontWeight: 600, fontFamily: 'monospace' }} />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant='body2' sx={{ fontWeight: 700, color: 'success.main' }}>
+                        ₦{Number(row.amount || 0).toLocaleString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant='body2'>{row.fund_method || row.payment_method || '—'}</Typography>
+                    </TableCell>
+                    <TableCell><StatusBadge status={row.fund_status?.toLowerCase()} /></TableCell>
+                    <TableCell>
+                      <Typography variant='body2' color='text.secondary'>{moment(row.createdOn).format('DD MMM, YYYY')}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title='View Details'>
+                        <Button size='small' variant='outlined' startIcon={<Eye fontSize='small' />}
+                          onClick={() => fetchDetail(row._id)}
+                          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+                          View
+                        </Button>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 4, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography variant='body2' color='text.secondary'>
+              Page <strong>{pageNumber}</strong> of <strong>{totalPages}</strong> · {totalCount.toLocaleString()} records
+            </Typography>
+            <Pagination count={totalPages} page={pageNumber} onChange={handlePageChange} color='primary' shape='rounded' size='small' />
+          </Box>
+        </>
+      )}
+
+      {/* Detail Modal */}
+      <StyledDialog open={modalOpen} onClose={() => setModalOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Box>
+            <Typography variant='h6' sx={{ fontWeight: 700 }}>Funding Details</Typography>
+            <Typography variant='body2' color='text.secondary'>Review and approve or reject this funding request</Typography>
+          </Box>
+          <IconButton onClick={() => setModalOpen(false)} size='small'><CloseIcon fontSize='small' /></IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          {modalLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress size={40} /></Box>
+          ) : modalData ? (
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'action.hover', borderRadius: 2, p: 2, mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', width: 44, height: 44, fontWeight: 700, color: '#ffffff' }}>
+                    {getInitials(modalData.fund_name)}
+                  </Avatar>
+                  <Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>{modalData.fund_name}</Typography>
+                    <Typography variant='body2' color='text.secondary'>Tag: {modalData.fund_tag_id}</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ textAlign: 'right' }}>
+                  <Typography variant='h5' sx={{ fontWeight: 700, color: 'success.main' }}>
+                    ₦{Number(modalData.amount || 0).toLocaleString()}
+                  </Typography>
+                  <StatusBadge status={modalData.fund_status?.toLowerCase()} />
+                </Box>
+              </Box>
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <Box sx={{ backgroundColor: 'action.hover', borderRadius: 2, p: 1.5, textAlign: 'center' }}>
+                    <Typography variant='body2' color='text.secondary'>Submitted</Typography>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>{moment(modalData.createdOn).format('DD MMM YYYY')}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ backgroundColor: 'action.hover', borderRadius: 2, p: 1.5, textAlign: 'center' }}>
+                    <Typography variant='body2' color='text.secondary'>Payment Method</Typography>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>{modalData.fund_method || modalData.payment_method || '—'}</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <DetailRow label='Transaction ID' value={modalData.tid || modalData._id} highlight='primary.main' />
+              <DetailRow label='Bank Name' value={modalData.bank_name} />
+              <DetailRow label='Description' value={modalData.fund_desc || modalData.tran_desc} />
+              <DetailRow label='Status' value={modalData.fund_status} />
+
+              {modalData.payment_proof_url && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>Payment Proof</Typography>
+                  <Box component='a' href={modalData.payment_proof_url} target='_blank' rel='noreferrer'
+                    sx={{ display: 'block', borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+                    <Box component='img' src={modalData.payment_proof_url} alt='Payment Proof'
+                      sx={{ width: '100%', maxHeight: 200, objectFit: 'cover' }} />
+                  </Box>
+                </Box>
+              )}
+
+              {isProcessed(modalData.fund_status) && (
+                <Alert severity={modalData.fund_status === 'Approved' ? 'success' : 'error'} sx={{ mt: 2, borderRadius: 2 }}>
+                  <Typography variant='body2'>
+                    This funding request has been {modalData.fund_status?.toLowerCase()}. No further action required.
+                  </Typography>
+                </Alert>
+              )}
+            </Box>
+          ) : null}
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button variant='outlined' onClick={() => setModalOpen(false)} sx={{ borderRadius: 2 }}>Close</Button>
+          {modalData && !isProcessed(modalData.fund_status) && (
+            <>
+              <Button variant='outlined' color='error' startIcon={<CancelIcon />}
+                onClick={() => handleAction('reject')} sx={{ borderRadius: 2 }}>
+                Reject
+              </Button>
+              <Button variant='contained' color='success' startIcon={<CheckCircleIcon />}
+                onClick={() => handleAction('approve')} sx={{ borderRadius: 2 }}>
+                Approve
+              </Button>
+            </>
+          )}
         </DialogActions>
+      </StyledDialog>
 
-      </BootstrapDialog>
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setConfirmAction(null); setRejectNote('') }}
+        onConfirm={handleConfirmAction}
+        loading={actionLoading}
+        title={confirmAction === 'approve' ? 'Approve Funding' : 'Reject Funding'}
+        message={
+          confirmAction === 'approve'
+            ? `Are you sure you want to approve this funding of ₦${Number(modalData?.amount || 0).toLocaleString()}? This will credit the user's wallet.`
+            : (
+              <Box>
+                <Typography variant='body2' sx={{ mb: 2 }}>
+                  Are you sure you want to reject this funding of <strong>₦{Number(modalData?.amount || 0).toLocaleString()}</strong>? The user will be notified.
+                </Typography>
+                <TextField
+                  fullWidth
+                  size='small'
+                  multiline
+                  rows={3}
+                  label='Rejection Reason (optional)'
+                  placeholder='Enter reason for rejection...'
+                  value={rejectNote}
+                  onChange={e => setRejectNote(e.target.value)}
+                />
+              </Box>
+            )
+        }
+        confirmLabel={confirmAction === 'approve' ? 'Approve' : 'Reject'}
+        confirmColor={confirmAction === 'approve' ? 'success' : 'error'}
+      />
     </Card>
   )
 }
 
-export default AccountFoundingTable
+export default AccountFundingTable

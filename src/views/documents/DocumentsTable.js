@@ -253,37 +253,37 @@ const DocumentsTable = ({ docType = 'pending' }) => {
               <TableBody>
                 {documents.map(doc => (
                   <TableRow key={doc._id} hover>
-                    <TableCell>
+                                        <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem' }}>
-                          {doc.user_name?.charAt(0)?.toUpperCase() || 'U'}
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem', color: '#ffffff' }}>
+                          {doc.owners_name?.charAt(0)?.toUpperCase() || 'U'}
                         </Avatar>
                         <Box>
                           <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                            {doc.user_name || 'Unknown'}
+                            {doc.owners_name || 'Unknown'}
                           </Typography>
                           <Typography variant='body2' color='text.secondary'>
-                            {doc.user_email}
+                            {doc.owners_email}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                        {doc.doc_type || doc.document_type || 'KYC Document'}
+                        {doc.document_name || doc.document_type || 'KYC Document'}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        {doc.user_tag || doc.tag_id || 'N/A'}
+                        {doc.owners_tag_id || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={doc.doc_status?.toLowerCase() || docType} />
+                      <StatusBadge status={doc.document_status?.toLowerCase() || docType} />
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' color='text.secondary'>
-                        {moment(doc.createdOn).format('DD MMM, YYYY')}
+                        {doc.createdOn ? moment(doc.createdOn).format('DD MMM, YYYY') : '—'}
                       </Typography>
                     </TableCell>
                     <TableCell>
