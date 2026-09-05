@@ -1,69 +1,26 @@
-
-import React, {useContext, useEffect, useState, CSSProperties } from 'react'
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
-import { useRouter } from 'next/router'
-
-// ** MUI Imports
 import Grid from '@mui/material/Grid'
-import Link from 'next/link'
-import Card from '@mui/material/Card'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import UserApprovedTable from 'src/views/documents/approvedTable';
-import UserDocumentPendingTable from 'src/views/documents/pendingTable';
-import UserDocumentRejectedTable from 'src/views/documents/rejected';
+import PageHeader from 'src/@core/components/common/PageHeader'
+import DocumentsTable from 'src/views/documents/DocumentsTable'
 
-
-const RejectedDocument = () => {
+const RejectedDocuments = () => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Typography variant='h5'>
-          {/* <Link href='https://mui.com/components/tables/' target='_blank'>
-            Active Users
-          </Link> */}
-            Rejected Documents
-
-        </Typography>
-        <Typography variant='body2'>View all users rejected/cancelled documents in the system </Typography>
+        <PageHeader
+          title='Rejected Documents'
+          subtitle='KYC documents that have been rejected'
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'KYC Documents' },
+            { label: 'Rejected' },
+          ]}
+        />
       </Grid>
       <Grid item xs={12}>
-        <Card>
-          <UserDocumentRejectedTable />
-        </Card>
+        <DocumentsTable docType='rejected' />
       </Grid>
-      {/* <Grid item xs={12}>
-        <Card>
-          <CardHeader title='Dense Table' titleTypographyProps={{ variant: 'h6' }} />
-
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <CardHeader title='Sticky Header' titleTypographyProps={{ variant: 'h6' }} />
-
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <CardHeader title='Collapsible Table' titleTypographyProps={{ variant: 'h6' }} />
-
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <CardHeader title='Spanning Table' titleTypographyProps={{ variant: 'h6' }} />
-
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <CardHeader title='Customized Table' titleTypographyProps={{ variant: 'h6' }} />
-
-        </Card>
-      </Grid> */}
     </Grid>
   )
 }
 
-export default RejectedDocument
+export default RejectedDocuments

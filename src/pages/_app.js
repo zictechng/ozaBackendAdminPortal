@@ -53,6 +53,22 @@ const App = props => {
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
   const [appDetails, setAppDetails] = useState('');
   const [loadingData, setLoadingData] = useState(false);
+  const [dynamicAppName, setDynamicAppName] = useState('Admin Portal');
+  const [dynamicAppDesc, setDynamicAppDesc] = useState('');
+
+  // Load app name from localStorage on mount
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('AppSettingData');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.app_name && dynamicAppName === 'Admin Portal') {
+          setDynamicAppName(parsed.app_name + ' Admin');
+          setDynamicAppDesc(parsed.app_short_name || '');
+        }
+      } catch (e) {}
+    }
+  }
 
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
@@ -97,10 +113,10 @@ const App = props => {
   return (
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>{ `${'Oza'} App Admin`}</title>
+      <title>{dynamicAppName}</title>
         <meta
           name='description'
-          content={`${'Oza App'} – Most reliable and profitable way to sale and buy virtual funds – is the most friendly & highly profitable system you can trust with all your virtual funds deals on the go.`}
+          content={dynamicAppDesc || `${dynamicAppName} – Admin control panel`}
         />
         <meta name='keywords' content='Online business, Virtual funds, Sale paypal funds, Bitcoin, Payoneer, Work from home, loan, free loan, make money online' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />

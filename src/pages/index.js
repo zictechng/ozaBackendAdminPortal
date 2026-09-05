@@ -1,341 +1,312 @@
-import React, {useContext, useEffect, useState, CSSProperties } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import ScaleLoader from "react-spinners/ScaleLoader";
-
-// ** MUI Imports
 import Grid from '@mui/material/Grid'
-
-// ** Custom Components Imports
-import CardStatisticsVerticalComponent from 'src/@core/components/card-statistics/card-stats-vertical'
-
-// ** Styled Component Import
-import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
-
-// ** Demo Components Imports
-import Table from 'src/views/dashboard/Table'
-import Trophy from 'src/views/dashboard/Trophy'
-import TotalEarning from 'src/views/dashboard/TotalEarning'
-import StatisticsCard from 'src/views/dashboard/StatisticsCard'
-import { AccountAlert, AccountCancel, AccountCheck, AccountGroup } from 'mdi-material-ui'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import { AuthContext } from 'src/@core/context/authContext';
-import { AuthenticateUser, AuthenticateUserCheck, PageRedirect } from 'src/@core/function/controlFunction';
-import client from 'src/@core/context/client';
+import Table from '@mui/material/Table'
+import TableHead from '@mui/material/TableHead'
+import TableBody from '@mui/material/TableBody'
+import TableRow from '@mui/material/TableRow'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import Divider from '@mui/material/Divider'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
+import Avatar from '@mui/material/Avatar'
+import Link from 'next/link'
+import moment from 'moment'
+import {
+  AccountCheck, AccountAlert, AccountCancel, AccountGroup,
+  CurrencyUsd, CashMultiple, Bitcoin, TrendingUp,
+  Cellphone, Flash, Television, School, AccessPoint,
+  HandCoin,
+} from 'mdi-material-ui'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-import 'react-toastify/dist/ReactToastify.css';
-
-const useUser = () => ({ user: null, loading: false })
+import StatsCard from 'src/@core/components/common/StatsCard'
+import StatusBadge from 'src/@core/components/common/StatusBadge'
+import EmptyState from 'src/@core/components/common/EmptyState'
+import { AuthContext } from 'src/@core/context/authContext'
+import client from 'src/@core/context/client'
 
 const Dashboard = () => {
-
-  // ** States
-  const [anchorEl, setAnchorEl] = useState(true);
-  const [todaySale, setTodaySale] = useState('');
-  const [accountFund, setAccountFund] = useState('');
-  const [payPalSale, setPayPalSale] = useState('');
-  const [payoneerSale, setPayoneerSale] = useState('');
-  const [bitcoinSale, setBitcoinSale] = useState('');
-
-  const [allUsers, setAllUsers] = useState('');
-  const [activeUsers, setActiveUsers] = useState('');
-  const [pendingUsers, setPendingUsers] = useState('');
-  const [suspendedUsers, setSuspendedUsers] = useState('');
-  const [loadingFetch, setLoadingFetch] = useState(false);
-
-  const [LoadingData, setLoadingData] = useState(false);
-
-  // ** Hook
-  //const theme = useTheme()
   const router = useRouter()
-  const {test, loading, isAuthenticated, userToken, logo, setLogo} = useContext(AuthContext)
+  const { userToken } = useContext(AuthContext)
+  const token = userToken || (typeof window !== 'undefined' ? localStorage.getItem('userToken') : '')
+  const headers = { Authorization: 'Bearer ' + token }
 
-  const userTokenId = localStorage.getItem('userToken')
-  const userPro = localStorage.getItem('userInfo')
-  const [appTitleLocal, setAppTitleLocal] = useState("")
+  const [salesStats, setSalesStats] = useState(null)
+  const [userStats, setUserStats] = useState(null)
+  const [recentTx, setRecentTx] = useState([])
+  const [billsStats, setBillsStats] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const override = {
-    display: "block",
-    margin: "0 auto",
+  const fetchDashboard = async () => {
+    setLoading(true)
+    try {
+      const [salesRes, userRes, recentRes, billsRes] = await Promise.all([
+        client.get('/api/dashboard_salesReport', { headers }),
+        client.get('/api/dashboard_userReport', { headers }),
+        client.get('/api/recent_transactions/all', { headers }),
+        client.get('/api/bills_services_status', { headers }),
+      ])
 
-    //borderColor: "red",
-  };
-
-  const handleRedirect = PageRedirect('/pages/login')
-
-  // check user login authorization if valid
-  const CheckUserLogin = () =>{
-    AuthenticateUserCheck(userTokenId).then((res)=>
-        {
-          if(res.status == '401'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-          else if(res.status == '402'){
-            router.replace(handleRedirect)
-            localStorage.clear()
-          }
-        });
-      }
-
-  // get daily sales stats here
-  const dailySalesStats = async() =>{
-    setLoadingFetch(true)
-      try {
-        const res = await client.get(`/api/dashboard_salesReport`, {
-          headers: {
-          'Authorization': 'Bearer '+userTokenId,
-          }
-        })
-
-      //console.log(res.data);
-      if(res.data.msg =='201'){
-      //console.log('Daily Sales ' ,res.data);
-      setTodaySale(res.data)
-      setPayPalSale(res.data.feedPaypal)
-      setPayoneerSale(res.data.feedPayoneer)
-      setBitcoinSale(res.data.feedBitcoin)
-      setAccountFund(res.data.feedAcctFund)
-      }
-      } catch (error) {
-        console.log(error.message)
-      }
-      finally{
-        setLoadingFetch(false)
-      }
+      if (salesRes.data.msg === '201') setSalesStats(salesRes.data)
+      if (userRes.data.msg === '201') setUserStats(userRes.data)
+      if (recentRes.data) setRecentTx(recentRes.data.slice(0, 8))
+      if (billsRes.data.msg === '200') setBillsStats(billsRes.data.services)
+    } catch (e) {
+      console.log('Dashboard fetch error:', e.message)
+    } finally {
+      setLoading(false)
+    }
   }
-
- // get daily sales stats here
- const getUserStats = async() =>{
-  try {
-    const res = await client.get(`/api/dashboard_userReport`, {
-      headers: {
-      'Authorization': 'Bearer '+userTokenId,
-      }
-    })
-
-  //console.log(res.data);
-  if(res.data.msg =='201'){
-  //console.log('Daily Sales ' ,res.data);
-  setAllUsers(res.data.feedAll)
-  setActiveUsers(res.data.feedActive)
-  setPendingUsers(res.data.feedPending)
-  setSuspendedUsers(res.data.feedSuspended)
-  }
-  } catch (error) {
-    console.log(error.message)
-  }
-}
 
   useEffect(() => {
-    const getAppSetting = async() =>{
-      setLoadingData(true);
-      try {
-        const res = await client.get(`/api/app_setting`, {
-          headers: {
-          'Authorization': 'Bearer '+userTokenId,
-          }
-        })
-
-      //console.log('Pending users ' , res.data);
-    if(res.data.msg =='201'){
-
-      setAppTitleLocal(res.data.infoData)
-      let appTitleLocal = res.data.infoData;
-      setLongDesc(res.data.feedAll[0]?.app_launch_desc)
-      setAppTitle(res.data.feedAll[0]?.app_launch_title)
-
-      localStorage.setItem('AppSettingData',  JSON.stringify( appTitleLocal));
-      }
-      } catch (error) {
-        console.log(error.message)
-      }
-      finally{
-        setLoadingData(false)
-      }
-  }
-  getAppSetting()
-
-      const userInfo = localStorage.getItem('userInfo')
-      const userToken = localStorage.getItem('userToken')
-
-    // get local storage details
-    const userLocal = localStorage.getItem('userToken')
-    CheckUserLogin()
-
-    dailySalesStats()
-    getUserStats()
-
-    //payPalSalesStats()
-
-    if (userLocal == null) {
-      router.push(handleRedirect)
-      }
-    else{
-      console.log('User authenticated');
+    if (!token) {
+      router.replace('/pages/login')
+      
+      return
     }
-
+    fetchDashboard()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return (
-    <ApexChartWrapper>
-      {/* {anchorEl ?
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <ScaleLoader
-          color={'#1D2667'}
-          cssOverride={override}
-          size={80}
-      />
+  const billsServices = [
+    { key: 'airtime', label: 'Airtime', icon: <Cellphone />, color: '#4C5FD5' },
+    { key: 'data', label: 'Mobile Data', icon: <AccessPoint />, color: '#10B981' },
+    { key: 'electricity', label: 'Electricity', icon: <Flash />, color: '#F59E0B' },
+    { key: 'tv_subscription', label: 'TV Sub', icon: <Television />, color: '#8B5CF6' },
+    { key: 'exam_cards', label: 'Exam Cards', icon: <School />, color: '#EC4899' },
+  ]
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress size={48} />
       </Box>
-      : ''} */}
+    )
+  }
 
-      <Grid container spacing={6}>
-        <Grid item xs={12} md={4}>
-          <Trophy data={todaySale.feedback}
-          loading={loadingFetch}/>
-        </Grid>
-        <Grid item xs={12} md={8}>
-          <StatisticsCard
-          payPalSales={payPalSale}
-          payoneerSales={payoneerSale}
-          bitcoinSales={bitcoinSale}
-          acctFund={accountFund}/>
-        </Grid>
-        {/* <Grid item xs={12} md={6} lg={4}>
-          <WeeklyOverview />
-        </Grid> */}
-        <Grid item xs={12} md={6} lg={4}>
-          <TotalEarning />
-        </Grid>
+  return (
+    <Grid container spacing={6}>
+      <ToastContainer position='top-right' autoClose={3000} />
 
-        <Grid item xs={12} md={6} lg={8}>
-          <Grid container spacing={6}>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats={allUsers}
-                icon={<AccountGroup />}
-                color='secondary'
-                trendNumber='+42%'
-                title='All Users'
-                subtitle='Total users signup for the platform'
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats={activeUsers}
-                title='Active Users'
-                trend='negative'
-                color='success'
-
-                //trendNumber='-15%'
-                subtitle='Total active users in the platform'
-                icon={<AccountCheck />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats={pendingUsers}
-                trend='negative'
-                color='warning'
-
-                //trendNumber='-18%'
-                title='Pending Users'
-                subtitle='Total users accounts that is not yet activated/approved'
-                icon={<AccountAlert />}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CardStatisticsVerticalComponent
-                stats={suspendedUsers}
-                color='error'
-                trend='negative'
-                trendNumber='-18%'
-                subtitle='Total users accounts that was suspended in the platform'
-                title='Users Suspended'
-                icon={<AccountCancel />}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        {/* <Grid item xs={12} md={6} lg={4}>
-          <SalesByCountries />
-        </Grid>
-        <Grid item xs={12} md={12} lg={8}>
-          <DepositWithdraw />
-        </Grid> */}
-
-        {/* <Grid item xs={12} md={6} lg={12}>
-          <Grid container spacing={6}>
-            <Grid item xs={3}>
-              <CardStatisticsVerticalComponent
-                stats='$25.6k'
-                icon={<Poll />}
-                color='success'
-                trendNumber='+42%'
-                title='Total Profit'
-                subtitle='Weekly Profit'
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CardStatisticsVerticalComponent
-                stats='$78'
-                title='Refunds'
-                trend='negative'
-                color='secondary'
-                trendNumber='-15%'
-                subtitle='Past Month'
-                icon={<CurrencyUsd />}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CardStatisticsVerticalComponent
-                stats='862'
-                trend='negative'
-                trendNumber='-18%'
-                title='New Project'
-                subtitle='Yearly Project'
-                icon={<BriefcaseVariantOutline />}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CardStatisticsVerticalComponent
-                stats='15'
-                color='warning'
-                trend='negative'
-                trendNumber='-18%'
-                subtitle='Last Week'
-                title='Sales Queries'
-                icon={<HelpCircleOutline />}
-              />
-            </Grid>
-          </Grid>
-        </Grid> */}
-        {' '}
-        {/* <CardContent>
-
-        </CardContent> */}
-        <Grid item xs={12}>
-        {/* <Typography variant='h5'>
-          <Link href='https://mui.com/components/tables/' target='_blank'>
-            MUI Tables
-          </Link>
-        </Typography> */}
-
-        <Grid item xs={12} >
-        <Typography variant='body2'
-        style={{
-          height: "5vh",
-          paddingTop: "12px"
-        }}
-      >
-        Recent transaction</Typography>
-
-        </Grid>
-          <Table />
-        </Grid>
+      {/* Page Title */}
+      <Grid item xs={12}>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant='h5' sx={{ fontWeight: 700 }}>Dashboard</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Welcome back! Here is what is happening today.
+          </Typography>
+        </Box>
       </Grid>
 
-    </ApexChartWrapper>
+      {/* Sales Stats Row */}
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Today Sales'
+          value={`$${Number(salesStats?.feedback || 0).toLocaleString()}`}
+          subtitle='Total daily sales value'
+          icon={<TrendingUp />}
+          iconBg='#EEF2FF'
+          iconColor='#4C5FD5'
+          trend='up'
+          trendValue='8%'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='PayPal Sales'
+          value={`$${Number(salesStats?.feedPaypal || 0).toLocaleString()}`}
+          subtitle='Total PayPal transactions'
+          icon={<CurrencyUsd />}
+          iconBg='#DBEAFE'
+          iconColor='#3B82F6'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Account Funding'
+          value={`₦${Number(salesStats?.feedAcctFund || 0).toLocaleString()}`}
+          subtitle='Total account funding'
+          icon={<CashMultiple />}
+          iconBg='#D1FAE5'
+          iconColor='#10B981'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Payoneer Sales'
+          value={`$${Number(salesStats?.feedPayoneer || 0).toLocaleString()}`}
+          subtitle='Total Payoneer transactions'
+          icon={<CurrencyUsd />}
+          iconBg='#FEF3C7'
+          iconColor='#F59E0B'
+        />
+      </Grid>
+
+      {/* User Stats Row */}
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='All Users'
+          value={Number(userStats?.feedAll || 0).toLocaleString()}
+          subtitle='Total registered users'
+          icon={<AccountGroup />}
+          iconBg='#EDE9FE'
+          iconColor='#7C3AED'
+          trend='up'
+          trendValue='42%'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Active Users'
+          value={Number(userStats?.feedActive || 0).toLocaleString()}
+          subtitle='Total active users'
+          icon={<AccountCheck />}
+          iconBg='#D1FAE5'
+          iconColor='#10B981'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Pending Users'
+          value={Number(userStats?.feedPending || 0).toLocaleString()}
+          subtitle='Awaiting activation'
+          icon={<AccountAlert />}
+          iconBg='#FEF3C7'
+          iconColor='#F59E0B'
+        />
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <StatsCard
+          title='Suspended Users'
+          value={Number(userStats?.feedSuspended || 0).toLocaleString()}
+          subtitle='Suspended accounts'
+          icon={<AccountCancel />}
+          iconBg='#FEE2E2'
+          iconColor='#EF4444'
+          trend='negative'
+          trendValue='18%'
+        />
+      </Grid>
+
+      {/* Bills Services Status */}
+      <Grid item xs={12}>
+        <Card>
+          <CardHeader
+            title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Bills Services Status</Typography>}
+            subheader={<Typography variant='body2' color='text.secondary'>Current status of all bill payment services</Typography>}
+            action={
+              <Link href='/bills/services' passHref>
+                <Button size='small' variant='outlined'>Manage Services</Button>
+              </Link>
+            }
+          />
+          <Divider />
+          <CardContent>
+            <Grid container spacing={4}>
+              {billsServices.map((service) => (
+                <Grid item xs={6} sm={4} md={2.4} key={service.key}>
+                  <Box sx={{
+                    p: 3, borderRadius: 2, textAlign: 'center',
+                    backgroundColor: service.color + '15',
+                    border: '1px solid ' + service.color + '30',
+                  }}>
+                    <Box sx={{ color: service.color, mb: 1 }}>{service.icon}</Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700, mb: 0.5 }}>
+                      {service.label}
+                    </Typography>
+                    <StatusBadge status={billsStats?.[service.key] || 'active'} />
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* Recent Transactions */}
+      <Grid item xs={12}>
+        <Card>
+          <CardHeader
+            title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Recent Transactions</Typography>}
+            subheader={<Typography variant='body2' color='text.secondary'>Latest platform transactions</Typography>}
+            action={
+              <Link href='/all-transactions' passHref>
+                <Button size='small' variant='outlined'>View All</Button>
+              </Link>
+            }
+          />
+          <Divider />
+          <CardContent sx={{ p: 0 }}>
+            {recentTx.length === 0 ? (
+              <EmptyState title='No Recent Transactions' message='No transactions found.' />
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Name</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>TID</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Amount</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Date</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Type</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Status</Typography></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {recentTx.map((tx) => (
+                      <TableRow key={tx._id} hover>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'primary.main' }}>
+                              {tx.acct_name?.charAt(0) || 'U'}
+                            </Avatar>
+                            <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                              {tx.acct_name}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.75rem' }}>
+                            {tx.tid}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2' sx={{ fontWeight: 700, color: tx.tran_type === 'Credit' ? 'success.main' : 'error.main' }}>
+                            ₦{Number(tx.amount || 0).toLocaleString()}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2' color='text.secondary'>
+                            {moment(tx.creditOn).format('DD MMM, YYYY')}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2'>
+                            {tx.transac_nature || tx.tran_type}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={tx.transaction_status?.toLowerCase()} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+    </Grid>
   )
 }
 

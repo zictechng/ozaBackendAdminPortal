@@ -21,7 +21,9 @@ const UserProvider = ({children}) =>{
   const [appSettingDetails, setAppSettingDetails] = useState();
   const [logo, setLogo] = useState('');
   const [appLogoMain, setAppLogoMain] = useState('');
-  const [appName, setAppName] = useState('');
+  const [appName, setAppName] = useState('Admin Portal');
+  const [appLogo, setAppLogo] = useState('');
+  const [appDesc, setAppDesc] = useState('');
 
   // login action function
   const loginAction = async (username, password)=>{
@@ -34,18 +36,20 @@ const UserProvider = ({children}) =>{
 
   //console.log(res.data);
   if(res.data.msg =='200'){
-    //console.log('Login details ' ,res.data);
     let userInfo = res.data;
     let appSettingDetails = res.data.appData;
       setUserInfo(userInfo)
       setUserToken(userInfo.token)
-
       setAppSettingDetails(appSettingDetails)
+      setAppName(appSettingDetails?.app_name || 'Admin Portal')
+      setAppLogo(appSettingDetails?.app_logo || '')
+      setAppDesc(appSettingDetails?.app_short_name || '')
       localStorage.setItem('userToken', userInfo.token);
-      localStorage.setItem('AppSettingData',  JSON.stringify( appSettingDetails));
+      localStorage.setItem('AppSettingData', JSON.stringify(appSettingDetails));
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       router.replace('/')
       }
+      
     else if(res.data.status == '401') {
       return toast.error('Failed! No user record found', {
         position: "top-right",
@@ -143,6 +147,8 @@ const UserProvider = ({children}) =>{
           setUserToken(userToken);
           setUserInfo(userInfo);
           setAppSettingDetails(appSettingDetails)
+          setAppName(appSettingDetails?.app_name || 'Admin Portal')
+          setAppLogo(appSettingDetails?.app_logo || '')
           console.log('User LoggedIn ')
         }
      } catch (error) {
@@ -165,7 +171,9 @@ const UserProvider = ({children}) =>{
     isAuthenticated,
     logo, setLogo,
     appName, setAppName,
-    appLogoMain, setAppLogoMain
+    appLogo, setAppLogo,
+    appDesc, setAppDesc,
+    appLogoMain, setAppLogoMain,
     }}>
       {children}
     </AuthContext.Provider>

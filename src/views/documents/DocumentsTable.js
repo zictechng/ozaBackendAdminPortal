@@ -1,7 +1,7 @@
-import { useState, useEffect, useContext } from 'react'
+
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import moment from 'moment'
-import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Table from '@mui/material/Table'
@@ -23,11 +23,7 @@ import Divider from '@mui/material/Divider'
 import Tooltip from '@mui/material/Tooltip'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import { Magnify, DotsVertical, Eye, AccountCancel, AccountCheck, Delete } from 'mdi-material-ui'
+import { Magnify, DotsVertical, Eye, FileCheck, FileCancel } from 'mdi-material-ui'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -36,10 +32,14 @@ import EmptyState from 'src/@core/components/common/EmptyState'
 import ConfirmDialog from 'src/@core/components/common/ConfirmDialog'
 import client from 'src/@core/context/client'
 
-// Action menu per row
-const RowActions = ({ user, onAction }) => {
+const endpointMap = {
+  approved: '/api/approvedDocument_details',
+  pending:  '/api/pendingDocument_details',
+  rejected: '/api/rejectedDocument_details',
+}
+
+const RowActions = ({ doc, onAction, docType }) => {
   const [anchor, setAnchor] = useState(null)
-  const isSuspended = user.acct_status === 'Suspended' || user.acct_status === 'Deactivated'
 
   return (
     <>
@@ -55,43 +55,33 @@ const RowActions = ({ user, onAction }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{ sx: { minWidth: 180, boxShadow: 3 } }}>
-        <MenuItem onClick={() => { setAnchor(null); onAction('view', user) }}>
+        <MenuItem onClick={() => { setAnchor(null); onAction('view', doc) }}>
           <Eye fontSize='small' sx={{ mr: 1.5, color: 'primary.main' }} />
-          <Typography variant='body2'>View Details</Typography>
+          <Typography variant='body2'>View Document</Typography>
         </MenuItem>
-        {!isSuspended && (
-          <MenuItem onClick={() => { setAnchor(null); onAction('suspend', user) }}>
-            <AccountCancel fontSize='small' sx={{ mr: 1.5, color: 'error.main' }} />
-            <Typography variant='body2' color='error.main'>Suspend Account</Typography>
-          </MenuItem>
-        )}
-        {isSuspended && (
-          <MenuItem onClick={() => { setAnchor(null); onAction('activate', user) }}>
-            <AccountCheck fontSize='small' sx={{ mr: 1.5, color: 'success.main' }} />
-            <Typography variant='body2' color='success.main'>Activate Account</Typography>
-          </MenuItem>
+        {docType === 'pending' && (
+          <>
+            <MenuItem onClick={() => { setAnchor(null); onAction('approve', doc) }}>
+              <FileCheck fontSize='small' sx={{ mr: 1.5, color: 'success.main' }} />
+              <Typography variant='body2' color='success.main'>Approve</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => { setAnchor(null); onAction('reject', doc) }}>
+              <FileCancel fontSize='small' sx={{ mr: 1.5, color: 'error.main' }} />
+              <Typography variant='body2' color='error.main'>Reject</Typography>
+            </MenuItem>
+          </>
         )}
       </Menu>
     </>
   )
 }
 
-const UserTableData = ({ userType = 'active' }) => {
+const DocumentsTable = ({ docType = 'pending' }) => {
   const router = useRouter()
   const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
   const headers = { Authorization: 'Bearer ' + token }
 
-  // Map userType to API endpoint
-  const endpointMap = {
-    active:    '/api/activeUser_details',
-    pending:   '/api/pendingUser_details',
-    suspended: '/api/suspendUser_details',
-    deleted:   '/api/deletedUser_details',
-  }
-
-  const endpoint = endpointMap[userType] || endpointMap.active
-
-  const [users, setUsers] = useState([])
+  const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -103,42 +93,41 @@ const UserTableData = ({ userType = 'active' }) => {
   const [actionLoading, setActionLoading] = useState(false)
   const pageLimit = 15
 
-  const fetchUsers = async (pageNum = 1) => {
+  const fetchDocuments = async (pageNum = 1) => {
     setLoading(true)
     try {
       const res = await client.get(
-        `${endpoint}?pageNumber=${pageNum}&pageLimit=${pageLimit}`,
+        `${endpointMap[docType]}?pageNumber=${pageNum}&pageLimit=${pageLimit}`,
         { headers }
       )
       if (res.data.msg === '201') {
-        setUsers(res.data.feedAll || [])
+        setDocuments(res.data.feedAll || [])
         setTotalPages(res.data.totalPage || 1)
         setTotal(res.data.totalCount || res.data.feedAll?.length || 0)
       }
     } catch (e) {
-      toast.error('Failed to load users')
+      toast.error('Failed to load documents')
     } finally {
       setLoading(false)
     }
   }
 
   const handleSearch = async () => {
-    if (!search.trim()) {
-      fetchUsers(1)
-
-      return
+    if (!search.trim()) { fetchDocuments(1); 
+        
+        return 
     }
     setSearchLoading(true)
     try {
       const res = await client.post(
-        '/api/searchUsers_database',
+        '/api/searchUsersDocument_database',
         { dataInfo: search.trim() },
         { headers }
       )
       if (res.data.msg === '201') {
-        router.push(`/users/view-user/${res.data.feedAll._id}`)
+        router.push(`/documents/view-document/${res.data.feedAll._id}`)
       } else {
-        toast.warning(res.data.message || 'No user found')
+        toast.warning(res.data.message || 'No document found')
       }
     } catch (e) {
       toast.error('Search failed')
@@ -147,33 +136,34 @@ const UserTableData = ({ userType = 'active' }) => {
     }
   }
 
-    const handleAction = (action, user) => {
+  const handleAction = (action, doc) => {
     if (action === 'view') {
-      router.push(`/users/view-user/${user._id}`)
-      
+      router.push(`/documents/view-document/${doc._id}`)
+
       return
     }
-    setConfirmAction({ action, user })
+    setConfirmAction({ action, doc })
     setConfirmOpen(true)
   }
 
   const handleConfirmAction = async () => {
     if (!confirmAction) return
-    const { action, user } = confirmAction
+    const { action, doc } = confirmAction
     setActionLoading(true)
     try {
-      const actionStatus = action === 'suspend' ? 'Suspended' : 'Active'
-
-      const res = await client.post('/api/user_accountAction/', {
-        user_id: user._id,
-        action_status: actionStatus,
-      }, { headers })
-
+      let res
+      if (action === 'approve') {
+        res = await client.post('/api/adminApprove_document',
+          { doc_id: doc._id, user_id: doc.user_id }, { headers })
+      } else if (action === 'reject') {
+        res = await client.post('/api/adminRejected_documentUpload',
+          { doc_id: doc._id, user_id: doc.user_id }, { headers })
+      }
       if (res?.data?.msg === '200') {
-        toast.success(`User ${action === 'suspend' ? 'suspended' : 'activated'} successfully`)
-        fetchUsers(page)
+        toast.success(`Document ${action === 'approve' ? 'approved' : 'rejected'} successfully`)
+        fetchDocuments(page)
       } else {
-        toast.error(res?.data?.message || 'Action failed. Please try again.')
+        toast.error(res?.data?.message || 'Action failed')
       }
     } catch (e) {
       toast.error('Something went wrong')
@@ -186,13 +176,13 @@ const UserTableData = ({ userType = 'active' }) => {
 
   const handlePageChange = (e, value) => {
     setPage(value)
-    fetchUsers(value)
+    fetchDocuments(value)
   }
 
   useEffect(() => {
-    fetchUsers(1)
+    fetchDocuments(1)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userType])
+  }, [docType])
 
   return (
     <Card>
@@ -200,7 +190,7 @@ const UserTableData = ({ userType = 'active' }) => {
       <CardHeader
         title={
           <Typography variant='h6' sx={{ fontWeight: 700 }}>
-            {userType.charAt(0).toUpperCase() + userType.slice(1)} Users
+            {docType.charAt(0).toUpperCase() + docType.slice(1)} Documents
             {total > 0 && (
               <Typography component='span' variant='body2'
                 sx={{ ml: 1.5, color: 'text.secondary', fontWeight: 400 }}>
@@ -213,7 +203,7 @@ const UserTableData = ({ userType = 'active' }) => {
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
               size='small'
-              placeholder='Search by email or tag ID'
+              placeholder='Search by name or email'
               value={search}
               onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -224,18 +214,12 @@ const UserTableData = ({ userType = 'active' }) => {
                     <Magnify fontSize='small' />
                   </InputAdornment>
                 ),
-                endAdornment: searchLoading ? (
-                  <InputAdornment position='end'>
-                    <CircularProgress size={16} />
-                  </InputAdornment>
-                ) : null,
+                endAdornment: searchLoading
+                  ? <InputAdornment position='end'><CircularProgress size={16} /></InputAdornment>
+                  : null,
               }}
             />
-            <Button
-              variant='contained'
-              size='small'
-              onClick={handleSearch}
-              disabled={searchLoading}>
+            <Button variant='contained' size='small' onClick={handleSearch} disabled={searchLoading}>
               Search
             </Button>
           </Box>
@@ -247,10 +231,10 @@ const UserTableData = ({ userType = 'active' }) => {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
           <CircularProgress />
         </Box>
-      ) : users.length === 0 ? (
+      ) : documents.length === 0 ? (
         <EmptyState
-          title='No Users Found'
-          message={`No ${userType} users found in the system.`}
+          title='No Documents Found'
+          message={`No ${docType} documents found in the system.`}
         />
       ) : (
         <>
@@ -259,64 +243,51 @@ const UserTableData = ({ userType = 'active' }) => {
               <TableHead>
                 <TableRow sx={{ backgroundColor: 'action.hover' }}>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>User</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Email</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Phone</Typography></TableCell>
+                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Document Type</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Tag ID</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Balance</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Status</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Joined</Typography></TableCell>
+                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Submitted</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Actions</Typography></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map(user => (
-                  <TableRow key={user._id} hover>
+                {documents.map(doc => (
+                  <TableRow key={doc._id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar
-                          src={user.profile_photo}
-                          sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem' }}>
-                          {user.display_name?.charAt(0)?.toUpperCase()}
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.9rem' }}>
+                          {doc.user_name?.charAt(0)?.toUpperCase() || 'U'}
                         </Avatar>
                         <Box>
                           <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                            {user.display_name}
+                            {doc.user_name || 'Unknown'}
                           </Typography>
                           <Typography variant='body2' color='text.secondary'>
-                            {user.user_role || 'User'}
+                            {doc.user_email}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant='body2'>{user.email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant='body2'>{user.phone}</Typography>
+                      <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                        {doc.doc_type || doc.document_type || 'KYC Document'}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        {user.tag_id}
+                        {doc.user_tag || doc.tag_id || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                        ₦{Number(user.amount || 0).toLocaleString()}
-                      </Typography>
-                      <Typography variant='body2' color='text.secondary'>
-                        Bonus: ₦{Number(user.all_bonus_acct || 0).toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={user.acct_status?.toLowerCase()} />
+                      <StatusBadge status={doc.doc_status?.toLowerCase() || docType} />
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' color='text.secondary'>
-                        {moment(user.createdOn).format('DD MMM, YYYY')}
+                        {moment(doc.createdOn).format('DD MMM, YYYY')}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <RowActions user={user} onAction={handleAction} />
+                      <RowActions doc={doc} onAction={handleAction} docType={docType} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -344,17 +315,17 @@ const UserTableData = ({ userType = 'active' }) => {
         onClose={() => { setConfirmOpen(false); setConfirmAction(null) }}
         onConfirm={handleConfirmAction}
         loading={actionLoading}
-        title={confirmAction?.action === 'suspend' ? 'Suspend Account' : 'Activate Account'}
+        title={confirmAction?.action === 'approve' ? 'Approve Document' : 'Reject Document'}
         message={
-          confirmAction?.action === 'suspend'
-            ? `Are you sure you want to suspend ${confirmAction?.user?.display_name}? They will not be able to login.`
-            : `Are you sure you want to activate ${confirmAction?.user?.display_name}?`
+          confirmAction?.action === 'approve'
+            ? 'Are you sure you want to approve this document? The user will be notified.'
+            : 'Are you sure you want to reject this document? The user will be notified.'
         }
-        confirmLabel={confirmAction?.action === 'suspend' ? 'Suspend' : 'Activate'}
-        confirmColor={confirmAction?.action === 'suspend' ? 'error' : 'success'}
+        confirmLabel={confirmAction?.action === 'approve' ? 'Approve' : 'Reject'}
+        confirmColor={confirmAction?.action === 'approve' ? 'success' : 'error'}
       />
     </Card>
   )
 }
 
-export default UserTableData
+export default DocumentsTable

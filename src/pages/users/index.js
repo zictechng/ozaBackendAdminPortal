@@ -1,36 +1,26 @@
-
-import React, {useContext, useEffect, useState, CSSProperties } from 'react'
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
-import { useRouter } from 'next/router'
-
-// ** MUI Imports
 import Grid from '@mui/material/Grid'
-import Link from 'next/link'
-import Card from '@mui/material/Card'
-import Typography from '@mui/material/Typography'
-import UserTableData from 'src/views/users/UsersTable';
+import PageHeader from 'src/@core/components/common/PageHeader'
+import UserTableData from 'src/views/users/UsersTable'
 
-
-const ActiveUser = () => {
+const ActiveUsers = () => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Typography variant='h5'>
-          {/* <Link href='https://mui.com/components/tables/' target='_blank'>
-            Active Users
-          </Link> */}
-            Active Users
-        </Typography>
-        <Typography variant='body2'>All current active user in the system details </Typography>
+        <PageHeader
+          title='Active Users'
+          subtitle='All currently active user accounts in the system'
+          breadcrumbs={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Users' },
+            { label: 'Active' },
+          ]}
+        />
       </Grid>
       <Grid item xs={12}>
-        <Card>
-          <UserTableData />
-        </Card>
+        <UserTableData userType='active' />
       </Grid>
-
     </Grid>
   )
 }
 
-export default ActiveUser
+export default ActiveUsers

@@ -1,6 +1,6 @@
 const themeConfig = {
     // ** Layout Configs
-  templateName: 'Oza App Admin' /* App Name */,
+  templateName: 'Admin Portal' /* App Name — overridden dynamically from DB */,
   mode: 'light' /* light | dark */,
   contentWidth: 'boxed' /* full | boxed */,
   // ** Routing Configs
