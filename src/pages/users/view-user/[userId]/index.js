@@ -124,6 +124,9 @@ const ViewUserDetails = () => {
   const [bonusPauseOpen, setBonusPauseOpen] = useState(false)
   const [bonusPauseReason, setBonusPauseReason] = useState('')
   const [bonusPauseLoading, setBonusPauseLoading] = useState(false)
+  const [commissionPauseOpen, setCommissionPauseOpen] = useState(false)
+  const [commissionPauseReason, setCommissionPauseReason] = useState('')
+  const [commissionPauseLoading, setCommissionPauseLoading] = useState(false)
  
 
   // Password state
@@ -388,6 +391,34 @@ const ViewUserDetails = () => {
                 <Typography variant='body2'>{userData.user_bonus_pause_reason}</Typography>
               </Alert>
             )}
+
+            <Divider />
+
+            {/* Commission Pause */}
+            {userData.user_commission_paused ? (
+              <Button
+                fullWidth variant='contained' color='success'
+                startIcon={<AccountCheck />}
+                disabled={commissionPauseLoading}
+                onClick={() => handleCommissionPause('restore')}>
+                Restore Commission Earning
+              </Button>
+            ) : (
+              <Button
+                fullWidth variant='outlined' color='warning'
+                startIcon={<AccountCancel />}
+                disabled={userData.acct_status === 'Deleted' || commissionPauseLoading}
+                onClick={() => setCommissionPauseOpen(true)}>
+                Pause Commission Earning
+              </Button>
+            )}
+            {userData.user_commission_paused && userData.user_commission_pause_reason && (
+              <Alert severity='warning' sx={{ borderRadius: 2, mt: 1 }}>
+                <Typography variant='body2' sx={{ fontWeight: 600 }}>Commission Paused</Typography>
+                <Typography variant='body2'>{userData.user_commission_pause_reason}</Typography>
+              </Alert>
+            )}
+
           </CardContent>
         </Card>
 
@@ -747,6 +778,43 @@ const ViewUserDetails = () => {
           { value: 'Blocked', label: 'Block Account', color: 'error', icon: <Block /> },
         ]}
       />
+
+              {/* Commission Pause Dialog */}
+      <Dialog open={commissionPauseOpen} onClose={() => setCommissionPauseOpen(false)} maxWidth='xs' fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Pause Commission Earning</DialogTitle>
+        <DialogContent>
+          <Alert severity='info' sx={{ mb: 2, borderRadius: 2 }}>
+            <Typography variant='body2'>
+              This only pauses <strong>ongoing commission earning</strong>.
+              Referral bonus, signup bonus and coins are NOT affected.
+            </Typography>
+          </Alert>
+          <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+            <strong>{userData?.display_name}</strong> will not receive commission
+            from their referred users' transactions. They will be notified by email.
+          </Typography>
+          <TextField
+            fullWidth size='small' multiline rows={3}
+            label='Reason for pausing (required)'
+            placeholder='Enter reason...'
+            value={commissionPauseReason}
+            onChange={e => setCommissionPauseReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button variant='outlined'
+            onClick={() => { setCommissionPauseOpen(false); setCommissionPauseReason('') }}>
+            Cancel
+          </Button>
+          <Button
+            variant='contained' color='warning'
+            disabled={!commissionPauseReason.trim() || commissionPauseLoading}
+            startIcon={commissionPauseLoading ? <CircularProgress size={16} color='inherit' /> : null}
+            onClick={() => handleCommissionPause('pause')}>
+            {commissionPauseLoading ? 'Pausing...' : 'Pause Commission'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
 
         {/* Bonus Pause Dialog */}

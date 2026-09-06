@@ -78,6 +78,9 @@ const RewardsSettings = () => {
     coin_usd_value: 0.001,
     min_redeem_coins: 100,
     rewards_active: true,
+    coins_active: true,
+    commission_active: true,
+    promoter_commission_active: true,
     tier_bronze: 1,
     tier_silver: 1000,
     tier_gold: 5000,
@@ -95,7 +98,7 @@ const RewardsSettings = () => {
   const fetchSettings = async () => {
     setLoading(true)
     try {
-      const res = await client.get('/api/rewards_settings', { headers })
+      const res = await client.get('/api/rewards_settings/full', { headers })
       if (res.data.msg === '200') {
         setSettings(prev => ({ ...prev, ...res.data.settings }))
       }
@@ -106,7 +109,9 @@ const RewardsSettings = () => {
     }
   }
 
-  useEffect(() => { fetchSettings() }, [])
+  useEffect(() => { fetchSettings() },
+  // eslint-disable-next-line react-hooks/exhaustive-deps 
+  [])
 
   const handleChange = (field, value) => {
     setSettings(prev => ({ ...prev, [field]: value }))
@@ -218,8 +223,115 @@ const RewardsSettings = () => {
           </Grid>
         </SectionCard>
 
-        {/* Referral Rates */}
-                <SectionCard
+                {/* Global Controls */}
+        <SectionCard
+          title='Global Controls'
+          subtitle='Master switches — turn off any earning type for ALL users instantly'
+          icon={<ShieldAccount />}
+          iconColor='#EF4444'>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined' sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>Master Rewards Toggle</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      OFF = everything stops — coins, commission, promoter
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={Boolean(settings.rewards_active)}
+                    onChange={e => handleChange('rewards_active', e.target.checked)}
+                    color='success'
+                  />
+                </Box>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined' sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>Coins Earning</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Stop coins earning without stopping commission
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={Boolean(settings.coins_active)}
+                    onChange={e => handleChange('coins_active', e.target.checked)}
+                    color='success'
+                  />
+                </Box>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined' sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>Ongoing Commission</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Stop referral commission without stopping coins or promoter
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={Boolean(settings.commission_active)}
+                    onChange={e => handleChange('commission_active', e.target.checked)}
+                    color='success'
+                  />
+                </Box>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined' sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant='body2' sx={{ fontWeight: 700 }}>Promoter Commission</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Stop promoter commission without affecting other earnings
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={Boolean(settings.promoter_commission_active)}
+                    onChange={e => handleChange('promoter_commission_active', e.target.checked)}
+                    color='success'
+                  />
+                </Box>
+              </Card>
+            </Grid>
+            {!settings.rewards_active && (
+              <Grid item xs={12}>
+                <Alert severity='error' sx={{ borderRadius: 2 }}>
+                  <Typography variant='body2' sx={{ fontWeight: 700 }}>
+                    ⚠️ Master toggle is OFF — ALL earning types are disabled for ALL users.
+                  </Typography>
+                </Alert>
+              </Grid>
+            )}
+            {settings.rewards_active && !settings.coins_active && (
+              <Grid item xs={12}>
+                <Alert severity='warning' sx={{ borderRadius: 2 }}>
+                  <Typography variant='body2'>Coins earning is currently paused for all users.</Typography>
+                </Alert>
+              </Grid>
+            )}
+            {settings.rewards_active && !settings.commission_active && (
+              <Grid item xs={12}>
+                <Alert severity='warning' sx={{ borderRadius: 2 }}>
+                  <Typography variant='body2'>Ongoing commission earning is currently paused for all users.</Typography>
+                </Alert>
+              </Grid>
+            )}
+            {settings.rewards_active && !settings.promoter_commission_active && (
+              <Grid item xs={12}>
+                <Alert severity='warning' sx={{ borderRadius: 2 }}>
+                  <Typography variant='body2'>Promoter commission earning is currently paused for all users.</Typography>
+                </Alert>
+              </Grid>
+            )}
+          </Grid>
+        </SectionCard>
+
+        <SectionCard
           title='Automatic Referral Commission Rates'
           subtitle='These rates apply automatically after every purchase — no admin approval needed'
           icon={<AccountGroup />}

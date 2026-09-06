@@ -89,6 +89,7 @@ const AppSettings = () => {
   const [maxFunding, setMaxFunding] = useState('')
   const [payPalAction, setPayPalAction] = useState(false)
   const [payStackAction, setPayStackAction] = useState(false)
+  const [promoterBonus, setPromoterBonus] = useState(false)
 
   // Land page
   const [landTitle, setLandTitle] = useState('')
@@ -158,6 +159,7 @@ const AppSettings = () => {
         setMaxFunding(d?.app_maxi_funding || '')
         setPayPalAction(d?.app_paypal_bnt || false)
         setPayStackAction(d?.app_payStack_btn || false)
+        setPromoterBonus(d?.app_promoter_bonus || false)
         setLandTitle(d?.app_launch_title || '')
         setLandDesc(d?.app_launch_desc || '')
         setEditorKey(d?.app_textEditor_key || '')
@@ -278,6 +280,7 @@ const AppSettings = () => {
         baseUrl: appBaseUrl, mini_funding: miniFunding,
         maxi_funding: maxFunding, paypal_btn: payPalAction,
         payStack_btn: payStackAction, textEditorKey: editorKey,
+        promoter_bonus_status: promoterBonus,
       }, { headers })
       if (res.data.msg === '201') toast.success('App status updated successfully')
       else toast.error(res.data.message || 'Failed to save')
@@ -472,6 +475,7 @@ const AppSettings = () => {
                     <CardContent>
                       <SwitchRow label='Referral Bonus' subtitle='Enable referral bonus system' checked={referralBonus} onChange={setReferralBonus} />
                       <SwitchRow label='Signup Bonus' subtitle='Enable new user signup bonus' checked={signupBonus} onChange={setSignupBonus} />
+                      <SwitchRow label='Promoter Bonus' subtitle='Enable business promoter commission system' checked={promoterBonus} onChange={setPromoterBonus} />
                       <SwitchRow label='PayPal Button' subtitle='Show PayPal payment button' checked={payPalAction} onChange={setPayPalAction} />
                       <SwitchRow label='PayStack Button' subtitle='Show PayStack payment button' checked={payStackAction} onChange={setPayStackAction} />
                     </CardContent>
