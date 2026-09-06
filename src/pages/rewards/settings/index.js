@@ -219,9 +219,9 @@ const RewardsSettings = () => {
         </SectionCard>
 
         {/* Referral Rates */}
-        <SectionCard
-          title='Referral Commission Rates'
-          subtitle='Set commission rates for referral and promoter programs'
+                <SectionCard
+          title='Automatic Referral Commission Rates'
+          subtitle='These rates apply automatically after every purchase — no admin approval needed'
           icon={<AccountGroup />}
           iconColor='#10B981'>
           <Grid container spacing={4}>
@@ -230,7 +230,7 @@ const RewardsSettings = () => {
                 label='General Referral Rate'
                 value={settings.general_referral_rate}
                 onChange={v => handleChange('general_referral_rate', v)}
-                helperText='One-time bonus when referred user makes first purchase'
+                helperText='Auto-credited to referrer when their referred user makes their FIRST purchase only'
                 suffix='%'
               />
             </Grid>
@@ -239,7 +239,7 @@ const RewardsSettings = () => {
                 label='Business Promoter Rate'
                 value={settings.business_promoter_rate}
                 onChange={v => handleChange('business_promoter_rate', v)}
-                helperText='Ongoing commission on every purchase by promoted users'
+                helperText='Auto-credited to business promoter on EVERY purchase made by their promoted users'
                 suffix='%'
               />
             </Grid>

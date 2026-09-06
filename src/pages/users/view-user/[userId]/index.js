@@ -121,6 +121,10 @@ const ViewUserDetails = () => {
 
   // Dialog states
   const [actionDialog, setActionDialog] = useState(null)
+  const [bonusPauseOpen, setBonusPauseOpen] = useState(false)
+  const [bonusPauseReason, setBonusPauseReason] = useState('')
+  const [bonusPauseLoading, setBonusPauseLoading] = useState(false)
+ 
 
   // Password state
   const [passwords, setPasswords] = useState({
@@ -219,6 +223,30 @@ const ViewUserDetails = () => {
     }
   }
 
+   const handleBonusPause = async (action) => {
+      setBonusPauseLoading(true)
+      try {
+        const res = await client.post('/api/user/bonus_pause', {
+          user_id: userId,
+          action,
+          reason: bonusPauseReason,
+        }, { headers })
+        if (res?.data?.msg === '201') {
+          toast.success(`User bonus ${action === 'pause' ? 'paused' : 'restored'} successfully`)
+          fetchUser()
+          setBonusPauseOpen(false)
+          setBonusPauseReason('')
+        } else {
+          toast.error(res?.data?.message || 'Action failed')
+        }
+      } catch (e) {
+        toast.error('Something went wrong')
+      } finally {
+        setBonusPauseLoading(false)
+      }
+    }
+  
+
   const isNotVerified = userData && (
     userData.reg_stage1 !== 'Yes' ||
     userData.reg_stage2 !== 'Yes' ||
@@ -267,7 +295,7 @@ const ViewUserDetails = () => {
           <CardContent sx={{ textAlign: 'center', py: 5 }}>
             <Avatar
               src={userData.profile_photo}
-              sx={{ width: 90, height: 90, mx: 'auto', mb: 2, fontSize: '2rem', bgcolor: 'primary.main' }}>
+              sx={{ width: 90, height: 90, mx: 'auto', mb: 2, fontSize: '2rem', bgcolor: 'primary.main', color: '#ffffff' }}>
               {userData.display_name?.charAt(0)?.toUpperCase()}
             </Avatar>
             <Typography variant='h6' sx={{ fontWeight: 700 }}>{userData.display_name}</Typography>
@@ -321,13 +349,37 @@ const ViewUserDetails = () => {
               onClick={() => setActionDialog('state')}>
               Account State
             </Button>
-            <Button
+                        <Button
               fullWidth variant='outlined' color='success'
               startIcon={<ShieldAccount />}
               disabled={userData.acct_status === 'Deleted' || processing}
               onClick={() => setActionDialog('approval')}>
               Approval Action
             </Button>
+            <Divider />
+            {userData.user_bonus_paused ? (
+              <Button
+                fullWidth variant='contained' color='success'
+                startIcon={<AccountCheck />}
+                disabled={processing}
+                onClick={() => handleBonusPause('restore')}>
+                Restore Bonus Earning
+              </Button>
+            ) : (
+              <Button
+                fullWidth variant='outlined' color='warning'
+                startIcon={<AccountCancel />}
+                disabled={userData.acct_status === 'Deleted' || processing}
+                onClick={() => setBonusPauseOpen(true)}>
+                Pause Bonus Earning
+              </Button>
+            )}
+            {userData.user_bonus_paused && userData.user_bonus_pause_reason && (
+              <Alert severity='warning' sx={{ borderRadius: 2, mt: 1 }}>
+                <Typography variant='body2' sx={{ fontWeight: 600 }}>Bonus Paused</Typography>
+                <Typography variant='body2'>{userData.user_bonus_pause_reason}</Typography>
+              </Alert>
+            )}
           </CardContent>
         </Card>
 
@@ -687,6 +739,37 @@ const ViewUserDetails = () => {
           { value: 'Blocked', label: 'Block Account', color: 'error', icon: <Block /> },
         ]}
       />
+
+
+        {/* Bonus Pause Dialog */}
+      <Dialog open={bonusPauseOpen} onClose={() => setBonusPauseOpen(false)} maxWidth='xs' fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Pause Bonus Earning</DialogTitle>
+        <DialogContent>
+          <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+            Pausing bonus earning will prevent <strong>{userData?.display_name}</strong> from
+            receiving any referral, signup or commission bonuses. They will be notified by email.
+          </Typography>
+          <TextField
+            fullWidth size='small' multiline rows={3}
+            label='Reason for pausing (required)'
+            placeholder='Enter reason...'
+            value={bonusPauseReason}
+            onChange={e => setBonusPauseReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button variant='outlined' onClick={() => { setBonusPauseOpen(false); setBonusPauseReason('') }}>
+            Cancel
+          </Button>
+          <Button
+            variant='contained' color='warning'
+            disabled={!bonusPauseReason.trim() || bonusPauseLoading}
+            startIcon={bonusPauseLoading ? <CircularProgress size={16} color='inherit' /> : null}
+            onClick={() => handleBonusPause('pause')}>
+            {bonusPauseLoading ? 'Pausing...' : 'Pause Bonus'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Approval Dialog */}
       <AccountActionDialog

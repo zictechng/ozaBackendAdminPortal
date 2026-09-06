@@ -93,7 +93,7 @@ const SalesTable = () => {
       if (res.data.msg === '201') {
         setData(res.data.feedAll || [])
         setTotalPages(res.data.totalPage || 1)
-        setTotalCount(res.data.totalCount || res.data.feedAll?.length || 0)
+        setTotalCount(res.data.totalRecord || res.data.feedAll || res.data.feedAll?.length || 0)
       }
     } catch (e) {
       toast.error('Failed to load sales records')

@@ -101,9 +101,10 @@ const DocumentsTable = ({ docType = 'pending' }) => {
         { headers }
       )
       if (res.data.msg === '201') {
-        setDocuments(res.data.feedAll || [])
+        const docs = res.data.feedAll || []
+        setDocuments(docs)
         setTotalPages(res.data.totalPage || 1)
-        setTotal(res.data.totalCount || res.data.feedAll?.length || 0)
+        setTotal(docs.length || 0)
       }
     } catch (e) {
       toast.error('Failed to load documents')

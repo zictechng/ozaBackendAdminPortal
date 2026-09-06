@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import PageHeader from 'src/@core/components/common/PageHeader'
 import StatusBadge from 'src/@core/components/common/StatusBadge'
+import ConfirmDialog from 'src/@core/components/common/ConfirmDialog'
 import { AuthContext } from 'src/@core/context/authContext'
 import client from 'src/@core/context/client'
 
@@ -40,6 +41,8 @@ const BillsServiceConfig = () => {
   const [providers, setProviders] = useState([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState('')
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingChange, setPendingChange] = useState(null)
 
   const fetchData = async () => {
     setLoading(true)
@@ -62,35 +65,48 @@ const BillsServiceConfig = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleProviderChange = async (serviceType, providerId) => {
-    setSaving(serviceType)
-    try {
-      const res = await client.post('/api/provider/set-service', {
-        service_type: serviceType,
-        provider_id: providerId || null,
-      }, { headers })
-      if (res.data.msg === '200') {
-        toast.success(`${serviceType} provider updated`)
-        fetchData()
-      } else {
-        toast.error(res.data.message || 'Failed to update')
-      }
-    } catch (e) {
-      toast.error('Something went wrong')
-    } finally {
-      setSaving('')
-    }
+    const handleProviderChange = (serviceType, providerId) => {
+    const providerName = providers.find(p => p._id === providerId)?.name || 'None'
+    setPendingChange({
+      type: 'provider',
+      serviceType,
+      providerId,
+      title: 'Change Service Provider',
+      message: `Are you sure you want to set ${serviceType.replace('_', ' ')} provider to ${providerName}? This will affect all new transactions for this service.`,
+    })
+    setConfirmOpen(true)
   }
 
-  const handleStatusChange = async (serviceType, status) => {
-    setSaving(serviceType + '_status')
+  const handleStatusChange = (serviceType, status) => {
+    setPendingChange({
+      type: 'status',
+      serviceType,
+      status,
+      title: 'Change Service Status',
+      message: `Are you sure you want to set ${serviceType.replace('_', ' ')} to ${status}? ${status === 'paused' || status === 'hidden' ? 'Users will not be able to use this service.' : 'Users will be able to use this service.'}`,
+    })
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmChange = async () => {
+    if (!pendingChange) return
+    const { type, serviceType, providerId, status } = pendingChange
+    setSaving(serviceType)
     try {
-      const res = await client.post('/api/provider/set-service-status', {
-        service_type: serviceType,
-        status,
-      }, { headers })
+      let res
+      if (type === 'provider') {
+        res = await client.post('/api/provider/set-service', {
+          service_type: serviceType,
+          provider_id: providerId || null,
+        }, { headers })
+      } else {
+        res = await client.post('/api/provider/set-service-status', {
+          service_type: serviceType,
+          status,
+        }, { headers })
+      }
       if (res.data.msg === '200') {
-        toast.success(`${serviceType} status updated to ${status}`)
+        toast.success('Service configuration updated')
         fetchData()
       } else {
         toast.error(res.data.message || 'Failed to update')
@@ -99,6 +115,8 @@ const BillsServiceConfig = () => {
       toast.error('Something went wrong')
     } finally {
       setSaving('')
+      setConfirmOpen(false)
+      setPendingChange(null)
     }
   }
 
@@ -212,6 +230,17 @@ const BillsServiceConfig = () => {
           )
         })
       )}
+      
+      <ConfirmDialog
+      open={confirmOpen}
+      onClose={() => { setConfirmOpen(false); setPendingChange(null); fetchData() }}
+      onConfirm={handleConfirmChange}
+      loading={saving !== ''}
+      title={pendingChange?.title || 'Confirm Change'}
+      message={pendingChange?.message || 'Are you sure?'}
+      confirmLabel='Yes, Update'
+      confirmColor='primary'
+    />
     </Grid>
   )
 }

@@ -180,24 +180,24 @@ const ServiceRateView = () => {
           </RateCard>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <RateCard title='Referral Bonus Rate' icon={<Gift />} iconColor='#2E7D32' iconBg='#E8F5E9'>
-            <TextField fullWidth size='small' label='Referral Bonus Rate'
+                <Grid item xs={12} md={6}>
+          <RateCard title='Manual Referral Bonus Rate' icon={<Gift />} iconColor='#2E7D32' iconBg='#E8F5E9'>
+            <TextField fullWidth size='small' label='Manual Referral Bonus Rate'
               value={rates.bonus_rate}
               onChange={e => handleChange('bonus_rate', e.target.value)}
               InputProps={{ endAdornment: <InputAdornment position='end'>%</InputAdornment> }}
-              helperText='Commission rate paid to referrers when their referred users make purchases'
+              helperText='Used when admin manually approves a referral from the Referral Bonus page. Different from the automatic system in Rewards Settings.'
             />
           </RateCard>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <RateCard title='Signup Bonus Rate' icon={<TrendingUp />} iconColor='#6A1B9A' iconBg='#F3E5F5'>
+          <RateCard title='New User Signup Bonus' icon={<TrendingUp />} iconColor='#6A1B9A' iconBg='#F3E5F5'>
             <TextField fullWidth size='small' label='Signup Bonus Amount (₦)'
               value={rates.signup_bonus_rate}
               onChange={e => handleChange('signup_bonus_rate', e.target.value)}
               InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
-              helperText='Bonus amount credited to new users upon successful registration'
+              helperText='One-time bonus amount credited to new users wallet upon successful registration'
             />
           </RateCard>
         </Grid>

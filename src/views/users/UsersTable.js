@@ -157,6 +157,7 @@ const UserTableData = ({ userType = 'active' }) => {
     setConfirmOpen(true)
   }
 
+   
   const handleConfirmAction = async () => {
     if (!confirmAction) return
     const { action, user } = confirmAction
@@ -338,6 +339,8 @@ const UserTableData = ({ userType = 'active' }) => {
           </Box>
         </>
       )}
+
+          
 
       <ConfirmDialog
         open={confirmOpen}

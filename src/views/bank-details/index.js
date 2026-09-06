@@ -129,7 +129,7 @@ const UserBankDetailsTable = () => {
       if (res.data.msg === '201') {
         setBankData(res.data.feedAll || [])
         setTotalPageCount(res.data.totalPage || 1)
-        setTotalCount(res.data.totalCount || res.data.feedAll?.length || 0)
+        setTotalCount(res.data.totalRecord || res.data.feedAll || res.data.feedAll?.length || 0)
       }
     } catch (error) {
       toast.error('Failed to load bank details')
@@ -344,6 +344,7 @@ const UserBankDetailsTable = () => {
                             bgcolor: 'primary.main',
                             fontSize: '0.75rem',
                             fontWeight: 700,
+                            color: '#ffffff'
                           }}>
                           {getInitials(row.bank_acct_name)}
                         </Avatar>
@@ -524,7 +525,7 @@ const UserBankDetailsTable = () => {
                 mb: 3,
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40, fontWeight: 700 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40, fontWeight: 700, color: '#ffffff' }}>
                     {getInitials(modalData.bank_acct_name)}
                   </Avatar>
                   <Box>

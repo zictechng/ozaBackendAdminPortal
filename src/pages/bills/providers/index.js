@@ -59,6 +59,19 @@ const BillsProviders = () => {
   const [activating, setActivating] = useState('')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editProvider, setEditProvider] = useState(null)
+  const [actionConfirmOpen, setActionConfirmOpen] = useState(false)
+  const [actionConfirmData, setActionConfirmData] = useState(null)
+
+  const [editForm, setEditForm] = useState({
+    name: '', base_url: '', notes: '', api_key: '',
+    supported_services: {
+      airtime: false, data: false, electricity: false,
+      tv_subscription: false, exam_cards: false,
+    }
+  })
+  const [editSaving, setEditSaving] = useState(false)
 
   const headers = { Authorization: 'Bearer ' + token }
 
@@ -116,6 +129,51 @@ const BillsProviders = () => {
       toast.error('Something went wrong')
     } finally {
       setSaving(false)
+    }
+  }
+
+    // Open edit dialog
+  const handleEdit = (provider) => {
+    setEditProvider(provider)
+    setEditForm({
+      name: provider.name || '',
+      base_url: provider.base_url || '',
+      notes: provider.notes || '',
+      api_key: '',
+      supported_services: { ...provider.supported_services },
+    })
+    setEditOpen(true)
+  }
+
+  // Save edit
+  const handleSaveEdit = async () => {
+    if (!editForm.name || !editForm.base_url) {
+      toast.warning('Name and Base URL are required')
+
+      return
+    }
+    setEditSaving(true)
+    try {
+      const payload = {
+        provider_id: editProvider._id,
+        name: editForm.name,
+        base_url: editForm.base_url,
+        notes: editForm.notes,
+        supported_services: editForm.supported_services,
+      }
+      if (editForm.api_key) payload.api_key = editForm.api_key
+      const res = await client.post('/api/provider/update', payload, { headers })
+      if (res.data.msg === '200') {
+        toast.success('Provider updated successfully')
+        setEditOpen(false)
+        fetchProviders()
+      } else {
+        toast.error(res.data.message || 'Failed to update')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setEditSaving(false)
     }
   }
 
@@ -256,48 +314,131 @@ const BillsProviders = () => {
                 )}
 
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {provider.status === 'inactive' ? (
-                    <Button
-                      size='small'
-                      variant='contained'
-                      color='success'
-                      startIcon={activating === provider._id
-                        ? <CircularProgress size={14} color='inherit' />
-                        : <CheckCircle />}
-                      disabled={activating === provider._id}
-                      onClick={() => handleActivate(provider._id)}>
-                      Activate
-                    </Button>
-                  ) : (
+                  <Tooltip title='Edit provider details'>
                     <Button
                       size='small'
                       variant='outlined'
-                      color='error'
-                      startIcon={activating === provider._id
-                        ? <CircularProgress size={14} color='inherit' />
-                        : <CloseCircle />}
-                      disabled={activating === provider._id}
-                      onClick={() => handleDeactivate(provider._id)}>
-                      Deactivate
+                      startIcon={<Pencil />}
+                      onClick={() => handleEdit(provider)}>
+                      Edit
                     </Button>
+                  </Tooltip>
+
+                                    {provider.status === 'inactive' ? (
+                    <Tooltip title='Activate this provider and sync services'>
+                      <Button
+                        size='small'
+                        variant='contained'
+                        color='success'
+                        startIcon={activating === provider._id
+                          ? <CircularProgress size={14} color='inherit' />
+                          : <CheckCircle />}
+                        disabled={activating === provider._id}
+                        onClick={() => {
+                          setActionConfirmData({ action: 'activate', provider })
+                          setActionConfirmOpen(true)
+                        }}>
+                        Activate
+                      </Button>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title='Deactivate this provider'>
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        color='error'
+                        startIcon={activating === provider._id
+                          ? <CircularProgress size={14} color='inherit' />
+                          : <CloseCircle />}
+                        disabled={activating === provider._id}
+                        onClick={() => {
+                          setActionConfirmData({ action: 'deactivate', provider })
+                          setActionConfirmOpen(true)
+                        }}>
+                        Deactivate
+                      </Button>
+                    </Tooltip>
                   )}
 
-                  <Button
-                    size='small'
-                    variant='outlined'
-                    startIcon={syncing === provider._id
-                      ? <CircularProgress size={14} color='inherit' />
-                      : <Sync />}
-                    disabled={syncing === provider._id || provider.status !== 'active'}
-                    onClick={() => handleSync(provider._id)}>
-                    Sync Services
-                  </Button>
+                  <Tooltip title={provider.status !== 'active' ? 'Activate provider first' : 'Sync services from provider API'}>
+                    <span>
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        startIcon={syncing === provider._id
+                          ? <CircularProgress size={14} color='inherit' />
+                          : <Sync />}
+                        disabled={syncing === provider._id || provider.status !== 'active'}
+                        onClick={() => handleSync(provider._id)}>
+                        Sync Services
+                      </Button>
+                    </span>
+                  </Tooltip>
                 </Box>
               </CardContent>
             </Card>
           </Grid>
         ))
       )}
+
+      {/* Edit Provider Dialog */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Provider — {editProvider?.name}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={4} sx={{ mt: 0 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth label='Provider Name *' size='small'
+                value={editForm.name} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label='Base URL *' size='small'
+                value={editForm.base_url} onChange={e => setEditForm(p => ({ ...p, base_url: e.target.value }))}
+                placeholder='e.g. https://api.vtugate.com' />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label='New API Key (leave blank to keep current)' size='small'
+                type='password' value={editForm.api_key}
+                onChange={e => setEditForm(p => ({ ...p, api_key: e.target.value }))}
+                helperText='Only fill this if you want to update the API key' />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth label='Notes' size='small' multiline rows={2}
+                value={editForm.notes} onChange={e => setEditForm(p => ({ ...p, notes: e.target.value }))} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant='body2' sx={{ fontWeight: 600, mb: 1 }}>Supported Services</Typography>
+              {Object.keys(defaultForm.supported_services).map(service => (
+                <FormControlLabel
+                  key={service}
+                  control={
+                    <Switch size='small'
+                      checked={editForm.supported_services[service] || false}
+                      onChange={() => setEditForm(p => ({
+                        ...p,
+                        supported_services: {
+                          ...p.supported_services,
+                          [service]: !p.supported_services[service],
+                        }
+                      }))}
+                    />
+                  }
+                  label={service.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  sx={{ mr: 3 }}
+                />
+              ))}
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button onClick={() => setEditOpen(false)} variant='outlined' color='inherit' disabled={editSaving}>
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} variant='contained' disabled={editSaving}
+            startIcon={editSaving ? <CircularProgress size={16} color='inherit' /> : null}>
+            {editSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Add Provider Dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth='sm' fullWidth>
@@ -390,6 +531,7 @@ const BillsProviders = () => {
             </Grid>
           </Grid>
         </DialogContent>
+        
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
           <Button onClick={() => setAddOpen(false)} variant='outlined' color='inherit' disabled={saving}>
             Cancel
@@ -403,6 +545,32 @@ const BillsProviders = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={actionConfirmOpen}
+        onClose={() => { setActionConfirmOpen(false); setActionConfirmData(null) }}
+        onConfirm={async () => {
+          setActionConfirmOpen(false)
+          if (actionConfirmData?.action === 'activate') {
+            await handleActivate(actionConfirmData.provider._id)
+          } else {
+            await handleDeactivate(actionConfirmData.provider._id)
+          }
+          setActionConfirmData(null)
+        }}
+        loading={activating !== ''}
+        title={actionConfirmData?.action === 'activate' ? 'Activate Provider' : 'Deactivate Provider'}
+        message={
+          actionConfirmData?.action === 'activate'
+            ? `Are you sure you want to activate ${actionConfirmData?.provider?.name}? This will sync all services and make it available for transactions.`
+            : `Are you sure you want to deactivate ${actionConfirmData?.provider?.name}? Transactions using this provider will fall back to VTUGate.`
+        }
+        confirmLabel={actionConfirmData?.action === 'activate' ? 'Activate' : 'Deactivate'}
+        confirmColor={actionConfirmData?.action === 'activate' ? 'success' : 'error'}
+      />
+
+      {/* Edit Provider Dialog */}
+
     </Grid>
   )
 }

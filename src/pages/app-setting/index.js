@@ -4,6 +4,7 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Box from '@mui/material/Box'
+import Chip from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
@@ -18,8 +19,20 @@ import Alert from '@mui/material/Alert'
 import { Editor } from '@tinymce/tinymce-react'
 import {
   Cog, CurrencyUsd, Bank, InformationOutline,
-  Cellphone, Bitcoin,
+  Cellphone, Bitcoin, ImageOutline, Gift,
 } from 'mdi-material-ui'
+import { styled } from '@mui/material/styles'
+
+const ImgStyled = styled('img')(({ theme }) => ({
+  width: 120,
+  height: 120,
+  borderRadius: theme.shape.borderRadius,
+  objectFit: 'contain',
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.action.hover,
+  padding: theme.spacing(1),
+}))
+
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -81,8 +94,23 @@ const AppSettings = () => {
   const [landTitle, setLandTitle] = useState('')
   const [landDesc, setLandDesc] = useState('')
 
+  // Logo & Media
+  const [appLogo, setAppLogo] = useState('')
+  const [appMainLogo, setAppMainLogo] = useState('')
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [mainLogoUploading, setMainLogoUploading] = useState(false)
+
+  // Bonus Configuration
+  const [signupBonusUsd, setSignupBonusUsd] = useState('')
+  const [signupBonusRate, setSignupBonusRate] = useState('')
+  const [signupBonusMinTxn, setSignupBonusMinTxn] = useState('')
+  const [signupBonusServices, setSignupBonusServices] = useState([])
+  const [referralBonusUsd, setReferralBonusUsd] = useState('')
+  const [referralBonusRate, setReferralBonusRate] = useState('')
+  const [referralBonusMinTxn, setReferralBonusMinTxn] = useState('')
+  const [referralBonusServices, setReferralBonusServices] = useState([])
+
   // Bank details
-    // Bank details
   const [bank, setBank] = useState({
     paypal_address: '', payoneer_address: '', bitcoin_address: '',
     zenith_number: '', zenith_bankName: '', zenith_acctName: '',
@@ -133,6 +161,16 @@ const AppSettings = () => {
         setLandTitle(d?.app_launch_title || '')
         setLandDesc(d?.app_launch_desc || '')
         setEditorKey(d?.app_textEditor_key || '')
+        setAppLogo(d?.app_logo || '')
+        setAppMainLogo(d?.app_main_logo || '')
+        setSignupBonusUsd(d?.signup_bonus_usd_amount || '')
+        setSignupBonusRate(d?.signup_bonus_conversion_rate || '')
+        setSignupBonusMinTxn(d?.signup_bonus_min_txn_amount || '')
+        setSignupBonusServices(d?.signup_bonus_qualify_services || ['paypal', 'payoneer', 'bitcoin'])
+        setReferralBonusUsd(d?.referral_bonus_usd_amount || '')
+        setReferralBonusRate(d?.referral_bonus_conversion_rate || '')
+        setReferralBonusMinTxn(d?.referral_bonus_min_txn_amount || '')
+        setReferralBonusServices(d?.referral_bonus_qualify_services || ['paypal', 'payoneer', 'bitcoin'])
       }
 
       if (bankRes.data.msg === '201') {
@@ -158,6 +196,58 @@ const AppSettings = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+    const uploadLogo = async (file, type) => {
+    if (!file) 
+      { toast.warning('Please select a file'); 
+
+        return 
+      }
+    const maxSize = 800 * 1024
+    if (file.size > maxSize) 
+      { toast.warning('File size must be under 800KB'); 
+
+        return 
+      }
+    const formData = new FormData()
+    formData.append('file', file)
+    const endpoint = type === 'main' ? '/api/uploadMain_logo' : '/api/uploadApp_logo'
+    type === 'main' ? setMainLogoUploading(true) : setLogoUploading(true)
+    try {
+      const res = await client.post(endpoint, formData, {
+        headers: { ...headers, 'Content-Type': 'multipart/form-data' }
+      })
+      if (res.data.msg === '201') {
+        toast.success(`${type === 'main' ? 'Main logo' : 'App logo'} uploaded successfully`)
+        fetchSettings()
+      } else {
+        toast.error(res.data.message || 'Upload failed')
+      }
+    } catch (e) {
+      toast.error('Upload failed')
+    } finally {
+      type === 'main' ? setMainLogoUploading(false) : setLogoUploading(false)
+    }
+  }
+
+  const saveBonusConfig = async () => {
+  setSaving('bonus')
+  try {
+    const res = await client.post('/api/update_bonusConfig', {
+      signup_bonus_usd_amount: Number(signupBonusUsd),
+      signup_bonus_conversion_rate: Number(signupBonusRate),
+      signup_bonus_min_txn_amount: Number(signupBonusMinTxn),
+      signup_bonus_qualify_services: signupBonusServices,
+      referral_bonus_usd_amount: Number(referralBonusUsd),
+      referral_bonus_conversion_rate: Number(referralBonusRate),
+      referral_bonus_min_txn_amount: Number(referralBonusMinTxn),
+      referral_bonus_qualify_services: referralBonusServices,
+    }, { headers })
+    if (res.data.msg === '201') toast.success('Bonus configuration saved successfully')
+    else toast.error(res.data.message || 'Failed to save')
+  } catch (e) { toast.error('Something went wrong') }
+    finally { setSaving('') }
   }
 
   const saveAppName = async () => {
@@ -224,6 +314,17 @@ const AppSettings = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const ALL_SERVICE_TYPES = [
+    { key: 'paypal', label: 'PayPal' },
+    { key: 'payoneer', label: 'Payoneer' },
+    { key: 'bitcoin', label: 'Bitcoin' },
+    { key: 'airtime', label: 'Airtime' },
+    { key: 'data', label: 'Mobile Data' },
+    { key: 'electricity', label: 'Electricity' },
+    { key: 'tv_subscription', label: 'TV Subscription' },
+    { key: 'exam_cards', label: 'Exam Cards' },
+  ]
+
   const editorConfig = {
     height: 350,
     menubar: true,
@@ -259,11 +360,15 @@ const AppSettings = () => {
           <Tabs
             value={tab}
             onChange={(e, v) => setTab(v)}
-            sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 3 }}>
+            sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 3 }}
+            variant='scrollable'
+            scrollButtons='auto'>
             <Tab icon={<Cog fontSize='small' />} iconPosition='start' label='App Info' />
             <Tab icon={<InformationOutline fontSize='small' />} iconPosition='start' label='App Status' />
             <Tab icon={<Cellphone fontSize='small' />} iconPosition='start' label='Landing Page' />
             <Tab icon={<Bank fontSize='small' />} iconPosition='start' label='Bank Details' />
+            <Tab icon={<ImageOutline fontSize='small' />} iconPosition='start' label='Logo & Media' />
+            <Tab icon={<Gift fontSize='small' />} iconPosition='start' label='Bonus Config' />
           </Tabs>
 
           {/* Tab 0 — App Info */}
@@ -596,6 +701,314 @@ const AppSettings = () => {
                     <CardContent>
                       <TextField fullWidth size='small' label='Mobile Money Number'
                         value={bank.momo_number} onChange={e => setBank(p => ({ ...p, momo_number: e.target.value }))} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </CardContent>
+          )}
+
+          {/* Tab 4 — Logo & Media */}
+          {tab === 4 && (
+            <CardContent>
+              <Grid container spacing={4}>
+                {/* App Logo */}
+                <Grid item xs={12} md={6}>
+                  <Card variant='outlined'>
+                    <CardHeader
+                      title={<Typography variant='h6' sx={{ fontWeight: 700 }}>App Logo</Typography>}
+                      subheader={
+                        <Typography variant='body2' color='text.secondary'>
+                          Main app logo shown in header and emails. PNG or JPEG, max 800KB.
+                        </Typography>
+                      }
+                    />
+                    <Divider />
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
+                        <ImgStyled
+                          src={appLogo || '/images/avatars/1.png'}
+                          alt='App Logo'
+                          onError={e => e.target.src = '/images/avatars/1.png'}
+                        />
+                        <Box>
+                          <Button
+                            component='label'
+                            variant='contained'
+                            size='small'
+                            disabled={logoUploading}
+                            startIcon={logoUploading ? <CircularProgress size={14} color='inherit' /> : null}
+                            sx={{ mb: 1, display: 'block' }}>
+                            {logoUploading ? 'Uploading...' : 'Upload App Logo'}
+                            <input
+                              hidden
+                              type='file'
+                              accept='image/png,image/jpeg,image/jpg'
+                              onChange={e => uploadLogo(e.target.files[0], 'app')}
+                            />
+                          </Button>
+                          <Typography variant='body2' color='text.secondary'>
+                            Allowed: PNG, JPEG. Max: 800KB
+                          </Typography>
+                        </Box>
+                      </Box>
+                      {appLogo && (
+                        <Alert severity='success' sx={{ borderRadius: 2 }}>
+                          <Typography variant='body2'>App logo is set and active.</Typography>
+                        </Alert>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Main Logo */}
+                <Grid item xs={12} md={6}>
+                  <Card variant='outlined'>
+                    <CardHeader
+                      title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Main Logo</Typography>}
+                      subheader={
+                        <Typography variant='body2' color='text.secondary'>
+                          Secondary logo used on login page and banners. PNG or JPEG, max 800KB.
+                        </Typography>
+                      }
+                    />
+                    <Divider />
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
+                        <ImgStyled
+                          src={appMainLogo || '/images/avatars/1.png'}
+                          alt='Main Logo'
+                          onError={e => e.target.src = '/images/avatars/1.png'}
+                        />
+                        <Box>
+                          <Button
+                            component='label'
+                            variant='contained'
+                            size='small'
+                            disabled={mainLogoUploading}
+                            startIcon={mainLogoUploading ? <CircularProgress size={14} color='inherit' /> : null}
+                            sx={{ mb: 1, display: 'block' }}>
+                            {mainLogoUploading ? 'Uploading...' : 'Upload Main Logo'}
+                            <input
+                              hidden
+                              type='file'
+                              accept='image/png,image/jpeg,image/jpg'
+                              onChange={e => uploadLogo(e.target.files[0], 'main')}
+                            />
+                          </Button>
+                          <Typography variant='body2' color='text.secondary'>
+                            Allowed: PNG, JPEG. Max: 800KB
+                          </Typography>
+                        </Box>
+                      </Box>
+                      {appMainLogo && (
+                        <Alert severity='success' sx={{ borderRadius: 2 }}>
+                          <Typography variant='body2'>Main logo is set and active.</Typography>
+                        </Alert>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Guidelines */}
+                <Grid item xs={12}>
+                  <Alert severity='info' sx={{ borderRadius: 2 }}>
+                    <Typography variant='body2' sx={{ fontWeight: 700, mb: 0.5 }}>
+                      Logo Guidelines
+                    </Typography>
+                    <Typography variant='body2'>
+                      • Use a transparent background PNG for best results<br/>
+                      • Recommended size: 200x200px for app logo, 400x200px for main logo<br/>
+                      • Logo appears in the admin header, mobile app, and email notifications<br/>
+                      • After uploading, refresh the page to see the updated logo in the header
+                    </Typography>
+                  </Alert>
+                </Grid>
+              </Grid>
+            </CardContent>
+          )}
+
+                    {/* Tab 5 — Bonus Configuration */}
+          {tab === 5 && (
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+                <Button variant='contained' onClick={saveBonusConfig} disabled={saving === 'bonus'}
+                  startIcon={saving === 'bonus' ? <CircularProgress size={16} color='inherit' /> : null}
+                  sx={{ borderRadius: 2, px: 4 }}>
+                  {saving === 'bonus' ? 'Saving...' : 'Save Bonus Config'}
+                </Button>
+              </Box>
+
+              <Alert severity='info' sx={{ mb: 4, borderRadius: 2 }}>
+                <Typography variant='body2' sx={{ fontWeight: 700, mb: 0.5 }}>
+                  How Bonus Activation Works
+                </Typography>
+                <Typography variant='body2'>
+                  Bonuses are NOT credited immediately. They are activated only when the user makes a qualifying transaction
+                  that meets both the service type and minimum amount requirements you set below.
+                  This protects the platform from financial loss.
+                </Typography>
+              </Alert>
+
+              <Grid container spacing={4}>
+                {/* Signup Bonus */}
+                <Grid item xs={12} md={6}>
+                  <Card variant='outlined'>
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box sx={{ width: 36, height: 36, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#EDE9FE', color: '#7C3AED' }}>
+                            <Gift fontSize='small' />
+                          </Box>
+                          <Typography variant='h6' sx={{ fontWeight: 700 }}>Signup Bonus</Typography>
+                        </Box>
+                      }
+                    />
+                    <Divider />
+                    <CardContent>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Bonus Amount ($)'
+                            type='number' value={signupBonusUsd}
+                            onChange={e => setSignupBonusUsd(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>$</InputAdornment> }}
+                            helperText='Fixed dollar amount given to new users'
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Conversion Rate (₦ per $1)'
+                            type='number' value={signupBonusRate}
+                            onChange={e => setSignupBonusRate(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                            helperText='Admin-set rate to convert $ to ₦'
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField fullWidth size='small' label='Minimum Transaction Amount (₦)'
+                            type='number' value={signupBonusMinTxn}
+                            onChange={e => setSignupBonusMinTxn(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                            helperText='User must transact at least this amount to unlock bonus'
+                          />
+                        </Grid>
+                        {signupBonusUsd && signupBonusRate && (
+                          <Grid item xs={12}>
+                            <Box sx={{ p: 2, borderRadius: 2, backgroundColor: '#EDE9FE' }}>
+                              <Typography variant='body2' sx={{ fontWeight: 700, color: '#7C3AED' }}>
+                                Preview: ${signupBonusUsd} × ₦{signupBonusRate} = ₦{(Number(signupBonusUsd) * Number(signupBonusRate)).toLocaleString()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        <Grid item xs={12}>
+                          <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>
+                            Qualifying Service Types
+                          </Typography>
+                          <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+                            Select which transaction types qualify to unlock this bonus
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {ALL_SERVICE_TYPES.map(s => (
+                            <Chip
+                                key={s.key}
+                                label={s.label}
+                                size='small'
+                                clickable
+                                color={signupBonusServices.includes(s.key) ? 'primary' : 'default'}
+                                variant={signupBonusServices.includes(s.key) ? 'filled' : 'outlined'}
+                                onClick={() => {
+                                  setSignupBonusServices(prev =>
+                                    prev.includes(s.key)
+                                      ? prev.filter(x => x !== s.key)
+                                      : [...prev, s.key]
+                                  )
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Referral Bonus */}
+                <Grid item xs={12} md={6}>
+                  <Card variant='outlined'>
+                    <CardHeader
+                      title={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box sx={{ width: 36, height: 36, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#D1FAE5', color: '#10B981' }}>
+                            <Gift fontSize='small' />
+                          </Box>
+                          <Typography variant='h6' sx={{ fontWeight: 700 }}>Referral Bonus</Typography>
+                        </Box>
+                      }
+                    />
+                    <Divider />
+                    <CardContent>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Bonus Amount ($)'
+                            type='number' value={referralBonusUsd}
+                            onChange={e => setReferralBonusUsd(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>$</InputAdornment> }}
+                            helperText='Fixed dollar amount given to referrer (one time)'
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Conversion Rate (₦ per $1)'
+                            type='number' value={referralBonusRate}
+                            onChange={e => setReferralBonusRate(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                            helperText='Admin-set rate to convert $ to ₦'
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField fullWidth size='small' label='Minimum Transaction Amount (₦)'
+                            type='number' value={referralBonusMinTxn}
+                            onChange={e => setReferralBonusMinTxn(e.target.value)}
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
+                            helperText='Referred user must transact at least this amount to trigger bonus'
+                          />
+                        </Grid>
+                        {referralBonusUsd && referralBonusRate && (
+                          <Grid item xs={12}>
+                            <Box sx={{ p: 2, borderRadius: 2, backgroundColor: '#D1FAE5' }}>
+                              <Typography variant='body2' sx={{ fontWeight: 700, color: '#10B981' }}>
+                                Preview: ${referralBonusUsd} × ₦{referralBonusRate} = ₦{(Number(referralBonusUsd) * Number(referralBonusRate)).toLocaleString()}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        <Grid item xs={12}>
+                          <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>
+                            Qualifying Service Types
+                          </Typography>
+                          <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+                            Select which transaction types qualify to trigger this bonus
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {ALL_SERVICE_TYPES.map(s => (
+                              <Chip
+                                key={s.key}
+                                label={s.label}
+                                size='small'
+                                clickable
+                                color={referralBonusServices.includes(s.key) ? 'success' : 'default'}
+                                variant={referralBonusServices.includes(s.key) ? 'filled' : 'outlined'}
+                                onClick={() => {
+                                  setReferralBonusServices(prev =>
+                                    prev.includes(s.key)
+                                      ? prev.filter(x => x !== s.key)
+                                      : [...prev, s.key]
+                                  )
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Grid>
+                      </Grid>
                     </CardContent>
                   </Card>
                 </Grid>

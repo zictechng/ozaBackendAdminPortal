@@ -177,7 +177,7 @@ useEffect(() => {
 // get local storage details
 const userLocal = localStorage.getItem('userToken')
 allPendingUsers()
-
+// eslint-disable-next-line react-hooks/exhaustive-deps 
 }, [])
 
   return (
