@@ -4,13 +4,14 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Box from '@mui/material/Box'
+import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import CircularProgress from '@mui/material/CircularProgress'
 import InputAdornment from '@mui/material/InputAdornment'
-import { CurrencyUsd, Bitcoin, TrendingUp, TrendingDown, Gift } from 'mdi-material-ui'
+import { CurrencyUsd, Bitcoin } from 'mdi-material-ui'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -180,26 +181,18 @@ const ServiceRateView = () => {
           </RateCard>
         </Grid>
 
-                <Grid item xs={12} md={6}>
-          <RateCard title='Manual Referral Bonus Rate' icon={<Gift />} iconColor='#2E7D32' iconBg='#E8F5E9'>
-            <TextField fullWidth size='small' label='Manual Referral Bonus Rate'
-              value={rates.bonus_rate}
-              onChange={e => handleChange('bonus_rate', e.target.value)}
-              InputProps={{ endAdornment: <InputAdornment position='end'>%</InputAdornment> }}
-              helperText='Used when admin manually approves a referral from the Referral Bonus page. Different from the automatic system in Rewards Settings.'
-            />
-          </RateCard>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <RateCard title='New User Signup Bonus' icon={<TrendingUp />} iconColor='#6A1B9A' iconBg='#F3E5F5'>
-            <TextField fullWidth size='small' label='Signup Bonus Amount (₦)'
-              value={rates.signup_bonus_rate}
-              onChange={e => handleChange('signup_bonus_rate', e.target.value)}
-              InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }}
-              helperText='One-time bonus amount credited to new users wallet upon successful registration'
-            />
-          </RateCard>
+          <Grid item xs={12}>
+          <Alert severity='info' sx={{ borderRadius: 2 }}>
+            <Typography variant='body2' sx={{ fontWeight: 700, mb: 0.5 }}>
+              Signup & Referral Bonus Rates Moved
+            </Typography>
+            <Typography variant='body2'>
+              Signup bonus and referral bonus amounts are now configured in
+              <strong> App Settings → Bonus Config</strong> tab.
+              This gives you full control over amounts, conversion rates,
+              minimum transaction thresholds and qualifying service types.
+            </Typography>
+          </Alert>
         </Grid>
       </Grid>
     </Box>
