@@ -223,28 +223,36 @@ const ViewUserDetails = () => {
     }
   }
 
-   const handleBonusPause = async (action) => {
-      setBonusPauseLoading(true)
-      try {
-        const res = await client.post('/api/user/bonus_pause', {
-          user_id: userId,
-          action,
-          reason: bonusPauseReason,
-        }, { headers })
-        if (res?.data?.msg === '201') {
-          toast.success(`User bonus ${action === 'pause' ? 'paused' : 'restored'} successfully`)
-          fetchUser()
-          setBonusPauseOpen(false)
-          setBonusPauseReason('')
-        } else {
-          toast.error(res?.data?.message || 'Action failed')
-        }
-      } catch (e) {
-        toast.error('Something went wrong')
-      } finally {
-        setBonusPauseLoading(false)
+  const handleBonusPause = async (action) => {
+    setBonusPauseLoading(true)
+    try {
+      const res = await client.post('/api/user/bonus_pause', {
+        user_id: userId,
+        action,
+        reason: bonusPauseReason,
+      }, { headers })
+      if (res?.data?.msg === '200' || res?.data?.msg === '201') {
+        // Close modal and clear reason first
+        setBonusPauseOpen(false)
+        setBonusPauseReason('')
+
+        // Show toast before fetchUser re-renders page
+        toast.success(
+          `User bonus ${action === 'pause' ? 'paused' : 'restored'} successfully`,
+          { autoClose: 3000 }
+        )
+
+        // Delay fetchUser slightly so toast renders first
+        setTimeout(() => fetchUser(), 800)
+      } else {
+        toast.error(res?.data?.message || 'Action failed')
       }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setBonusPauseLoading(false)
     }
+  }
   
 
   const isNotVerified = userData && (
