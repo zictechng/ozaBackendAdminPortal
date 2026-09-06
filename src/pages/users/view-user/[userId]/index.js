@@ -226,6 +226,32 @@ const ViewUserDetails = () => {
     }
   }
 
+  const handleCommissionPause = async (action) => {
+    setCommissionPauseLoading(true)
+    try {
+      const res = await client.post('/api/user/commission_pause', {
+        user_id: userId,
+        action,
+        reason: commissionPauseReason,
+      }, { headers })
+      if (res?.data?.msg === '200' || res?.data?.msg === '201') {
+        setCommissionPauseOpen(false)
+        setCommissionPauseReason('')
+        toast.success(
+          `Commission earning ${action === 'pause' ? 'paused' : 'restored'} successfully`,
+          { autoClose: 3000 }
+        )
+        setTimeout(() => fetchUser(), 500)
+      } else {
+        toast.error(res?.data?.message || 'Action failed')
+      }
+    } catch (e) {
+      toast.error('Something went wrong')
+    } finally {
+      setCommissionPauseLoading(false)
+    }
+  }
+
   const handleBonusPause = async (action) => {
     setBonusPauseLoading(true)
     try {
