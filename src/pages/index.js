@@ -52,13 +52,13 @@ const Dashboard = () => {
       const [salesRes, userRes, recentRes, billsRes] = await Promise.all([
         client.get('/api/dashboard_salesReport', { headers }),
         client.get('/api/dashboard_userReport', { headers }),
-        client.get('/api/recent_transactions/all', { headers }),
+        client.get('/api/user_recentReport', { headers }),
         client.get('/api/bills_services_status', { headers }),
       ])
 
       if (salesRes.data.msg === '201') setSalesStats(salesRes.data)
       if (userRes.data.msg === '201') setUserStats(userRes.data)
-      if (recentRes.data) setRecentTx(recentRes.data.slice(0, 8))
+      if (recentRes.data.msg === '201') setRecentTx(recentRes.data.feedAll || [])
       if (billsRes.data.msg === '200') setBillsStats(billsRes.data.services)
     } catch (e) {
       console.log('Dashboard fetch error:', e.message)
@@ -67,27 +67,7 @@ const Dashboard = () => {
     }
   }
 
-
-    const getRecentTransactions = async () => {
-    setRecentLoading(true);
-    try {
-      const res = await client.get('/api/user_recentReport', {
-        headers: { 'Authorization': 'Bearer ' + userTokenId }
-      });
-      if (res.data.msg === '201') {
-        setRecentTx(res.data.feedAll || []);
-      }
-    } catch (error) {
-      console.log('Recent tx error:', error.message);
-    } finally {
-      setRecentLoading(false);
-    }
-  };
-
-
-
   useEffect(() => {
-    getRecentTransactions();
     if (!token) {
       router.replace('/pages/login')
       
@@ -267,7 +247,7 @@ const Dashboard = () => {
           />
           <Divider />
           <CardContent sx={{ p: 0 }}>
-            {recentLoading ? (
+            {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                 <CircularProgress size={32} />
               </Box>
@@ -291,7 +271,7 @@ const Dashboard = () => {
                       <TableRow key={tx._id} hover>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'primary.main' }}>
+                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem', bgcolor: 'primary.main', color: '#ffffff' }}>
                               {tx.acct_name?.charAt(0) || 'U'}
                             </Avatar>
                             <Typography variant='body2' sx={{ fontWeight: 600 }}>
