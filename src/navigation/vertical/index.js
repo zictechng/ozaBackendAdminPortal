@@ -92,18 +92,8 @@ const navigation = () => {
     },
     {
       icon: CurrencyUsd,
-      title: 'Withdrawals (Pending)',
+      title: 'Withdrawals',
       path: '/withdrawal',
-    },
-    {
-      icon: CurrencyUsd,
-      title: 'Withdrawals (Approved)',
-      path: '/withdrawal/approved',
-    },
-    {
-      icon: CurrencyUsd,
-      title: 'Withdrawals (Rejected)',
-      path: '/withdrawal/rejected',
     },
     {
       icon: CubeOutline,

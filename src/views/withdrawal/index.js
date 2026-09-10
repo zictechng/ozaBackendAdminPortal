@@ -298,7 +298,7 @@ const WithdrawalTable = ({ statusType = 'pending' }) => {
                         {statusType === 'rejected' && (
                           <TableCell>
                             <Typography variant='body2' color='error.main' sx={{ maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {row.reject_reason || '—'}
+                              {row.withdrawal_note || '—'}
                             </Typography>
                           </TableCell>
                         )}
@@ -373,7 +373,7 @@ const WithdrawalTable = ({ statusType = 'pending' }) => {
               <DetailRow label='Submitted' value={moment(modalData.createdOn).format('DD MMM YYYY, hh:mm A')} />
               {modalData.processed_by && <DetailRow label='Processed By' value={modalData.processed_by} />}
               {modalData.processed_date && <DetailRow label='Processed Date' value={moment(modalData.processed_date).format('DD MMM YYYY, hh:mm A')} />}
-              {modalData.reject_reason && <DetailRow label='Rejection Reason' value={modalData.reject_reason} highlight='error.main' />}
+              {modalData.withdrawal_note && <DetailRow label='Rejection Reason' value={modalData.withdrawal_note} highlight='error.main' />}
 
               {isProcessed(modalData.withdrawal_status) && (
                 <Alert
