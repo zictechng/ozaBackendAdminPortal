@@ -44,7 +44,6 @@ const Dashboard = () => {
   const [recentTx, setRecentTx] = useState([])
   const [billsStats, setBillsStats] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [recentLoading, setRecentLoading] = useState(false);
 
   const fetchDashboard = async () => {
     setLoading(true)

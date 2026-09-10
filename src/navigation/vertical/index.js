@@ -10,6 +10,7 @@ import {
   Flash, AccessPoint, Television, School, // Changed LightningBolt to Flash
   Cellphone, Gift, Cog, Star, ViewGrid,
   ShieldAccount, History, Autorenew,
+  ChartBar, ChartLine, AccountDetails, FileExport,
 } from 'mdi-material-ui'
 
 //import { Autorenew } from 'mdi-material-ui'
@@ -168,6 +169,28 @@ const navigation = () => {
       title: 'Active Admins',
       icon: ShieldAccount,
       path: '/admin-user',
+    },
+
+        { sectionTitle: 'Reports & Analytics' },
+    {
+      icon: ChartLine,
+      title: 'Financial Report',
+      path: '/reports/financial',
+    },
+    {
+      icon: AccountDetails,
+      title: 'User Report',
+      path: '/reports/users',
+    },
+    {
+      icon: ChartBar,
+      title: 'Services Report',
+      path: '/reports/services',
+    },
+    {
+      icon: FileExport,
+      title: 'Export Data',
+      path: '/reports/export',
     },
 
     { sectionTitle: 'System Logs' },
