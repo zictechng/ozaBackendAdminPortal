@@ -202,7 +202,7 @@ export default function ServicesReport() {
               <>
                 <ResponsiveContainer width='100%' height={200}>
                   <PieChart>
-                    <Pie data={data.networkBreakdown.map(n => ({ name: n._id, value: n.revenue }))}
+                    <Pie data={data.networkBreakdown.map(n => ({ name: n._id || 'Other', value: n.revenue }))}
                       cx='50%' cy='50%' innerRadius={45} outerRadius={80}
                       paddingAngle={3} dataKey='value'>
                       {data.networkBreakdown.map((_, i) => (
@@ -213,11 +213,13 @@ export default function ServicesReport() {
                   </PieChart>
                 </ResponsiveContainer>
                 <Box>
-                  {data.networkBreakdown.map((item, i) => (
+                {data.networkBreakdown.map((item, i) => (
                     <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: COLORS[i % COLORS.length] }} />
-                        <Typography variant='caption' sx={{ color: 'text.secondary' }}>{item._id}</Typography>
+                        <Typography variant='caption' sx={{ color: 'text.secondary' }}>
+                          {item._id || 'Other'}
+                        </Typography>
                       </Box>
                       <Box sx={{ textAlign: 'right' }}>
                         <Typography variant='caption' sx={{ fontWeight: 700 }}>{formatNaira(item.revenue)}</Typography>
