@@ -153,7 +153,7 @@ const ViewUserDetails = () => {
   }
 
 
-    const fetchTransactions = async (pageNum = 1) => {
+  const fetchTransactions = async (pageNum = 1) => {
     if (!userId) return
     setTxLoading(true)
     try {
@@ -239,9 +239,9 @@ const ViewUserDetails = () => {
         setCommissionPauseReason('')
         toast.success(
           `Commission earning ${action === 'pause' ? 'paused' : 'restored'} successfully`,
-          { autoClose: 3000 }
+          { autoClose: 2000 }
         )
-        setTimeout(() => fetchUser(), 500)
+        setTimeout(() => fetchUser(), 1500)
       } else {
         toast.error(res?.data?.message || 'Action failed')
       }
@@ -268,11 +268,11 @@ const ViewUserDetails = () => {
         // Show toast before fetchUser re-renders page
         toast.success(
           `User bonus ${action === 'pause' ? 'paused' : 'restored'} successfully`,
-          { autoClose: 3000 }
+          { autoClose: 2000 }
         )
 
         // Delay fetchUser slightly so toast renders first
-        setTimeout(() => fetchUser(), 800)
+        setTimeout(() => fetchUser(), 1500)
       } else {
         toast.error(res?.data?.message || 'Action failed')
       }

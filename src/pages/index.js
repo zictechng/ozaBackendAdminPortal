@@ -44,6 +44,7 @@ const Dashboard = () => {
   const [recentTx, setRecentTx] = useState([])
   const [billsStats, setBillsStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [recentLoading, setRecentLoading] = useState(false);
 
   const fetchDashboard = async () => {
     setLoading(true)
@@ -66,13 +67,34 @@ const Dashboard = () => {
     }
   }
 
+
+    const getRecentTransactions = async () => {
+    setRecentLoading(true);
+    try {
+      const res = await client.get('/api/user_recentReport', {
+        headers: { 'Authorization': 'Bearer ' + userTokenId }
+      });
+      if (res.data.msg === '201') {
+        setRecentTx(res.data.feedAll || []);
+      }
+    } catch (error) {
+      console.log('Recent tx error:', error.message);
+    } finally {
+      setRecentLoading(false);
+    }
+  };
+
+
+
   useEffect(() => {
+    getRecentTransactions();
     if (!token) {
       router.replace('/pages/login')
       
       return
     }
     fetchDashboard()
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -245,7 +267,11 @@ const Dashboard = () => {
           />
           <Divider />
           <CardContent sx={{ p: 0 }}>
-            {recentTx.length === 0 ? (
+            {recentLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress size={32} />
+              </Box>
+            ) : recentTx.length === 0 ? (
               <EmptyState title='No Recent Transactions' message='No transactions found.' />
             ) : (
               <TableContainer>
