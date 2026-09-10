@@ -276,7 +276,7 @@ export default function FinancialReport() {
 
       {/* Category Breakdown + Bills Revenue */}
       <Grid item xs={12} md={6}>
-        <Card sx={{ height: '100%' }}>
+        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <CardHeader
             title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Transaction by Category</Typography>}
             subheader={<Typography variant='body2' color='text.secondary'>Revenue by transaction type</Typography>}
@@ -288,7 +288,7 @@ export default function FinancialReport() {
                 <Typography>No data available</Typography>
               </Box>
             ) : (
-              <>
+              <Box sx={{ flex: 1 }}>
                 <ResponsiveContainer width='100%' height={220}>
                   <PieChart>
                     <Pie data={categoryData} cx='50%' cy='50%'
@@ -315,15 +315,16 @@ export default function FinancialReport() {
                     </Box>
                   ))}
                 </Box>
-              </>
+              </Box>
             )}
           </CardContent>
         </Card>
       </Grid>
 
       {/* Bills Revenue */}
+            
       <Grid item xs={12} md={6}>
-        <Card sx={{ height: '100%' }}>
+        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <CardHeader
             title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Bills Revenue</Typography>}
             subheader={<Typography variant='body2' color='text.secondary'>Revenue by bill type</Typography>}

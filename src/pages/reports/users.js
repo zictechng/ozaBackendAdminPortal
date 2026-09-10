@@ -262,7 +262,7 @@ export default function UserReport() {
         <Card>
           <CardHeader
             title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Top Users by Balance</Typography>}
-            subheader={<Typography variant='body2' color='text.secondary'>Highest wallet balances</Typography>}
+            subheader={<Typography variant='body2' color='text.secondary'>Top 10 highest wallet balances</Typography>}
           />
           <Divider />
           <TableContainer>
@@ -281,7 +281,7 @@ export default function UserReport() {
                   <TableRow key={u._id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 28, height: 28, fontSize: '0.75rem', bgcolor: 'primary.main' }}>
+                        <Avatar sx={{ width: 28, height: 28, fontSize: '0.75rem', bgcolor: 'primary.main', color: '#ffffff' }}>
                           {u.display_name?.charAt(0)}
                         </Avatar>
                         <Box>
