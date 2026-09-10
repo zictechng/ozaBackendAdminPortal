@@ -30,14 +30,6 @@ import client from 'src/@core/context/client'
 const COLORS = ['#4C5FD5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
 const formatNaira = v => '₦' + Number(v || 0).toLocaleString()
 
-const SERVICE_ICONS = {
-  airtime: Cellphone,
-  data: AccessPoint,
-  electricity: Flash,
-  tv_subscription: Television,
-  exam_cards: School,
-}
-
 export default function ServicesReport() {
   const router = useRouter()
   const { userToken } = useContext(AuthContext)
