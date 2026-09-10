@@ -151,6 +151,7 @@ const WithdrawalTable = () => {
 
       const res = await client.post(endpoint, {
         tran_id: modalData._id,
+        reject_reason: rejectNote,
       }, { headers })
 
       if (res.data.msg === '201') {
@@ -241,7 +242,7 @@ const WithdrawalTable = () => {
                   <TableRow key={row._id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'warning.main', fontSize: '0.8rem', fontWeight: 700 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.8rem', fontWeight: 700, color:'#ffffff' }}>
                           {getInitials(row.withdrawal_name)}
                         </Avatar>
                         <Box>
@@ -372,7 +373,7 @@ const WithdrawalTable = () => {
       </StyledDialog>
 
       {/* Confirm Dialog */}
-      <ConfirmDialog
+    <ConfirmDialog
         open={confirmOpen}
         onClose={() => { setConfirmOpen(false); setConfirmAction(null); setRejectNote('') }}
         onConfirm={handleConfirmAction}
@@ -381,7 +382,20 @@ const WithdrawalTable = () => {
         message={
           confirmAction === 'approve'
             ? `Are you sure you want to approve this withdrawal of ₦${Number(modalData?.amount || 0).toLocaleString()}? This action cannot be undone.`
-            : `Are you sure you want to reject this withdrawal of ₦${Number(modalData?.amount || 0).toLocaleString()}? The user will be notified.`
+            : (
+              <Box>
+                <Typography variant='body2' sx={{ mb: 2 }}>
+                  Are you sure you want to reject this withdrawal of <strong>₦{Number(modalData?.amount || 0).toLocaleString()}</strong>? The user will be notified.
+                </Typography>
+                <TextField
+                  fullWidth size='small' multiline rows={3}
+                  label='Rejection Reason (optional)'
+                  placeholder='Enter reason for rejection...'
+                  value={rejectNote}
+                  onChange={e => setRejectNote(e.target.value)}
+                />
+              </Box>
+            )
         }
         confirmLabel={confirmAction === 'approve' ? 'Yes, Approve' : 'Yes, Reject'}
         confirmColor={confirmAction === 'approve' ? 'success' : 'error'}
