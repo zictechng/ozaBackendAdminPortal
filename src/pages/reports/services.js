@@ -16,7 +16,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { Flash, AccessPoint, Television, School, Cellphone, CheckCircle, CloseCircle } from 'mdi-material-ui'
+
+import CheckCircle from 'mdi-material-ui/CheckCircle'
+import CloseCircle from 'mdi-material-ui/CloseCircle'
+import Cellphone from 'mdi-material-ui/Cellphone'
 
 import PageHeader from 'src/@core/components/common/PageHeader'
 import StatsCard from 'src/@core/components/common/StatsCard'
@@ -46,7 +49,7 @@ export default function ServicesReport() {
 
   useEffect(() => {
     if (!token) { router.replace('/pages/login'); 
-        
+
         return }
     fetchReport({
       dateFrom: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
@@ -106,7 +109,7 @@ export default function ServicesReport() {
           title='Total Bills Revenue'
           value={formatNaira(data?.summary?.totalRevenue)}
           subtitle='All services combined'
-          icon={CheckCircle}
+          icon={<CheckCircle />}
           iconBg='#D1FAE5'
           iconColor='#10B981'
         />
@@ -116,7 +119,7 @@ export default function ServicesReport() {
           title='Total Transactions'
           value={Number(data?.summary?.totalTransactions || 0).toLocaleString()}
           subtitle='All bill payments'
-          icon={Cellphone}
+          icon={<Cellphone />}
           iconBg='#EEF2FF'
           iconColor='#4C5FD5'
         />
@@ -126,7 +129,7 @@ export default function ServicesReport() {
           title='Successful'
           value={Number(data?.summary?.successCount || 0).toLocaleString()}
           subtitle='Completed transactions'
-          icon={CheckCircle}
+          icon={<CheckCircle />}
           iconBg='#D1FAE5'
           iconColor='#10B981'
         />
@@ -136,7 +139,7 @@ export default function ServicesReport() {
           title='Success Rate'
           value={`${data?.summary?.successRate || 0}%`}
           subtitle='Transaction success ratio'
-          icon={CloseCircle}
+          icon={<CloseCircle />}
           iconBg='#FEF3C7'
           iconColor='#F59E0B'
         />

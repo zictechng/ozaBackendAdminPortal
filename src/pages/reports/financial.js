@@ -14,7 +14,12 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { CashMultiple, TrendingUp, TrendingDown, ClockOutline, CheckCircle, CloseCircle } from 'mdi-material-ui'
+import CashMultiple from 'mdi-material-ui/CashMultiple'
+import TrendingUp from 'mdi-material-ui/TrendingUp'
+import TrendingDown from 'mdi-material-ui/TrendingDown'
+import ClockOutline from 'mdi-material-ui/ClockOutline'
+import CheckCircle from 'mdi-material-ui/CheckCircle'
+import CloseCircle from 'mdi-material-ui/CloseCircle'
 import Papa from 'papaparse'
 
 import PageHeader from 'src/@core/components/common/PageHeader'
@@ -168,12 +173,12 @@ export default function FinancialReport() {
       </Grid>
 
       {/* Summary Cards */}
-      <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={4}>
         <StatsCard
           title='Total Credits'
           value={formatNaira(data?.summary?.totalCredits)}
           subtitle={`${formatNum(data?.summary?.creditCount)} transactions`}
-          icon={TrendingUp}
+          icon={<TrendingUp />}
           iconBg='#D1FAE5'
           iconColor='#10B981'
         />
@@ -183,7 +188,7 @@ export default function FinancialReport() {
           title='Total Debits'
           value={formatNaira(data?.summary?.totalDebits)}
           subtitle={`${formatNum(data?.summary?.debitCount)} transactions`}
-          icon={TrendingDown}
+          icon={<TrendingDown />}
           iconBg='#FEE2E2'
           iconColor='#EF4444'
         />
@@ -193,7 +198,7 @@ export default function FinancialReport() {
           title='Completed Transactions'
           value={formatNum(data?.summary?.completedTx)}
           subtitle={`${formatNum(data?.summary?.pendingTx)} pending`}
-          icon={CheckCircle}
+          icon={<CheckCircle />}
           iconBg='#EEF2FF'
           iconColor='#4C5FD5'
         />
@@ -203,7 +208,7 @@ export default function FinancialReport() {
           title='Pending Transactions'
           value={formatNum(data?.summary?.pendingTx)}
           subtitle='Awaiting approval'
-          icon={ClockOutline}
+          icon={<ClockOutline />}
           iconBg='#FEF3C7'
           iconColor='#F59E0B'
         />
@@ -213,7 +218,7 @@ export default function FinancialReport() {
           title='Failed / Rejected'
           value={formatNum(data?.summary?.failedTx)}
           subtitle='Failed transactions'
-          icon={CloseCircle}
+          icon={<CloseCircle />}
           iconBg='#FEE2E2'
           iconColor='#EF4444'
         />
@@ -223,7 +228,7 @@ export default function FinancialReport() {
           title='Total Transactions'
           value={formatNum(data?.summary?.totalTx)}
           subtitle='All types combined'
-          icon={CashMultiple}
+          icon={<CashMultiple />}
           iconBg='#EEF2FF'
           iconColor='#4C5FD5'
         />

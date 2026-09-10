@@ -22,7 +22,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { AccountGroup, AccountCheck, AccountAlert, AccountCancel, ShieldAccount } from 'mdi-material-ui'
+import AccountGroup from 'mdi-material-ui/AccountGroup'
+import AccountCheck from 'mdi-material-ui/AccountCheck'
+import AccountAlert from 'mdi-material-ui/AccountAlert'
+import ShieldAccount from 'mdi-material-ui/ShieldAccount'
 import moment from 'moment'
 
 import PageHeader from 'src/@core/components/common/PageHeader'
@@ -128,7 +131,7 @@ export default function UserReport() {
           title='Total Users'
           value={Number(data?.summary?.totalUsers || 0).toLocaleString()}
           subtitle='All registered users'
-          icon={AccountGroup}
+          icon={<AccountGroup />}
           iconBg='#EEF2FF'
           iconColor='#4C5FD5'
         />
@@ -138,7 +141,7 @@ export default function UserReport() {
           title='New in Period'
           value={Number(data?.summary?.newUsersInPeriod || 0).toLocaleString()}
           subtitle='Registered in date range'
-          icon={AccountCheck}
+          icon={<AccountCheck />}
           iconBg='#D1FAE5'
           iconColor='#10B981'
         />
@@ -148,7 +151,7 @@ export default function UserReport() {
           title='Verified Users'
           value={Number(data?.summary?.verifiedUsers || 0).toLocaleString()}
           subtitle='KYC approved'
-          icon={ShieldAccount}
+          icon={<ShieldAccount />}
           iconBg='#FEF3C7'
           iconColor='#F59E0B'
         />
@@ -158,7 +161,7 @@ export default function UserReport() {
           title='Verification Rate'
           value={`${data?.summary?.verificationRate || 0}%`}
           subtitle='Of total users verified'
-          icon={AccountAlert}
+          icon={<AccountAlert />}
           iconBg='#EDE9FE'
           iconColor='#8B5CF6'
         />

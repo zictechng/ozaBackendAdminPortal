@@ -1,6 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Grid from '@mui/material/Grid'
+import {
+  AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
@@ -32,6 +37,111 @@ import StatusBadge from 'src/@core/components/common/StatusBadge'
 import EmptyState from 'src/@core/components/common/EmptyState'
 import { AuthContext } from 'src/@core/context/authContext'
 import client from 'src/@core/context/client'
+
+
+
+const QuickRevenueChart = ({ token }) => {
+  const [chartData, setChartData] = useState([])
+  const headers = { Authorization: 'Bearer ' + token }
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await client.get('/api/reports/financial', {
+          headers,
+          params: {
+            dateFrom: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0],
+            period: 'monthly',
+          }
+        })
+        if (res.data.msg === '201') {
+          const map = {}
+          res.data.timeSeries.forEach(item => {
+            const key = item._id.period
+            if (!map[key]) map[key] = { period: key, Credit: 0, Debit: 0 }
+            map[key][item._id.type] = item.total
+          })
+          setChartData(Object.values(map).sort((a, b) => a.period.localeCompare(b.period)))
+        }
+      } catch (e) { console.log(e.message) }
+    }
+    if (token) fetch()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  if (!chartData.length) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+      <CircularProgress size={28} />
+    </Box>
+  )
+
+  return (
+    <ResponsiveContainer width='100%' height={220}>
+      <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id='cGrad' x1='0' y1='0' x2='0' y2='1'>
+            <stop offset='5%' stopColor='#4C5FD5' stopOpacity={0.3} />
+            <stop offset='95%' stopColor='#4C5FD5' stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id='dGrad' x1='0' y1='0' x2='0' y2='1'>
+            <stop offset='5%' stopColor='#EF4444' stopOpacity={0.3} />
+            <stop offset='95%' stopColor='#EF4444' stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray='3 3' stroke='#f0f0f0' />
+        <XAxis dataKey='period' tick={{ fontSize: 10 }} />
+        <YAxis tickFormatter={v => `₦${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} tick={{ fontSize: 10 }} />
+        <Tooltip formatter={v => '₦' + Number(v).toLocaleString()} />
+        <Area type='monotone' dataKey='Credit' stroke='#4C5FD5' fill='url(#cGrad)' strokeWidth={2} />
+        <Area type='monotone' dataKey='Debit' stroke='#EF4444' fill='url(#dGrad)' strokeWidth={2} />
+      </AreaChart>
+    </ResponsiveContainer>
+  )
+}
+
+const QuickUserChart = ({ token }) => {
+  const [chartData, setChartData] = useState([])
+  const headers = { Authorization: 'Bearer ' + token }
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await client.get('/api/reports/users', {
+          headers,
+          params: {
+            dateFrom: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0],
+            period: 'monthly',
+          }
+        })
+        if (res.data.msg === '201') {
+          setChartData(res.data.userGrowth?.map(g => ({ period: g._id, users: g.count })) || [])
+        }
+      } catch (e) { console.log(e.message) }
+    }
+    if (token) fetch()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  if (!chartData.length) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+      <CircularProgress size={28} />
+    </Box>
+  )
+
+  return (
+    <ResponsiveContainer width='100%' height={220}>
+      <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray='3 3' stroke='#f0f0f0' />
+        <XAxis dataKey='period' tick={{ fontSize: 10 }} />
+        <YAxis tick={{ fontSize: 10 }} />
+        <Tooltip />
+        <Bar dataKey='users' fill='#4C5FD5' radius={[4, 4, 0, 0]} name='New Users' />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
 
 const Dashboard = () => {
   const router = useRouter()
@@ -195,6 +305,48 @@ const Dashboard = () => {
           trend='negative'
           trendValue='18%'
         />
+      </Grid>
+
+            {/* Quick Analytics */}
+      <Grid item xs={12}>
+        <Grid container spacing={4}>
+          {/* Revenue Trend */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardHeader
+                title={<Typography variant='h6' sx={{ fontWeight: 700 }}>Revenue Trend (6 Months)</Typography>}
+                subheader={<Typography variant='body2' color='text.secondary'>Credits vs Debits</Typography>}
+                action={
+                  <Link href='/reports/financial' passHref>
+                    <Button size='small' variant='outlined'>Full Report</Button>
+                  </Link>
+                }
+              />
+              <Divider />
+              <CardContent>
+                <QuickRevenueChart token={token} />
+              </CardContent>
+            </Card>
+          </Grid>
+          {/* User Growth */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardHeader
+                title={<Typography variant='h6' sx={{ fontWeight: 700 }}>User Growth (6 Months)</Typography>}
+                subheader={<Typography variant='body2' color='text.secondary'>New registrations per month</Typography>}
+                action={
+                  <Link href='/reports/users' passHref>
+                    <Button size='small' variant='outlined'>Full Report</Button>
+                  </Link>
+                }
+              />
+              <Divider />
+              <CardContent>
+                <QuickUserChart token={token} />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </Grid>
 
       {/* Bills Services Status */}
