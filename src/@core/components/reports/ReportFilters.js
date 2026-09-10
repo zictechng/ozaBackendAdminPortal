@@ -8,7 +8,8 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
-import { Refresh, FileExcel } from 'mdi-material-ui'
+import Refresh from 'mdi-material-ui/Refresh'
+import FileExcel from 'mdi-material-ui/FileExcel'
 
 const ReportFilters = ({
   onFilter,
@@ -97,11 +98,17 @@ const ReportFilters = ({
               <TextField
                 fullWidth select label='Category' size='small'
                 value={category} onChange={e => setCategory(e.target.value)}>
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='PayPal'>PayPal</MenuItem>
-                <MenuItem value='Payoneer'>Payoneer</MenuItem>
-                <MenuItem value='Bitcoin'>Bitcoin</MenuItem>
-                <MenuItem value='Account Funding'>Funding</MenuItem>
+              <MenuItem value=''>All</MenuItem>
+              <MenuItem value='PayPal'>PayPal</MenuItem>
+              <MenuItem value='Payoneer'>Payoneer</MenuItem>
+              <MenuItem value='Bitcoin'>Bitcoin</MenuItem>
+              <MenuItem value='Account Funding'>Account Funding</MenuItem>
+              <MenuItem value='Exchange'>Buy/Exchange</MenuItem>
+              <MenuItem value='Airtime'>Airtime</MenuItem>
+              <MenuItem value='Data'>Data</MenuItem>
+              <MenuItem value='Electricity'>Electricity</MenuItem>
+              <MenuItem value='TV Subscription'>TV Subscription</MenuItem>
+              <MenuItem value='Exam Cards'>Exam Cards</MenuItem>
               </TextField>
             </Grid>
           )}

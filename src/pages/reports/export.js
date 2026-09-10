@@ -17,7 +17,8 @@ import TableRow from '@mui/material/TableRow'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import Chip from '@mui/material/Chip'
-import { FileExcel, FilePdf } from 'mdi-material-ui'
+import FileExcel from 'mdi-material-ui/FileExcel'
+import FilePdfBox from 'mdi-material-ui/FilePdfBox'
 import Papa from 'papaparse'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -45,7 +46,7 @@ export default function ExportReport() {
 
   useEffect(() => {
     if (!token) { router.replace('/pages/login'); 
-        
+
         return }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -169,7 +170,7 @@ export default function ExportReport() {
                   </Button>
                   <Button
                     variant='outlined' color='error' size='small'
-                    startIcon={<FilePdf />}
+                    startIcon={<FilePdfBox />}
                     onClick={exportPDF}
                     disabled={!data.length}>
                     Export PDF
