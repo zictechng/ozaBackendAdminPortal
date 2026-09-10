@@ -25,24 +25,9 @@ const navigation = () => {
 
     { sectionTitle: 'Users' },
     {
-      title: 'Active Users',
-      icon: AccountCheck,
+      title: 'User Management',
+      icon: AccountGroup,
       path: '/users',
-    },
-    {
-      title: 'Pending Users',
-      icon: AccountAlert,
-      path: '/users/pending-users',
-    },
-    {
-      title: 'Suspended Users',
-      icon: AccountCancel,
-      path: '/users/suspended-users',
-    },
-    {
-      title: 'Deleted Users',
-      icon: AccountRemove,
-      path: '/users/deleted-users',
     },
 
     { sectionTitle: 'KYC Documents' },

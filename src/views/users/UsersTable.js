@@ -101,6 +101,7 @@ const UserTableData = ({ userType = 'active' }) => {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [suspendReason, setSuspendReason] = useState('')
   const pageLimit = 15
 
   const fetchUsers = async (pageNum = 1) => {
@@ -167,6 +168,8 @@ const UserTableData = ({ userType = 'active' }) => {
       const res = await client.post('/api/user_accountAction/', {
         user_id: user._id,
         action_status: actionStatus,
+        suspend_reason: action === 'suspend' ? suspendReason : '',
+        suspended_by: 'Admin',
       }, { headers })
 
       if (res?.data?.msg === '200') {
@@ -181,6 +184,7 @@ const UserTableData = ({ userType = 'active' }) => {
       setActionLoading(false)
       setConfirmOpen(false)
       setConfirmAction(null)
+      setSuspendReason('')
     }
   }
 
@@ -346,11 +350,24 @@ const UserTableData = ({ userType = 'active' }) => {
         onClose={() => { setConfirmOpen(false); setConfirmAction(null) }}
         onConfirm={handleConfirmAction}
         loading={actionLoading}
-        title={confirmAction?.action === 'suspend' ? 'Suspend Account' : 'Activate Account'}
+        title={confirmAction?.action === 'suspend' ? '⚠️ Suspend Account' : '✅ Activate Account'}
         message={
           confirmAction?.action === 'suspend'
-            ? `Are you sure you want to suspend ${confirmAction?.user?.display_name}? They will not be able to login.`
-            : `Are you sure you want to activate ${confirmAction?.user?.display_name}?`
+            ? (
+              <Box>
+                <Typography variant='body2' sx={{ mb: 2 }}>
+                  Are you sure you want to suspend <strong>{confirmAction?.user?.display_name}</strong>? They will not be able to login.
+                </Typography>
+                <TextField
+                  fullWidth size='small' multiline rows={3}
+                  label='Reason for suspension (optional)'
+                  placeholder='Enter reason...'
+                  value={suspendReason}
+                  onChange={e => setSuspendReason(e.target.value)}
+                />
+              </Box>
+            )
+            : `Are you sure you want to activate ${confirmAction?.user?.display_name}? They will be able to login again.`
         }
         confirmLabel={confirmAction?.action === 'suspend' ? 'Suspend' : 'Activate'}
         confirmColor={confirmAction?.action === 'suspend' ? 'error' : 'success'}

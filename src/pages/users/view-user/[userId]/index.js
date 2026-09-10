@@ -341,6 +341,36 @@ const ViewUserDetails = () => {
               <StatusBadge status={userData.acct_status?.toLowerCase()} />
               <Chip label={`Tag: ${userData.tag_id}`} size='small' variant='outlined' />
             </Box>
+
+            {/* Suspension / Action Info */}
+            {['Suspended', 'Blocked', 'Deleted'].includes(userData.acct_status) && (
+              <Alert
+                severity={userData.acct_status === 'Deleted' ? 'error' : 'warning'}
+                sx={{ mb: 2, borderRadius: 2, textAlign: 'left' }}>
+                <AlertTitle sx={{ fontWeight: 700 }}>
+                  Account {userData.acct_status}
+                </AlertTitle>
+                {userData.suspended_by && (
+                  <Typography variant='body2'>
+                    <strong>By:</strong> {userData.suspended_by}
+                  </Typography>
+                )}
+                {userData.suspended_date && (
+                  <Typography variant='body2'>
+                    <strong>Date:</strong> {moment(userData.suspended_date).format('DD MMM YYYY, hh:mm A')}
+                  </Typography>
+                )}
+                {userData.suspend_reason && (
+                  <Typography variant='body2'>
+                    <strong>Reason:</strong> {userData.suspend_reason}
+                  </Typography>
+                )}
+                {!userData.suspend_reason && !userData.suspended_by && (
+                  <Typography variant='body2'>No additional details recorded.</Typography>
+                )}
+              </Alert>
+            )}
+
             <Divider sx={{ mb: 3 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
               <Box>
