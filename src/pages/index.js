@@ -42,6 +42,7 @@ import client from 'src/@core/context/client'
 
 const QuickRevenueChart = ({ token }) => {
   const [chartData, setChartData] = useState([])
+  const [fetched, setFetched] = useState(false)
   const headers = { Authorization: 'Bearer ' + token }
 
   useEffect(() => {
@@ -65,14 +66,21 @@ const QuickRevenueChart = ({ token }) => {
           setChartData(Object.values(map).sort((a, b) => a.period.localeCompare(b.period)))
         }
       } catch (e) { console.log(e.message) }
+      finally { setFetched(true) }
     }
     if (token) fetch()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
-  if (!chartData.length) return (
+  if (!fetched) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
       <CircularProgress size={28} />
+    </Box>
+  )
+
+  if (!chartData.length) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+      <Typography variant='body2' color='text.secondary'>No revenue data available</Typography>
     </Box>
   )
 
@@ -102,6 +110,7 @@ const QuickRevenueChart = ({ token }) => {
 
 const QuickUserChart = ({ token }) => {
   const [chartData, setChartData] = useState([])
+  const [fetched, setFetched] = useState(false)
   const headers = { Authorization: 'Bearer ' + token }
 
   useEffect(() => {
@@ -110,7 +119,7 @@ const QuickUserChart = ({ token }) => {
         const res = await client.get('/api/reports/users', {
           headers,
           params: {
-            dateFrom: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+            dateFrom: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
             dateTo: new Date().toISOString().split('T')[0],
             period: 'monthly',
           }
@@ -119,14 +128,21 @@ const QuickUserChart = ({ token }) => {
           setChartData(res.data.userGrowth?.map(g => ({ period: g._id, users: g.count })) || [])
         }
       } catch (e) { console.log(e.message) }
+      finally { setFetched(true) }
     }
     if (token) fetch()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
-  if (!chartData.length) return (
+  if (!fetched) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
       <CircularProgress size={28} />
+    </Box>
+  )
+
+  if (!chartData.length) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+      <Typography variant='body2' color='text.secondary'>No registration data available</Typography>
     </Box>
   )
 
