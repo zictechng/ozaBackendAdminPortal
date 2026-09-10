@@ -53,7 +53,13 @@ const DetailRow = ({ label, value, highlight }) => (
   </Box>
 )
 
-const WithdrawalTable = () => {
+const endpointMap = {
+  pending: '/api/userWithdrawal_details',
+  approved: '/api/userWithdrawalApproved_details',
+  rejected: '/api/userWithdrawalRejected_details',
+}
+
+const WithdrawalTable = ({ statusType = 'pending' }) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('userToken') : ''
   const headers = { Authorization: 'Bearer ' + token }
 
@@ -80,7 +86,7 @@ const WithdrawalTable = () => {
     setLoading(true)
     try {
       const res = await client.get(
-        `/api/userWithdrawal_details?pageNumber=${page}&pageLimit=${pageLimit}`,
+        `${endpointMap[statusType]}?pageNumber=${page}&pageLimit=${pageLimit}`,
         { headers }
       )
       if (res.data.msg === '201') {
@@ -226,14 +232,22 @@ const WithdrawalTable = () => {
         <>
           <TableContainer>
             <Table>
-              <TableHead>
+               <TableHead>
                 <TableRow sx={{ backgroundColor: 'action.hover' }}>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>User</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Tag ID</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Amount</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Type</Typography></TableCell>
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Status</Typography></TableCell>
-                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Date</Typography></TableCell>
+                  <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Submitted</Typography></TableCell>
+                  {statusType !== 'pending' && (
+                    <>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Processed By</Typography></TableCell>
+                      <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Processed Date</Typography></TableCell>
+                      {statusType === 'rejected' && (
+                        <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Reason</Typography></TableCell>
+                      )}
+                    </>
+                  )}
                   <TableCell><Typography variant='body2' sx={{ fontWeight: 700 }}>Actions</Typography></TableCell>
                 </TableRow>
               </TableHead>
@@ -262,9 +276,6 @@ const WithdrawalTable = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant='body2'>{row.withdrawal_type || 'Withdraw'}</Typography>
-                    </TableCell>
-                    <TableCell>
                       <StatusBadge status={row.withdrawal_status?.toLowerCase()} />
                     </TableCell>
                     <TableCell>
@@ -272,6 +283,27 @@ const WithdrawalTable = () => {
                         {moment(row.createdOn).format('DD MMM, YYYY')}
                       </Typography>
                     </TableCell>
+                    {statusType !== 'pending' && (
+                      <>
+                        <TableCell>
+                          <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                            {row.processed_by || 'Admin'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant='body2' color='text.secondary'>
+                            {row.processed_date ? moment(row.processed_date).format('DD MMM YYYY, hh:mm A') : '—'}
+                          </Typography>
+                        </TableCell>
+                        {statusType === 'rejected' && (
+                          <TableCell>
+                            <Typography variant='body2' color='error.main' sx={{ maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {row.reject_reason || '—'}
+                            </Typography>
+                          </TableCell>
+                        )}
+                      </>
+                    )}
                     <TableCell>
                       <Button size='small' variant='outlined' startIcon={<Eye fontSize='small' />}
                         onClick={() => openModal(row)}>
@@ -339,6 +371,9 @@ const WithdrawalTable = () => {
               <DetailRow label='Note' value={modalData.withdrawal_note} />
               <DetailRow label='Status' value={modalData.withdrawal_status} />
               <DetailRow label='Submitted' value={moment(modalData.createdOn).format('DD MMM YYYY, hh:mm A')} />
+              {modalData.processed_by && <DetailRow label='Processed By' value={modalData.processed_by} />}
+              {modalData.processed_date && <DetailRow label='Processed Date' value={moment(modalData.processed_date).format('DD MMM YYYY, hh:mm A')} />}
+              {modalData.reject_reason && <DetailRow label='Rejection Reason' value={modalData.reject_reason} highlight='error.main' />}
 
               {isProcessed(modalData.withdrawal_status) && (
                 <Alert
