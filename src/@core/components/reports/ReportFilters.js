@@ -100,12 +100,9 @@ const ReportFilters = ({
                 value={category} onChange={e => setCategory(e.target.value)}>
               <MenuItem value=''>All</MenuItem>
               <MenuItem value='Account Funding'>Account Funding</MenuItem>
-              <MenuItem value='PayPal'>PayPal (Sell)</MenuItem>
-              <MenuItem value='Paypal'>PayPal (Buy)</MenuItem>
-              <MenuItem value='Payoneer'>Payoneer (Sell)</MenuItem>
-              <MenuItem value='Payooner'>Payoneer (Buy)</MenuItem>
+              <MenuItem value='PayPal'>PayPal</MenuItem>
+              <MenuItem value='Payoneer'>Payoneer</MenuItem>
               <MenuItem value='Bitcoin'>Bitcoin</MenuItem>
-              <MenuItem value='Exchange'>Buy / Exchange</MenuItem>
               <MenuItem value='Withdraw'>Withdrawal</MenuItem>
               <MenuItem value='Bills Payment | Airtime'>Airtime</MenuItem>
               <MenuItem value='Bills Payment | Mobile Data'>Data</MenuItem>
