@@ -91,6 +91,11 @@ const navigation = () => {
       path: '/all-transactions',
     },
     {
+      icon: CurrencyUsd,
+      title: 'Withdrawals',
+      path: '/withdrawal',
+    },
+    {
       icon: CubeOutline,
       title: 'Bills Transactions',
       path: '/bills/transactions',

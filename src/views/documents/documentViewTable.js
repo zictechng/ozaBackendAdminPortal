@@ -36,6 +36,8 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import moment from 'moment'
 import ConfirmDialog from 'src/@core/components/common/ConfirmDialog'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
 import client from 'src/@core/context/client'
 
 // ── Styled Components ─────────────────────────────
@@ -149,6 +151,8 @@ const DocumentViewPage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
 
   // ── Image lightbox state ──────────────────────
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -176,8 +180,41 @@ const DocumentViewPage = () => {
   }, [docId])
 
   const handleAction = (action) => {
-    setConfirmAction(action)
-    setConfirmOpen(true)
+    if (action === 'reject') {
+      setRejectDialogOpen(true)
+    } else {
+      setConfirmAction(action)
+      setConfirmOpen(true)
+    }
+  }
+
+  const handleRejectSubmit = async () => {
+    if (!rejectReason.trim()) {
+      toast.warning('Please provide a reason for rejection')
+
+      return
+    }
+    setActionLoading(true)
+    try {
+      const res = await client.post('/api/adminRejected_documentUpload', {
+        doc_id: docId,
+        user_id: docData?.user_id,
+        doc_name: docData?.document_name,
+        reject_reason: rejectReason.trim(),
+      }, { headers })
+      if (res?.data?.msg === '201' || res?.data?.msg === '200') {
+        toast.success('Document rejected. User has been notified.')
+        setRejectDialogOpen(false)
+        setRejectReason('')
+        fetchDocument()
+      } else {
+        toast.error(res?.data?.message || 'Rejection failed. Please try again.')
+      }
+    } catch (e) {
+      toast.error('Something went wrong. Please try again.')
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const handleConfirmAction = async () => {
@@ -673,6 +710,40 @@ const DocumentViewPage = () => {
             }}
           />
         </DialogContent>
+      </Dialog>
+
+      {/* ── Reject Reason Dialog ──────────────────── */}
+      <Dialog open={rejectDialogOpen} onClose={() => { setRejectDialogOpen(false); setRejectReason('') }} maxWidth='sm' fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>❌ Reject Document</DialogTitle>
+        <DialogContent>
+          <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
+            You are rejecting <strong>{docData?.document_name}</strong> submitted by <strong>{docData?.owners_name}</strong>. Please provide a clear reason — the user will be notified with this reason.
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label='Rejection Reason *'
+            placeholder='e.g. Document image is blurry, ID has expired, wrong document type submitted...'
+            value={rejectReason}
+            onChange={e => setRejectReason(e.target.value)}
+            error={!rejectReason.trim() && rejectReason.length > 0}
+            helperText={!rejectReason.trim() && rejectReason.length > 0 ? 'Reason cannot be empty' : ''}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button variant='outlined' color='inherit'
+            disabled={actionLoading}
+            onClick={() => { setRejectDialogOpen(false); setRejectReason('') }}>
+            Cancel
+          </Button>
+          <Button variant='contained' color='error'
+            disabled={!rejectReason.trim() || actionLoading}
+            startIcon={actionLoading ? <CircularProgress size={16} color='inherit' /> : null}
+            onClick={handleRejectSubmit}>
+            {actionLoading ? 'Rejecting...' : 'Confirm Rejection'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* ── Confirm Dialog ────────────────────────── */}
