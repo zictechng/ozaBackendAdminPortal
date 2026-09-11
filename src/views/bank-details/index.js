@@ -35,6 +35,8 @@ import CloseIcon from '@mui/icons-material/Close'
 import PrintIcon from '@mui/icons-material/Print'
 import SearchIcon from '@mui/icons-material/Search'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import CheckIcon from '@mui/icons-material/Check'
 
 import { Eye, Bank, CreditCard, Bitcoin } from 'mdi-material-ui'
 import { toast, ToastContainer } from 'react-toastify'
@@ -53,12 +55,47 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
   },
 }))
 
+// ── Copy Button ───────────────────────────────────
+const CopyButton = ({ value }) => {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (!value || value === '—') return
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  if (!value || value === '—') return null
+
+  return (
+    <Tooltip title={copied ? 'Copied!' : 'Copy'} placement='top'>
+      <IconButton
+        size='small'
+        onClick={handleCopy}
+        sx={{
+          ml: 0.5,
+          color: copied ? 'success.main' : 'action.active',
+          transition: 'color 0.2s',
+          '&:hover': { color: 'primary.main', bgcolor: 'action.hover' },
+          width: 24,
+          height: 24,
+        }}>
+        {copied
+          ? <CheckIcon sx={{ fontSize: 14 }} />
+          : <ContentCopyIcon sx={{ fontSize: 14 }} />}
+      </IconButton>
+    </Tooltip>
+  )
+}
+
 // ── Detail Row ────────────────────────────────────
-const DetailRow = ({ label, value, highlight }) => (
+const DetailRow = ({ label, value, highlight, copyable = false }) => (
   <Box sx={{
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     py: 1.5,
     borderBottom: '1px solid',
     borderColor: 'divider',
@@ -68,14 +105,17 @@ const DetailRow = ({ label, value, highlight }) => (
     <Typography variant='body2' color='text.secondary' sx={{ fontWeight: 500, minWidth: 140 }}>
       {label}
     </Typography>
-    <Typography variant='body2' sx={{
-      fontWeight: 600,
-      textAlign: 'right',
-      color: highlight || 'text.primary',
-      wordBreak: 'break-all',
-    }}>
-      {value || '—'}
-    </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Typography variant='body2' sx={{
+        fontWeight: 600,
+        textAlign: 'right',
+        color: highlight || 'text.primary',
+        wordBreak: 'break-all',
+      }}>
+        {value || '—'}
+      </Typography>
+      {copyable && <CopyButton value={value} />}
+    </Box>
   </Box>
 )
 
@@ -578,12 +618,13 @@ const UserBankDetailsTable = () => {
                 title='Bank Account'
                 color='primary.main'
               />
-              <DetailRow label='Bank Name' value={modalData.bank_name} />
-              <DetailRow label='Account Name' value={modalData.bank_acct_name} />
+              <DetailRow label='Bank Name' value={modalData.bank_name} copyable />
+              <DetailRow label='Account Name' value={modalData.bank_acct_name} copyable />
               <DetailRow
                 label='Account Number'
                 value={modalData.bank_acct_number}
                 highlight='primary.main'
+                copyable
               />
 
               {/* Digital Wallets Section */}
@@ -592,8 +633,8 @@ const UserBankDetailsTable = () => {
                 title='Digital Wallets'
                 color='success.main'
               />
-              <DetailRow label='PayPal Address' value={modalData.paypal_address} />
-              <DetailRow label='Payoneer Address' value={modalData.payoneer_address} />
+              <DetailRow label='PayPal Address' value={modalData.paypal_address} copyable />
+              <DetailRow label='Payoneer Address' value={modalData.payoneer_address} copyable />
 
               {/* Crypto Section */}
               <SectionHeader
@@ -601,7 +642,7 @@ const UserBankDetailsTable = () => {
                 title='Cryptocurrency'
                 color='warning.main'
               />
-              <DetailRow label='Bitcoin Address' value={modalData.btc_address} />
+              <DetailRow label='Bitcoin Address' value={modalData.btc_address} copyable />
 
               {/* Note */}
               {modalData.tran_desc && (
