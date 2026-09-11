@@ -61,6 +61,11 @@ const navigation = () => {
       path: '/buying',
     },
     {
+      icon: CurrencyUsd,
+      title: 'USD Funding',
+      path: '/usd-funding',
+    },
+    {
       icon: CubeOutline,
       title: 'All Transactions',
       path: '/all-transactions',

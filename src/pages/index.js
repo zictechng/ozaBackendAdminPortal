@@ -453,7 +453,7 @@ const Dashboard = () => {
                         </TableCell>
                         <TableCell>
                           <Typography variant='body2' sx={{ fontWeight: 700, color: tx.tran_type === 'Credit' ? 'success.main' : 'error.main' }}>
-                            ₦{Number(tx.amount || 0).toLocaleString()}
+                            {tx.sender_currency_type === '$' || tx.currency_level === '2' ? '$' : '₦'}{Number(tx.amount || 0).toLocaleString()}
                           </Typography>
                         </TableCell>
                         <TableCell>
