@@ -343,8 +343,6 @@ const UserTableData = ({ userType = 'active' }) => {
         </>
       )}
 
-          
-
       <ConfirmDialog
         open={confirmOpen}
         onClose={() => { setConfirmOpen(false); setConfirmAction(null) }}

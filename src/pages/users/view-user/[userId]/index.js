@@ -342,35 +342,6 @@ const ViewUserDetails = () => {
               <Chip label={`Tag: ${userData.tag_id}`} size='small' variant='outlined' />
             </Box>
 
-            {/* Suspension / Action Info */}
-            {['Suspended', 'Blocked', 'Deleted'].includes(userData.acct_status) && (
-              <Alert
-                severity={userData.acct_status === 'Deleted' ? 'error' : 'warning'}
-                sx={{ mb: 2, borderRadius: 2, textAlign: 'left' }}>
-                <AlertTitle sx={{ fontWeight: 700 }}>
-                  Account {userData.acct_status}
-                </AlertTitle>
-                {userData.suspended_by && (
-                  <Typography variant='body2'>
-                    <strong>By:</strong> {userData.suspended_by}
-                  </Typography>
-                )}
-                {userData.suspended_date && (
-                  <Typography variant='body2'>
-                    <strong>Date:</strong> {moment(userData.suspended_date).format('DD MMM YYYY, hh:mm A')}
-                  </Typography>
-                )}
-                {userData.suspend_reason && (
-                  <Typography variant='body2'>
-                    <strong>Reason:</strong> {userData.suspend_reason}
-                  </Typography>
-                )}
-                {!userData.suspend_reason && !userData.suspended_by && (
-                  <Typography variant='body2'>No additional details recorded.</Typography>
-                )}
-              </Alert>
-            )}
-
             <Divider sx={{ mb: 3 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
               <Box>
@@ -714,7 +685,7 @@ const ViewUserDetails = () => {
             </CardContent>
           )}
 
-                    {/* Transactions Tab */}
+          {/* Transactions Tab */}
           {tab === 3 && (
             <CardContent sx={{ p: 0 }}>
               {txLoading ? (
@@ -805,7 +776,37 @@ const ViewUserDetails = () => {
             </CardContent>
           )}
         </Card>
+        {/* Suspension / Action Info */}
+        {['Suspended', 'Blocked', 'Deleted'].includes(userData.acct_status) && (
+          <Alert
+            severity={userData.acct_status === 'Deleted' ? 'error' : 'warning'}
+            sx={{ mb: 2, borderRadius: 2, textAlign: 'left', mt:10 }}>
+            <AlertTitle sx={{ fontWeight: 700 }}>
+              Account {userData.acct_status}
+            </AlertTitle>
+            {userData.suspended_by && (
+              <Typography variant='body2'>
+                <strong>By:</strong> {userData.suspended_by}
+              </Typography>
+            )}
+            {userData.suspended_date && (
+              <Typography variant='body2'>
+                <strong>Date:</strong> {moment(userData.suspended_date).format('DD MMM YYYY, hh:mm A')}
+              </Typography>
+            )}
+            {userData.suspend_reason && (
+              <Typography variant='body2'>
+                <strong>Reason:</strong> {userData.suspend_reason}
+              </Typography>
+            )}
+            {!userData.suspend_reason && !userData.suspended_by && (
+              <Typography variant='body2'>No additional details recorded.</Typography>
+            )}
+          </Alert>
+        )}
       </Grid>
+
+      
 
       {/* Account Status Dialog */}
       <AccountActionDialog
@@ -835,7 +836,8 @@ const ViewUserDetails = () => {
         ]}
       />
 
-              {/* Commission Pause Dialog */}
+
+      {/* Commission Pause Dialog */}
       <Dialog open={commissionPauseOpen} onClose={() => setCommissionPauseOpen(false)} maxWidth='xs' fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>Pause Commission Earning</DialogTitle>
         <DialogContent>

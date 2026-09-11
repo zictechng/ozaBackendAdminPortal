@@ -32,19 +32,9 @@ const navigation = () => {
 
     { sectionTitle: 'KYC Documents' },
     {
-      title: 'Approved',
-      icon: FileCheck,
-      path: '/documents/approved',
-    },
-    {
-      title: 'Pending',
       icon: FileAlert,
+      title: 'KYC Documents',
       path: '/documents/pending',
-    },
-    {
-      title: 'Rejected',
-      icon: FileCancel,
-      path: '/documents/rejected',
     },
 
     { sectionTitle: 'Bank Details' },
