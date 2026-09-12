@@ -111,7 +111,7 @@ const AllTransactionsTable = () => {
             <Table sx={{ minWidth: 900 }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: 'action.hover' }}>
-                  {['User', 'Amount', 'Nature', 'Category', 'TID', 'Balance', 'Type', 'Status', 'Date'].map(col => (
+                  {['User', 'Amount', 'Nature', 'Category', 'TID', 'NGN Equiv', 'Type', 'Status', 'Date'].map(col => (
                     <TableCell key={col}><Typography variant='body2' sx={{ fontWeight: 700 }}>{col}</Typography></TableCell>
                   ))}
                 </TableRow>
@@ -134,7 +134,7 @@ const AllTransactionsTable = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' sx={{ fontWeight: 700, color: row.tran_type === 'Credit' ? 'success.main' : 'error.main' }}>
-                        ₦{Number(row.amount || 0).toLocaleString()}
+                        {row.sender_currency_type === '$' || row.currency_level === '2' ? '$' : '₦'}{Number(row.amount || 0).toLocaleString()}
                       </Typography>
                     </TableCell>
                     <TableCell><Typography variant='body2'>{row.transac_nature || '—'}</Typography></TableCell>
@@ -148,7 +148,11 @@ const AllTransactionsTable = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                        ₦{Number(row.trans_balance || 0).toLocaleString()}
+                        {row.sender_currency_type === '$' || row.currency_level === '2'
+                          ? row.trans_balance > 0
+                            ? `₦${Number(row.trans_balance || 0).toLocaleString()}` // NGN equivalent for sales
+                            : `$${Number(row.amount || 0).toLocaleString()}`        // USD amount for USD funding
+                          : `₦${Number(row.trans_balance || 0).toLocaleString()}`}
                       </Typography>
                     </TableCell>
                     <TableCell>

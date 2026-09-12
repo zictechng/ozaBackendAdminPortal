@@ -266,7 +266,7 @@ const UsdFundingTable = () => {
               <DetailRow label='Description' value={modalData.tran_desc} />
               <DetailRow label='Submitted' value={moment(modalData.createdOn).format('DD MMM YYYY, hh:mm A')} />
 
-                {modalData.payment_proof_url ? (
+                {modalData.payment_proof_url && (
                 <Box sx={{ mt: 2 }}>
                     <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>
                     Payment Proof
@@ -290,16 +290,12 @@ const UsdFundingTable = () => {
                         src={modalData.payment_proof_url}
                         alt='Payment Proof'
                         onError={e => { e.target.style.display = 'none' }}
-                        sx={{ width: '100%', maxHeight: 240, objectFit: 'contain', display: 'block', background: '#f9f9f9' }}
+                        sx={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block', background: '#f9f9f9' }}
                     />
                     </Box>
                     <Typography variant='caption' color='text.secondary'>
                     Click image to open full size in a new tab
                     </Typography>
-                </Box>
-                ) : (
-                <Box sx={{ mt: 2, p: 2, borderRadius: 2, border: '1px dashed', borderColor: 'divider', textAlign: 'center' }}>
-                    <Typography variant='body2' color='text.secondary'>No payment proof uploaded</Typography>
                 </Box>
                 )}
 
