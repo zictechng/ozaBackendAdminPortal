@@ -146,7 +146,7 @@ const AppSettings = () => {
         setUpdateTitle(d?.app_updateTitle || '')
         setUpdateNote(d?.app_update_note || '')
         setUpdateBtnText(d?.app_update_btn_text || '')
-        setUpdateShowIcon(d?.app_updateShowIcon || false)
+        setUpdateShowIcon(d?.app_updateShowIcon === true || d?.app_updateShowIcon === 'true')
         setPaypalSale(d?.app_paypal_sale || false)
         setPayoneerSale(d?.app_payoneer_sale || false)
         setBitcoinSale(d?.app_bitcoin_sale || false)
@@ -427,9 +427,20 @@ const AppSettings = () => {
                     label={<Typography variant='body2' sx={{ fontWeight: 600 }}>Show Update Icon</Typography>}
                   />
                 </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography variant='body2' sx={{ fontWeight: 700, mb: 2 }}>App Short Description</Typography>
+                  {editorKey ? (
+                    <Editor apiKey={editorKey} onInit={(evt, editor) => editorRef.current = editor}
+                      initialValue={shortName} init={editorConfig} />
+                  ) : (
+                    <TextField fullWidth multiline rows={3} label='Short Description'
+                      value={shortName} onChange={e => setShortName(e.target.value)} />
+                  )}
+                </Grid>
                 <Grid item xs={12}>
                   <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>
-                    App Description
+                    App Long Description
                   </Typography>
                   <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
                     Full platform description — used in metadata and app stores
@@ -452,16 +463,6 @@ const AppSettings = () => {
                   )}
                 </Grid>
 
-                <Grid item xs={12}>
-                  <Typography variant='body2' sx={{ fontWeight: 700, mb: 2 }}>App Short Description</Typography>
-                  {editorKey ? (
-                    <Editor apiKey={editorKey} onInit={(evt, editor) => editorRef.current = editor}
-                      initialValue={shortName} init={editorConfig} />
-                  ) : (
-                    <TextField fullWidth multiline rows={6} label='Short Description'
-                      value={shortName} onChange={e => setShortName(e.target.value)} />
-                  )}
-                </Grid>
               </Grid>
             </CardContent>
           )}
