@@ -282,11 +282,14 @@ const SystemActivityTable = () => {
               <DetailRow label='Country' value={modalData.log_country} />
               <DetailRow
                 label='Amount'
-                value={
-                  modalData.log_amt
-                    ? `₦${Number(modalData.log_amt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : '—'
-                }
+                value={(() => {
+                  if (!modalData.log_amt) return '—'
+                  const usdNatures = ['USD Funding Approved', 'USD Funding Rejected', 'Sale fund Approved', 'Funds Sales Rejected']
+                  const isUsd = usdNatures.some(n => modalData.log_nature?.toLowerCase().includes(n.toLowerCase()))
+                  const formatted = Number(modalData.log_amt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  
+                  return isUsd ? `$${formatted}` : `₦${formatted}`
+                })()}
               />
               <DetailRow label='Status' value={modalData.log_status} />
               <DetailRow label='Date' value={modalData.createdOn ? moment(modalData.createdOn).format('DD MMM YYYY, hh:mm A') : '—'} />
