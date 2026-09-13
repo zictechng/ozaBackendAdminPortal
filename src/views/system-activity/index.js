@@ -280,7 +280,14 @@ const SystemActivityTable = () => {
               <DetailRow label='Receiver Number' value={modalData.log_receiver_number} />
               <DetailRow label='Receiver Bank' value={modalData.log_receiver_bank} />
               <DetailRow label='Country' value={modalData.log_country} />
-              <DetailRow label='Amount' value={modalData.log_amt} />
+              <DetailRow
+                label='Amount'
+                value={
+                  modalData.log_amt
+                    ? `₦${Number(modalData.log_amt).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : '—'
+                }
+              />
               <DetailRow label='Status' value={modalData.log_status} />
               <DetailRow label='Date' value={modalData.createdOn ? moment(modalData.createdOn).format('DD MMM YYYY, hh:mm A') : '—'} />
             </Box>

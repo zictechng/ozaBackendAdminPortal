@@ -103,7 +103,7 @@ const UsdFundingTable = () => {
     try {
       const endpoint = confirmAction === 'approve'
         ? '/api/approveUsdFunding'
-        : '/api/rejectSaleFunding'
+        : '/api/rejectUsdFunding'
 
       const res = await client.post(endpoint, {
         tran_id: modalData._id,
