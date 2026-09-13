@@ -90,6 +90,9 @@ const AppSettings = () => {
   const [payPalAction, setPayPalAction] = useState(false)
   const [payStackAction, setPayStackAction] = useState(false)
   const [promoterBonus, setPromoterBonus] = useState(false)
+  const [miniWithdrawal, setMiniWithdrawal] = useState('')
+  const [maxiWithdrawal, setMaxiWithdrawal] = useState('')
+  const [appEmail, setAppEmail] = useState('')
 
   // Land page
   const [landTitle, setLandTitle] = useState('')
@@ -160,6 +163,9 @@ const AppSettings = () => {
         setPayPalAction(d?.app_paypal_bnt || false)
         setPayStackAction(d?.app_payStack_btn || false)
         setPromoterBonus(d?.app_promoter_bonus || false)
+        setMiniWithdrawal(d?.app_mini_withdrawal || '')
+        setMaxiWithdrawal(d?.app_maxi_withdrawal || '')
+        setAppEmail(d?.app_email || '')
         setLandTitle(d?.app_launch_title || '')
         setLandDesc(d?.app_launch_desc || '')
         setEditorKey(d?.app_textEditor_key || '')
@@ -281,6 +287,9 @@ const AppSettings = () => {
         maxi_funding: maxFunding, paypal_btn: payPalAction,
         payStack_btn: payStackAction, textEditorKey: editorKey,
         promoter_bonus_status: promoterBonus,
+        mini_withdrawal: miniWithdrawal,
+        maxi_withdrawal: maxiWithdrawal,
+        app_email: appEmail,
       }, { headers })
       if (res.data.msg === '201') toast.success('App status updated successfully')
       else toast.error(res.data.message || 'Failed to save')
@@ -517,10 +526,30 @@ const AppSettings = () => {
                             value={miniFunding} onChange={e => setMiniFunding(e.target.value)}
                             InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }} />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                                                <Grid item xs={12} sm={6}>
                           <TextField fullWidth size='small' label='Max Funding Amount (₦)'
                             value={maxFunding} onChange={e => setMaxFunding(e.target.value)}
                             InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }} />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Min Withdrawal Amount (₦)'
+                            value={miniWithdrawal} onChange={e => setMiniWithdrawal(e.target.value)}
+                            type='number'
+                            helperText='Minimum amount a user can withdraw'
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }} />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Max Withdrawal Amount (₦)'
+                            value={maxiWithdrawal} onChange={e => setMaxiWithdrawal(e.target.value)}
+                            type='number'
+                            helperText='Maximum amount a user can withdraw per transaction'
+                            InputProps={{ startAdornment: <InputAdornment position='start'>₦</InputAdornment> }} />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField fullWidth size='small' label='Platform Email Address'
+                            value={appEmail} onChange={e => setAppEmail(e.target.value)}
+                            type='email'
+                            helperText='Email used in all platform notifications and emails' />
                         </Grid>
                         <Grid item xs={12}>
                           <TextField fullWidth size='small' label='Maintenance Mode Message' multiline rows={3}
