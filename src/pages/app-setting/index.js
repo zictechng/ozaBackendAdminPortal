@@ -93,6 +93,9 @@ const AppSettings = () => {
   const [miniWithdrawal, setMiniWithdrawal] = useState('')
   const [maxiWithdrawal, setMaxiWithdrawal] = useState('')
   const [appEmail, setAppEmail] = useState('')
+  const [referralPercent, setReferralPercent] = useState(false)
+  const [purchaseReward, setPurchaseReward] = useState(false)
+  const [appDescription, setAppDescription] = useState('')
 
   // Land page
   const [landTitle, setLandTitle] = useState('')
@@ -166,6 +169,9 @@ const AppSettings = () => {
         setMiniWithdrawal(d?.app_mini_withdrawal || '')
         setMaxiWithdrawal(d?.app_maxi_withdrawal || '')
         setAppEmail(d?.app_email || '')
+        setReferralPercent(d?.app_referral_percent || false)
+        setPurchaseReward(d?.app_purchase_reward || false)
+        setAppDescription(d?.app_description || '')
         setLandTitle(d?.app_launch_title || '')
         setLandDesc(d?.app_launch_desc || '')
         setEditorKey(d?.app_textEditor_key || '')
@@ -290,6 +296,9 @@ const AppSettings = () => {
         mini_withdrawal: miniWithdrawal,
         maxi_withdrawal: maxiWithdrawal,
         app_email: appEmail,
+        referral_percent_status: referralPercent,
+        purchase_reward_status: purchaseReward,
+        app_description: appDescription,
       }, { headers })
       if (res.data.msg === '201') toast.success('App status updated successfully')
       else toast.error(res.data.message || 'Failed to save')
@@ -416,6 +425,13 @@ const AppSettings = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <TextField fullWidth size='small' label='App Description'
+                    value={appDescription} onChange={e => setAppDescription(e.target.value)}
+                    helperText='Full description of your platform — used in metadata and app stores'
+                    multiline rows={3} />
+                </Grid>
+                
+                <Grid item xs={12}>
                   <Typography variant='body2' sx={{ fontWeight: 700, mb: 2 }}>App Short Description</Typography>
                   {editorKey ? (
                     <Editor apiKey={editorKey} onInit={(evt, editor) => editorRef.current = editor}
@@ -485,6 +501,7 @@ const AppSettings = () => {
                       <SwitchRow label='Referral Bonus' subtitle='Enable referral bonus system' checked={referralBonus} onChange={setReferralBonus} />
                       <SwitchRow label='Signup Bonus' subtitle='Enable new user signup bonus' checked={signupBonus} onChange={setSignupBonus} />
                       <SwitchRow label='Promoter Bonus' subtitle='Enable business promoter commission system' checked={promoterBonus} onChange={setPromoterBonus} />
+                      <SwitchRow label='Purchase Rewards' subtitle='Enable coins reward on every bill purchase' checked={purchaseReward} onChange={setPurchaseReward} />
                       <SwitchRow label='PayPal Button' subtitle='Show PayPal payment button' checked={payPalAction} onChange={setPayPalAction} />
                       <SwitchRow label='PayStack Button' subtitle='Show PayStack payment button' checked={payStackAction} onChange={setPayStackAction} />
                     </CardContent>
