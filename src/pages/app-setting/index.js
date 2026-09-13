@@ -54,6 +54,7 @@ const AppSettings = () => {
   const headers = { Authorization: 'Bearer ' + token }
   const editorRef = useRef(null)
   const landEditorRef = useRef(null)
+  const descEditorRef = useRef(null)
 
   const [tab, setTab] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -268,10 +269,12 @@ const AppSettings = () => {
     setSaving('name')
     try {
       const desc = editorRef.current ? editorRef.current.getContent() : shortName
+      const fullDesc = descEditorRef.current ? descEditorRef.current.getContent() : appDescription
       
       const res = await client.post('/api/update_appName', {
         appName, appDesc: desc, appVersion,
         updateTitle, updateNote, updateBtnText, updateIcon: updateShowIcon,
+        appDescription: fullDesc,
       }, { headers })
       if (res.data.msg === '201') toast.success('App settings saved successfully')
       else toast.error(res.data.message || 'Failed to save')
@@ -425,12 +428,30 @@ const AppSettings = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField fullWidth size='small' label='App Description'
-                    value={appDescription} onChange={e => setAppDescription(e.target.value)}
-                    helperText='Full description of your platform — used in metadata and app stores'
-                    multiline rows={3} />
+                  <Typography variant='body2' sx={{ fontWeight: 700, mb: 1 }}>
+                    App Description
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+                    Full platform description — used in metadata and app stores
+                  </Typography>
+                  {editorKey ? (
+                    <Editor
+                      apiKey={editorKey}
+                      onInit={(evt, editor) => descEditorRef.current = editor}
+                      initialValue={appDescription}
+                      init={editorConfig}
+                    />
+                  ) : (
+                    <TextField
+                      fullWidth multiline rows={4}
+                      label='App Description'
+                      value={appDescription}
+                      onChange={e => setAppDescription(e.target.value)}
+                      helperText='Full description of your platform'
+                    />
+                  )}
                 </Grid>
-                
+
                 <Grid item xs={12}>
                   <Typography variant='body2' sx={{ fontWeight: 700, mb: 2 }}>App Short Description</Typography>
                   {editorKey ? (
