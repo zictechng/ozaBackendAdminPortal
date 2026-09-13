@@ -153,7 +153,7 @@ const AppSettings = () => {
         setPaypalBuy(d?.app_paypal_buy || false)
         setPayoneerBuy(d?.app_payoneer_buy || false)
         setBitcoinBuy(d?.app_bitcoin_buy || false)
-        setAppStatus(d?.app_state || false)
+        setAppStatus(d?.app_state === true || d?.app_state === 'Active' || d?.app_state === true)
         setReferralBonus(d?.app_referral_bonus || false)
         setSignupBonus(d?.app_signup_bonus || false)
         setStopNewSignup(d?.app_new_signup_status || false)
@@ -288,7 +288,8 @@ const AppSettings = () => {
         const res = await client.post('/api/update_appStatus', {
         paypalSale, payoneerSale, bitcoinSale,
         paypalBuy, payoneerBuy, bitcoinBuy,
-        appStatus, referral_bonus_status: referralBonus,
+        appStatus: appStatus ? 'Active' : 'Inactive',
+        referral_bonus_status: referralBonus,
         signup_bonus_status: signupBonus, newSignup_status: stopNewSignup,
         appMode_status: appMode, appLogin_status: stopUserLogin,
         appMode_message: appModeMessage, payPayToken: payPayKey,
