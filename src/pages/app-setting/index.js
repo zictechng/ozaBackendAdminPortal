@@ -509,10 +509,25 @@ const AppSettings = () => {
                     <Divider />
                     <CardContent>
                       <SwitchRow label='App Active' subtitle='Enable or disable the entire platform' checked={appStatus} onChange={setAppStatus} />
-                      <SwitchRow label='Stop New Signups' subtitle='Prevent new user registrations' checked={stopNewSignup} onChange={setStopNewSignup} />
-                      <SwitchRow label='Stop User Login' subtitle='Prevent all user logins' checked={stopUserLogin} onChange={setStopUserLogin} />
-                      <SwitchRow label='Maintenance Mode' subtitle='Show maintenance message to users' checked={appMode} onChange={setAppMode} />
-                    </CardContent>
+                      <SwitchRow
+                        label='Allow New Signups'
+                        subtitle='When OFF — new user registrations will be blocked'
+                        checked={!stopNewSignup}
+                        onChange={v => setStopNewSignup(!v)}
+                      />
+                      <SwitchRow
+                        label='Allow User Login'
+                        subtitle='When OFF — all user logins will be blocked'
+                        checked={!stopUserLogin}
+                        onChange={v => setStopUserLogin(!v)}
+                      />
+                      <SwitchRow
+                        label='Maintenance Mode'
+                        subtitle='When ON — users will see a maintenance message'
+                        checked={appMode}
+                        onChange={setAppMode}
+                      />
+                      </CardContent>
                   </Card>
                 </Grid>
 
