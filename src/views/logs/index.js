@@ -162,9 +162,13 @@ const SystemLogsTable = () => {
                       <Chip label={row.login_nature || '—'} size='small' variant='outlined' sx={{ fontSize: '0.7rem' }} />
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={
-                        row.login_status === '1' || row.login_status === 'Online' ? 'active' : 'inactive'
-                      } />
+                      <Chip
+                        label={row.login_status === 1 || row.login_status === '1' ? 'Online' : 'Offline'}
+                        size='small'
+                        color={row.login_status === 1 || row.login_status === '1' ? 'success' : 'default'}
+                        variant={row.login_status === 1 || row.login_status === '1' ? 'filled' : 'outlined'}
+                        sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                      />
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' color='text.secondary'>
