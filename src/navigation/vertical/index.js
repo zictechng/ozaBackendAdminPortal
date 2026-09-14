@@ -177,6 +177,11 @@ const navigation = () => {
       title: 'Export Data',
       path: '/reports/export',
     },
+    {
+      title: 'User Marketing Export',
+      icon: AccountGroup,
+      path: '/reports/users-export',
+    },
     { sectionTitle: 'Marketing' },
       {
         title: 'Newsletter',
