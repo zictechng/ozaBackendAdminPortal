@@ -10,7 +10,7 @@ import {
   Flash, AccessPoint, Television, School, // Changed LightningBolt to Flash
   Cellphone, Gift, Cog, Star, ViewGrid,
   ShieldAccount, History, Autorenew,
-  ChartBar, ChartLine, AccountDetails, FileExport,
+  ChartBar, ChartLine, AccountDetails, FileExport, EmailOutline,
 } from 'mdi-material-ui'
 
 //import { Autorenew } from 'mdi-material-ui'
@@ -177,8 +177,14 @@ const navigation = () => {
       title: 'Export Data',
       path: '/reports/export',
     },
-
+    { sectionTitle: 'Marketing' },
+      {
+        title: 'Newsletter',
+        icon: EmailOutline,
+        path: '/newsletter',
+      },
     { sectionTitle: 'System Logs' },
+    
     {
       title: 'Logs',
       icon: Autorenew,
@@ -189,6 +195,7 @@ const navigation = () => {
       icon: History,
       path: '/system-activity',
     },
+    
   ]
 }
 
