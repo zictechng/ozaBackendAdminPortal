@@ -218,10 +218,12 @@ const DocumentViewPage = () => {
         reject_reason: rejectReason.trim(),
       }, { headers })
       if (res?.data?.msg === '201' || res?.data?.msg === '200') {
-        toast.success('Document rejected. User has been notified.')
         setRejectDialogOpen(false)
         setRejectReason('')
         fetchDocument()
+        setTimeout(() => {
+          toast.success('Document rejected successfully. User has been notified.')
+        }, 300)
       } else {
         toast.error(res?.data?.message || 'Rejection failed. Please try again.')
       }
@@ -635,7 +637,7 @@ const DocumentViewPage = () => {
               />
               {docData.document_status === 'Approved' && (
                 <TimelineItem
-                  icon={<CheckCircle fontSize='small' color='#fff' />}
+                  icon={<CheckCircle fontSize='small' />}
                   title='Document Approved'
                   desc={docData.action_date
                     ? moment(docData.action_date).format('DD MMM YYYY, hh:mm A')
@@ -645,7 +647,7 @@ const DocumentViewPage = () => {
               )}
               {docData.document_status === 'Rejected' && (
                 <TimelineItem
-                  icon={<CloseCircle fontSize='small' color='#ffffff' />}
+                  icon={<CloseCircle fontSize='small' />}
                   title='Document Rejected'
                   desc={docData.reject_document_reason || 'No reason provided'}
                   color='error'
@@ -653,7 +655,7 @@ const DocumentViewPage = () => {
               )}
               {isPending && (
                 <TimelineItem
-                  icon={<Clock fontSize='small' color='#fff' />}
+                  icon={<Clock fontSize='small' />}
                   title='Awaiting Review'
                   desc='Pending admin action'
                   color='warning'
