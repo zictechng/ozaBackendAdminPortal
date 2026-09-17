@@ -123,12 +123,27 @@ const TimelineItem = ({ icon, title, desc, color }) => (
       width: 36,
       height: 36,
       borderRadius: '50%',
-      backgroundColor: `${color}.light`,
-      color: `${color}.main`,
+      backgroundColor:
+        color === 'success' ? '#D1FAE5' :
+        color === 'error'   ? '#FEE2E2' :
+        color === 'warning' ? '#FEF3C7' :
+        '#DBEAFE',
+      color:
+        color === 'success' ? '#10B981' :
+        color === 'error'   ? '#EF4444' :
+        color === 'warning' ? '#F59E0B' :
+        '#3B82F6',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
+      '& svg': {
+        color:
+          color === 'success' ? '#10B981' :
+          color === 'error'   ? '#EF4444' :
+          color === 'warning' ? '#F59E0B' :
+          '#3B82F6',
+      }
     }}>
       {icon}
     </Box>
@@ -216,6 +231,7 @@ const DocumentViewPage = () => {
       setActionLoading(false)
     }
   }
+  
 
   const handleConfirmAction = async () => {
     setActionLoading(true)
@@ -307,7 +323,7 @@ const DocumentViewPage = () => {
 
   return (
     <Grid container spacing={6}>
-      <ToastContainer position='top-right' autoClose={3000} theme='colored' />
+      <ToastContainer position='top-right' autoClose={3000} theme='colored' style={{ zIndex: 99999 }} />
 
       {/* ── Page Header ──────────────────────────── */}
       <Grid item xs={12}>
@@ -619,17 +635,17 @@ const DocumentViewPage = () => {
               />
               {docData.document_status === 'Approved' && (
                 <TimelineItem
-                  icon={<CheckCircle fontSize='small' />}
+                  icon={<CheckCircle fontSize='small' color='#fff' />}
                   title='Document Approved'
-                  desc={docData.approved_date
-                    ? moment(docData.approved_date).format('DD MMM YYYY, hh:mm A')
+                  desc={docData.action_date
+                    ? moment(docData.action_date).format('DD MMM YYYY, hh:mm A')
                     : 'Date not recorded'}
                   color='success'
                 />
               )}
               {docData.document_status === 'Rejected' && (
                 <TimelineItem
-                  icon={<CloseCircle fontSize='small' />}
+                  icon={<CloseCircle fontSize='small' color='#ffffff' />}
                   title='Document Rejected'
                   desc={docData.reject_document_reason || 'No reason provided'}
                   color='error'
@@ -637,7 +653,7 @@ const DocumentViewPage = () => {
               )}
               {isPending && (
                 <TimelineItem
-                  icon={<Clock fontSize='small' />}
+                  icon={<Clock fontSize='small' color='#fff' />}
                   title='Awaiting Review'
                   desc='Pending admin action'
                   color='warning'
