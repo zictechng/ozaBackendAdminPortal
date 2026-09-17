@@ -94,6 +94,9 @@ const AppSettings = () => {
   const [miniWithdrawal, setMiniWithdrawal] = useState('')
   const [maxiWithdrawal, setMaxiWithdrawal] = useState('')
   const [appEmail, setAppEmail] = useState('')
+  const [supportWhatsapp, setSupportWhatsapp] = useState('')
+  const [supportTelegram, setSupportTelegram] = useState('')
+  const [supportPhone, setSupportPhone] = useState('')
   const [referralPercent, setReferralPercent] = useState(false)
   const [purchaseReward, setPurchaseReward] = useState(false)
   const [appDescription, setAppDescription] = useState('')
@@ -170,6 +173,9 @@ const AppSettings = () => {
         setMiniWithdrawal(d?.app_mini_withdrawal || '')
         setMaxiWithdrawal(d?.app_maxi_withdrawal || '')
         setAppEmail(d?.app_email || '')
+        setSupportWhatsapp(d?.support_whatsapp || '')
+        setSupportTelegram(d?.support_telegram || '')
+        setSupportPhone(d?.support_phone || '')
         setReferralPercent(d?.app_referral_percent || false)
         setPurchaseReward(d?.app_purchase_reward || false)
         setAppDescription(d?.app_description || '')
@@ -300,6 +306,10 @@ const AppSettings = () => {
         mini_withdrawal: miniWithdrawal,
         maxi_withdrawal: maxiWithdrawal,
         app_email: appEmail,
+        support_whatsapp: supportWhatsapp,
+        support_telegram: supportTelegram,
+        support_email:    appEmail,
+        support_phone:    supportPhone,
         referral_percent_status: referralPercent,
         purchase_reward_status: purchaseReward,
         app_description: appDescription,
@@ -510,8 +520,8 @@ const AppSettings = () => {
                     <CardContent>
                       <SwitchRow label='App Active' subtitle='Enable or disable the entire platform' checked={appStatus} onChange={setAppStatus} />
                       <SwitchRow
-                        label='Allow New Signups'
-                        subtitle='When OFF — new user registrations will be blocked'
+                        label='Stop New Signups'
+                        subtitle='When On — new user registrations will be blocked'
                         checked={!stopNewSignup}
                         onChange={v => setStopNewSignup(!v)}
                       />
@@ -606,6 +616,25 @@ const AppSettings = () => {
                             type='email'
                             helperText='Email used in all platform notifications and emails' />
                         </Grid>
+                        <Grid item xs={12} md={4}>
+                          <TextField fullWidth size='small' label='WhatsApp Support Number'
+                            value={supportWhatsapp} onChange={e => setSupportWhatsapp(e.target.value)}
+                            placeholder='e.g. 2348012345678'
+                            helperText='International format without + (e.g. 2348012345678)' />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <TextField fullWidth size='small' label='Telegram Username or Link'
+                            value={supportTelegram} onChange={e => setSupportTelegram(e.target.value)}
+                            placeholder='e.g. ozasupport'
+                            helperText='Telegram username without @ or full t.me link' />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <TextField fullWidth size='small' label='Support Phone Number'
+                            value={supportPhone} onChange={e => setSupportPhone(e.target.value)}
+                            placeholder='e.g. +2348012345678'
+                            helperText='Phone number shown on contact page' />
+                        </Grid>
+                        
                         <Grid item xs={12}>
                           <TextField fullWidth size='small' label='Maintenance Mode Message' multiline rows={3}
                             value={appModeMessage} onChange={e => setAppModeMessage(e.target.value)}

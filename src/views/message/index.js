@@ -236,10 +236,10 @@ const AllMessagesTable = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' color='text.secondary'>
-                        {moment(row.createdOn).format('DD MMM, YYYY')}
+                        {row.createdOn ? moment(row.createdOn).format('DD MMM, YYYY') : '—'}
                       </Typography>
                       <Typography variant='body2' color='text.disabled'>
-                        {moment(row.createdOn).format('hh:mm A')}
+                        {row.createdOn ? moment(row.createdOn).format('hh:mm A'): '—'}
                       </Typography>
                     </TableCell>
                     <TableCell>

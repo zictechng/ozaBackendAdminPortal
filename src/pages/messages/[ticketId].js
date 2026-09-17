@@ -166,7 +166,7 @@ const TicketDetailPage = () => {
           <CardContent>
             {/* User Info */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700, fontSize: '1.1rem' }}>
+              <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700, fontSize: '1.1rem', color:'#ffffff' }}>
                 {getInitials(ticket.sender_name)}
               </Avatar>
               <Box>
@@ -201,7 +201,7 @@ const TicketDetailPage = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant='body2' color='text.secondary'>Submitted</Typography>
                 <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                  {moment(ticket.createdOn).format('DD MMM YYYY')}
+                  {ticket.createdOn ? moment(ticket.createdOn).format('DD MMM YYYY') : '—'}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -260,7 +260,7 @@ const TicketDetailPage = () => {
 
             {/* Original Message */}
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
-              <Avatar sx={{ width: 36, height: 36, bgcolor: 'grey.400', fontSize: '0.8rem', flexShrink: 0 }}>
+              <Avatar sx={{ width: 36, height: 36, bgcolor: 'grey.400', fontSize: '0.8rem', flexShrink: 0, color:'#000' }}>
                 {getInitials(ticket.sender_name)}
               </Avatar>
               <Box sx={{ maxWidth: '75%' }}>
@@ -295,7 +295,7 @@ const TicketDetailPage = () => {
                   <Avatar sx={{
                     width: 36, height: 36, flexShrink: 0,
                     bgcolor: isAdmin ? 'primary.main' : 'grey.400',
-                    fontSize: '0.8rem', fontWeight: 700,
+                    fontSize: '0.8rem', fontWeight: 700, color:'#ffffff'
                   }}>
                     {isAdmin ? 'A' : getInitials(ticket.sender_name)}
                   </Avatar>
