@@ -97,6 +97,8 @@ const AppSettings = () => {
   const [supportWhatsapp, setSupportWhatsapp] = useState('')
   const [supportTelegram, setSupportTelegram] = useState('')
   const [supportPhone, setSupportPhone] = useState('')
+  const [androidLink, setAndroidLink] = useState('')
+  const [iosLink, setIosLink] = useState('')
   const [referralPercent, setReferralPercent] = useState(false)
   const [purchaseReward, setPurchaseReward] = useState(false)
   const [appDescription, setAppDescription] = useState('')
@@ -176,6 +178,8 @@ const AppSettings = () => {
         setSupportWhatsapp(d?.support_whatsapp || '')
         setSupportTelegram(d?.support_telegram || '')
         setSupportPhone(d?.support_phone || '')
+        setAndroidLink(d?.app_download_android_link || '')
+        setIosLink(d?.app_download_ios_link || '')
         setReferralPercent(d?.app_referral_percent || false)
         setPurchaseReward(d?.app_purchase_reward || false)
         setAppDescription(d?.app_description || '')
@@ -310,6 +314,8 @@ const AppSettings = () => {
         support_telegram: supportTelegram,
         support_email:    appEmail,
         support_phone:    supportPhone,
+        app_download_android_link: androidLink,
+        app_download_ios_link:     iosLink,
         referral_percent_status: referralPercent,
         purchase_reward_status: purchaseReward,
         app_description: appDescription,
@@ -633,6 +639,19 @@ const AppSettings = () => {
                             value={supportPhone} onChange={e => setSupportPhone(e.target.value)}
                             placeholder='e.g. +2348012345678'
                             helperText='Phone number shown on contact page' />
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <TextField fullWidth size='small' label='Google Play Store URL'
+                            value={androidLink} onChange={e => setAndroidLink(e.target.value)}
+                            placeholder='https://play.google.com/store/apps/details?id=com.yourapp'
+                            helperText='Android download link — shown in app and website' />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField fullWidth size='small' label='Apple App Store URL'
+                            value={iosLink} onChange={e => setIosLink(e.target.value)}
+                            placeholder='https://apps.apple.com/app/yourapp/id000000000'
+                            helperText='iOS download link — shown in app and website' />
                         </Grid>
                         
                         <Grid item xs={12}>
