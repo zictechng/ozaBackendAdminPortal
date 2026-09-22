@@ -66,8 +66,8 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const ImgStyled = styled('img')(({ theme }) => ({
-  width: 130,
-  height: 100,
+  width: 200,
+  height: 60,
   marginRight: theme.spacing(6.25),
   borderRadius: theme.shape.borderRadius,
 
@@ -185,7 +185,7 @@ const LoginPage = () => {
                 aria-label="Loading Spinner"
                 data-testid="loader"
               />:
-              <ImgStyled src={appLogoMain == '' || appLogoMain == null ? "Oza App": appLogoMain} alt='App_Logo' />
+              <ImgStyled src={appLogoMain == '' || appLogoMain == null ? "Sendmoor": appLogoMain} alt='App_Logo' />
               }
             <Typography
               variant='h6'
@@ -277,7 +277,12 @@ const LoginPage = () => {
                 Don't have login details?
               </Typography>
               <Typography variant='body2'>
-                <Link passHref href='#'>
+                <Link 
+                  passHref 
+                  href='https://mail.google.com/mail/?view=cm&to=support@sendmoor.com' 
+                  target='_blank' 
+                  rel='noopener noreferrer'
+                >
                   <LinkStyled>Contact Admin</LinkStyled>
                 </Link>
               </Typography>

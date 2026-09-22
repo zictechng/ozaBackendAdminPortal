@@ -39,7 +39,7 @@ const UserLayout = ({ children }) => {
 
           //href='https://themeselection.com/products/materio-mui-react-nextjs-admin-template/'
         >
-          <img width={230} alt='upgrade to premium' src={`/images/misc/upgrade-banner-${settings.mode}.png`} />
+          <img width={230} alt='sendmoor' src={``} />
         </a>
       </Box>
     )

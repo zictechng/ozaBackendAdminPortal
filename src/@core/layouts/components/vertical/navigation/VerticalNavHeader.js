@@ -39,8 +39,8 @@ const StyledLink = styled('a')({
 })
 
 const ImgStyled = styled('img')(({ theme }) => ({
-  width: 130,
-  height: 100,
+  width: 200,
+  height: 60,
   marginRight: theme.spacing(6.25),
   marginTop: theme.spacing(3.30),
   borderRadius: theme.shape.borderRadius,

@@ -21,8 +21,11 @@ class CustomDocument extends Document {
             rel='stylesheet'
             href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
           />
+          <link rel="icon" type="image/png" href="/favicon-96x96.ico" sizes="96x96" />
           <link rel='apple-touch-icon' sizes='180x180' href='/images/apple-touch-icon.png' />
-          <link rel='shortcut icon' href='/images/favicon.png' />
+          <link rel='shortcut icon' href='/images/favicon.ico' />
+          <link rel="manifest" href="/site.webmanifest" />
+          <meta name="description" content="Sendmoor admin portal — manage virtual funds, airtime, data, electricity, TV subscriptions and educational pins." />
         </Head>
         <body>
           <Main />
